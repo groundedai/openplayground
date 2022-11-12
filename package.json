@@ -11,5 +11,8 @@
   "devDependencies": {
     "typescript": "^4.6.4",
     "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "showdown": "^2.1.0"
   }
 }

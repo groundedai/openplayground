@@ -1,4 +1,4 @@
-import { Project } from "./types";
+import { Project } from "../types";
 
 export function getProjects() {
   const projects: string | null = localStorage.getItem("projects");

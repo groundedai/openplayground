@@ -36,15 +36,25 @@ h1 {
   line-height: 1.1;
 }
 
+.h2 {
+  font-size: 2.4em;
+  line-height: 1.1;
+}
+
+.h3 {
+  font-size: 1.8em;
+  line-height: 1.1;
+}
+
 #app {
   max-width: 1280px;
 }
 
 #view {
-  /* Center the view */
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  width: 70vw;
 }
 
 .card {
@@ -81,4 +91,35 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+td {
+  max-width: 70vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8em;
+}
+
+td > h1,
+td > h2,
+td > h3,
+td > h4,
+td > h5,
+td > h6 {
+  font-size: 0.8em;
+  padding: 0;
+  margin: 0;
+}
+
+td:hover {
+  background-color: #d9d9d9;
+}
+
+table {
+  max-width: 70vw;
+}
+
+#projects {
+  margin-bottom: 2em;
 }
