@@ -1,8 +1,8 @@
-import { Project, Data, Record } from "../types";
+import { Project, Record } from "../types";
 import projectViewHTML from "./project-view.html?raw";
-import { getData, createData } from "../db/data";
+import { getRecords, createRecord } from "../db/records";
 import { DataTable } from "../components/datatable";
-import { RecordView } from "./record-view";
+import { router } from "../main";
 import showdown from "showdown";
 
 const mdConverter = new showdown.Converter();
@@ -10,7 +10,7 @@ const mdConverter = new showdown.Converter();
 export class ProjectView {
   container: HTMLDivElement;
   project: Project;
-  data: Data | null = null;
+  records: Array<Record> = [];
 
   constructor(container: HTMLDivElement, project: Project) {
     this.container = container;
@@ -18,7 +18,10 @@ export class ProjectView {
   }
 
   render() {
-    this.data = getData().find((d: Data) => d.project?.id === this.project.id);
+    console.log(getRecords());
+    this.records = getRecords().filter((r: Record) => {
+      return r.projectId === this.project.id;
+    });
     const html = projectViewHTML;
     const props: { [key: string]: string } = {
       projectName: this.project.name,
@@ -30,7 +33,7 @@ export class ProjectView {
       htmlWithProps = htmlWithProps.replace(re, value);
     }
     this.container.innerHTML = htmlWithProps;
-    if (this.data) {
+    if (this.records) {
       const dataItemsDiv = document.getElementById(
         "data-items"
       ) as HTMLDivElement;
@@ -39,17 +42,16 @@ export class ProjectView {
         { name: "ID", key: "id" },
         { name: "Text", key: "text" },
       ];
-      const rows = this.data.records.map((d) => {
+      const rows = this.records.map((d) => {
         let text = d.text.replace(/(\r\n|\n|\r)/gm, " ");
         text = mdConverter.makeHtml(text);
         return { id: d.id, text: text };
       });
       const rowClicked = (row: any) => {
         console.log("Row clicked", row);
-        const record = this.data?.records.find((r) => r.id === row.id);
+        const record = this.records.find((r) => r.id === row.id);
         if (record) {
-          const recordView = new RecordView(this.container, record);
-          recordView.render();
+          router.goTo(`/${this.project.id}/record/${record.id}`);
         }
       };
       const dataTable = new DataTable(dataItemsDiv, rows, columns, rowClicked);
@@ -76,9 +78,11 @@ export class ProjectView {
               document.getElementById("data-separator") as HTMLInputElement
             ).value;
             const dataString = data.toString();
-            const dataObject = this.parseRecords(dataString, separator);
-            console.log("Data uploaded", dataObject);
-            createData(dataObject);
+            const records = this.parseRecords(dataString, separator);
+            console.log("Data uploaded", records);
+            records.forEach((record) => {
+              createRecord(record);
+            });
             this.render();
           }
         };
@@ -87,21 +91,17 @@ export class ProjectView {
     });
   }
 
-  parseRecords(data: string, separator: string): Data {
-    let dataLines = data.split(separator);
-    dataLines = dataLines.map((line) => {
-      return line.trim();
+  parseRecords(data: string, separator: string): Array<Record> {
+    let records = data.split(separator);
+    records = records.map((record) => {
+      return record.trim();
     });
-    dataLines = dataLines.filter((line) => {
-      return line.length > 0;
+    records = records.filter((record) => {
+      return record.length > 0;
     });
-    const records = dataLines.map((line) => {
-      return new Record({ text: line });
+    const recordObjs = records.map((record) => {
+      return new Record({ text: record, projectId: this.project.id });
     });
-    const dataObject = new Data({
-      project: this.project,
-      records: records,
-    });
-    return dataObject;
+    return recordObjs;
   }
 }

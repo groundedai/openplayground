@@ -20,7 +20,7 @@ export class ProjectsView {
       const projectsList = document.createElement("projects-list");
       projects.forEach((project: Project) => {
         const li = document.createElement("li");
-        li.innerHTML = `<button class="open-project" data-id="${project.id}">${project.name}</button>`;
+        li.innerHTML = `<a href="/${project.id}">${project.name}</a>`;
         projectsList.appendChild(li);
       });
       projectsDiv.appendChild(projectsList);
@@ -51,7 +51,7 @@ export class ProjectsView {
       button.addEventListener("click", (e: Event) => {
         e.preventDefault();
         if (button.dataset.id) {
-          const id: number = parseInt(button.dataset.id);
+          const id: string = button.dataset.id;
           console.log("Open project", id);
           const project = getProjects().find((p: Project) => p.id === id);
           const projectView = new ProjectView(this.container, project);

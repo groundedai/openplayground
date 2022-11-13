@@ -50,7 +50,7 @@ export class DataTable {
       r.addEventListener("click", (e: Event) => {
         const row = (e.target as HTMLElement).closest("tr");
         if (row) {
-          const id = parseInt(row.dataset.id as string);
+          const id: string = row.dataset.id || "";
           if (id) {
             const row = this.rows.find((r) => r.id === id);
             if (row) {
@@ -64,11 +64,11 @@ export class DataTable {
 }
 
 export class TableRow {
-  id: number;
+  id: string;
   data: any;
   columns: Array<Column>;
 
-  constructor(id: number, data: any, columns: Array<Column>) {
+  constructor(id: string, data: any, columns: Array<Column>) {
     this.id = id;
     this.data = data;
     this.columns = columns;

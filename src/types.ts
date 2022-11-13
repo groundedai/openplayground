@@ -1,30 +1,23 @@
+import { makeId } from "./util/data";
+
 export class Project {
-  id: number;
+  id: string;
   name: string = "New project";
 
   constructor(values: Object = {}) {
-    this.id = Math.floor(Math.random() * 1000);
+    this.id = makeId();
     Object.assign(this, values);
   }
 }
 
 export class Record {
-  id: number = 0;
+  id: string;
   text: string = "";
+  projectId: string;
 
-  constructor(values: { text: string; id?: number }) {
-    this.id = values.id || Math.floor(Math.random() * 1000);
+  constructor(values: { text: string; projectId: string; id?: string }) {
+    this.id = values.id || makeId();
+    this.projectId = values.projectId;
     this.text = values.text;
-  }
-}
-
-export class Data {
-  id: number;
-  project: Project | null = null;
-  records: Array<Record> = [];
-
-  constructor(values: Object = {}) {
-    this.id = Math.floor(Math.random() * 1000);
-    Object.assign(this, values);
   }
 }

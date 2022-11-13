@@ -1,13 +1,14 @@
 <div id="record-view">
-  <p>{{ recordText }}</p>
-  <div id="editor">
-    <form id="editor-form">
-      <textarea
-        id="editor-textarea"
-        name="editor-textarea"
-        placeholder="Desired result here"
-      ></textarea>
-      <button type="submit">Save</button>
-    </form>
+  <div id="prompt-container">
+    <textarea id="prompt-content">{{ recordText }}</textarea>
   </div>
+  <!-- <div id="result-container">
+    <textarea id="result-content" placeholder="Desired result here"></textarea>
+  </div> -->
+  <button id="save-button">Save</button>
+  <button id="suggest-button">Suggest</button>
+  <details id="preview">
+    <summary class="h3">Preview</summary>
+    <div id="preview-content"></div>
+  </details>
 </div>
