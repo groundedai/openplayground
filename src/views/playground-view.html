@@ -1,0 +1,77 @@
+<div id="playground-view">
+  <div id="editor-container">
+    <textarea id="playground-textarea" rows="20"></textarea>
+    <div id="character-count">0</div>
+  </div>
+  <button id="suggest-button">Suggest</button>
+  <button id="save-template-button">Save Template</button>
+  <details id="settings" open>
+    <summary class="h3">Settings</summary>
+    <div id="settings-container">
+      <div class="setting">
+        <label for="markdown-format-preivew">Markdown format preview</label>
+        <input type="checkbox" id="markdown-format-preview" />
+      </div>
+      <div class="setting">
+        <label for="backend-select">Backend</label>
+        <select id="backend-select">
+          <option value="cohere">Cohere</option>
+          <option value="gpt-3">GPT-3</option>
+          <option value="gpt-neo">GPT-Neo</option>
+        </select>
+      </div>
+      <div id="backend-settings">
+        <div id="cohere-settings">
+          <div class="setting">
+            <label for="cohere-url">Cohere URL</label>
+            <input id="cohere-url" type="text" value="http://localhost:8080" />
+          </div>
+          <div class="setting">
+            <label for="cohere-api-key">Cohere API Key</label>
+            <input id="cohere-api-key" type="text" value="demo" />
+          </div>
+          <div class="setting">
+            <label for="cohere-model-name">Cohere Model Name</label>
+            <input id="cohere-model-name" type="text" value="demo" />
+          </div>
+          <!-- Number of tokens-->
+          <div class="setting">
+            <label for="cohere-num-tokens">Cohere Num Tokens</label>
+            <input id="cohere-num-tokens" type="number" value="10" />
+          </div>
+          <!-- Temperature-->
+          <div class="setting">
+            <label for="cohere-temperature">Cohere Temperature</label>
+            <input id="cohere-temperature" type="number" value="0.5" />
+          </div>
+          <!-- Top P-->
+          <div class="setting">
+            <label for="cohere-top-p">Cohere Top P</label>
+            <input id="cohere-top-p" type="number" value="0.9" />
+          </div>
+          <!-- Top K-->
+          <div class="setting">
+            <label for="cohere-top-k">Cohere Top K</label>
+            <input id="cohere-top-k" type="number" value="0" />
+          </div>
+          <!-- Frequency penalty-->
+          <div class="setting">
+            <label for="cohere-frequency-penalty"
+              >Cohere Frequency Penalty</label
+            >
+            <input id="cohere-frequency-penalty" type="number" value="0.0" />
+          </div>
+          <!-- Presence penalty-->
+          <div class="setting">
+            <label for="cohere-presence-penalty">Cohere Presence Penalty</label>
+            <input id="cohere-presence-penalty" type="number" value="0.0" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+  <details id="template-details" open>
+    <summary class="h3">Templates</summary>
+    <div id="template-container"></div>
+  </details>
+</div>

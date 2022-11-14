@@ -1,23 +1,35 @@
-import { makeId } from "./util/data";
-
-export class Project {
-  id: string;
-  name: string = "New project";
-
-  constructor(values: Object = {}) {
-    this.id = makeId();
-    Object.assign(this, values);
-  }
-}
-
 export class Record {
   id: string;
   text: string = "";
-  projectId: string;
+  datasetId: string;
 
-  constructor(values: { text: string; projectId: string; id?: string }) {
-    this.id = values.id || makeId();
-    this.projectId = values.projectId;
+  constructor(values: {
+    id: string | number;
+    text: string;
+    datasetId: string;
+  }) {
+    this.id = values.id.toString();
     this.text = values.text;
+    this.datasetId = values.datasetId;
+  }
+}
+
+export class Dataset {
+  id: string;
+  name: string;
+
+  constructor(values: { name: string; id: string | number }) {
+    this.id = values.id.toString();
+    this.name = values.name;
+  }
+}
+
+export class PromptTemplate {
+  name: string;
+  template: string;
+
+  constructor(values: { name: string; template: string }) {
+    this.name = values.name;
+    this.template = values.template;
   }
 }

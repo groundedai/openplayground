@@ -1,99 +1,140 @@
 import { Record } from "../types";
 import recordViewHtml from "./record-view.html?raw";
-import { LanguageModel } from "../lang-model/lang-model";
-import showdown from "showdown";
-import { parseEnv } from "../util/env";
-import env from "../../.env?raw";
 import { autosizeTextarea } from "../util/dom";
-import { updateRecord } from "../db/records";
-
-const envVars = parseEnv(env);
-const cohereApiKey = envVars.COHERE_API_KEY;
-
-const mdConverter = new showdown.Converter();
+import { getRecords, updateRecord } from "../db/records";
+import { router } from "../main";
+import { mdToHtml } from "../util/markdown";
+import { renderTemplate } from "../util/string";
 
 export class RecordView {
   container: HTMLDivElement;
   record: Record;
-  promptTextArea: HTMLTextAreaElement | null = null;
-  langModel: LanguageModel | null = null;
-  langModelConfig: any = null;
+  recordTextArea!: HTMLTextAreaElement;
+  previewContainer!: HTMLDivElement;
+  saveButton: HTMLButtonElement | null = null;
+  deleteButton: HTMLButtonElement | null = null;
+  nextButton: HTMLButtonElement | null = null;
+  prevButton: HTMLButtonElement | null = null;
+  backToDatasetButton: HTMLButtonElement | null = null;
 
-  constructor(container: HTMLDivElement, record: Record, langModelConfig: any) {
+  constructor(container: HTMLDivElement, record: Record) {
     this.container = container;
     this.record = record;
-    if (!cohereApiKey) {
-      throw new Error("COHERE_API_KEY not set");
-    }
-    this.langModel = new LanguageModel(cohereApiKey, langModelConfig);
   }
 
   render() {
     const html = recordViewHtml;
-    let htmlWithProps = html;
     const props: any = {
       recordText: this.record.text,
     };
-    for (const key in props) {
-      const value = props[key];
-      const re = new RegExp(`{{\\s*${key}\\s*}}`, "g");
-      htmlWithProps = htmlWithProps.replace(re, value);
-    }
+    let htmlWithProps = renderTemplate(html, props);
     this.container.innerHTML = htmlWithProps;
-    this.promptTextArea = this.container.querySelector(
-      "#prompt-content"
+    this.recordTextArea = this.container.querySelector(
+      "#record-text-area"
     ) as HTMLTextAreaElement;
-    this.promptTextArea.value = this.record.text;
-    autosizeTextarea(this.promptTextArea);
-    this.promptTextArea.addEventListener("input", (e: Event) => {
-      const target = e.target as HTMLTextAreaElement;
-      autosizeTextarea(target);
-    });
+    this.recordTextArea.hidden = true;
+    this.recordTextArea.value = this.record.text;
+    autosizeTextarea(this.recordTextArea);
+    this.previewContainer = this.container.querySelector(
+      "#preview-content"
+    ) as HTMLDivElement;
+    this.saveButton = this.container.querySelector(
+      "#save-button"
+    ) as HTMLButtonElement;
+    this.deleteButton = this.container.querySelector(
+      "#delete-button"
+    ) as HTMLButtonElement;
+    this.nextButton = this.container.querySelector(
+      "#next-button"
+    ) as HTMLButtonElement;
+    this.prevButton = this.container.querySelector(
+      "#prev-button"
+    ) as HTMLButtonElement;
+    this.backToDatasetButton = this.container.querySelector(
+      "#back-to-dataset-button"
+    ) as HTMLButtonElement;
     this.addListeners();
     this.makePreview();
   }
 
   addListeners() {
-    const suggestButton = this.container.querySelector(
-      "#suggest-button"
-    ) as HTMLButtonElement;
-    suggestButton.addEventListener("click", (e: Event) => {
-      e.preventDefault();
-      const prompt = this.promptTextArea?.value;
-      if (prompt) {
-        this.langModel?.getSuggestions(prompt).then((res) => {
-          console.log(res);
-          if (res.text && this.promptTextArea) {
-            this.promptTextArea.value += res.text;
-            autosizeTextarea(this.promptTextArea);
-          }
-          this.makePreview();
-        });
-      }
-    });
-    this.promptTextArea?.addEventListener("input", () => {
+    this.recordTextArea?.addEventListener("input", (e: Event) => {
+      const target = e.target as HTMLTextAreaElement;
+      autosizeTextarea(target);
       this.makePreview();
     });
-    const saveButton = this.container.querySelector(
-      "#save-button"
-    ) as HTMLButtonElement;
-    saveButton.addEventListener("click", (e: Event) => {
+    this.recordTextArea.addEventListener("blur", (e: Event) => {
+      if (this.recordTextArea) {
+        this.recordTextArea.hidden = true;
+        this.previewContainer.hidden = false;
+      }
+    });
+    this.previewContainer?.addEventListener("click", (e: Event) => {
+      this.previewContainer.hidden = true;
+      this.recordTextArea.hidden = false;
+      this.recordTextArea.focus();
+      autosizeTextarea(this.recordTextArea);
+    });
+    this.saveButton?.addEventListener("click", (e: Event) => {
       e.preventDefault();
-      const prompt = this.promptTextArea?.value;
+      const prompt = this.recordTextArea?.value;
       if (prompt) {
         this.record.text = prompt;
         updateRecord(this.record);
         console.log("saved record", this.record);
       }
     });
+    this.nextButton?.addEventListener("click", (e: Event) => {
+      e.preventDefault();
+      let records = getRecords().filter(
+        (r) => r.datasetId === this.record.datasetId
+      );
+      let foundCurrentRecord = false;
+      let nextRecord: Record | null = null;
+      records.forEach((record) => {
+        if (record.id === this.record.id) {
+          foundCurrentRecord = true;
+        } else if (foundCurrentRecord) {
+          nextRecord = record;
+          foundCurrentRecord = false; // stop loop
+        }
+      });
+      console.log("next record", nextRecord);
+      if (nextRecord) {
+        router.goTo(
+          `/datasets/${this.record.datasetId}/record/${nextRecord.id}`
+        );
+      }
+    });
+    this.prevButton?.addEventListener("click", (e: Event) => {
+      e.preventDefault();
+      let prevRecord: Record | null = null;
+      let foundCurrentRecord = false;
+      getRecords().forEach((record: Record) => {
+        if (!foundCurrentRecord) {
+          if (record.id === this.record.id) {
+            foundCurrentRecord = true;
+          } else {
+            prevRecord = record;
+          }
+        }
+      });
+      console.log("prev record", prevRecord);
+      if (prevRecord) {
+        router.goTo(
+          `/datasets/${this.record.datasetId}/record/${prevRecord.id}`
+        );
+      }
+    });
+    this.backToDatasetButton?.addEventListener("click", (e: Event) => {
+      e.preventDefault();
+      router.goTo(`/datasets/${this.record.datasetId}`);
+    });
   }
 
   makePreview() {
-    const previewContainer = this.container.querySelector(
-      "#preview-content"
-    ) as HTMLDivElement;
-    let promptText = this.promptTextArea?.value || "";
-    const html = mdConverter.makeHtml(promptText);
-    previewContainer.innerHTML = html;
+    let promptText = this.recordTextArea?.value || "";
+    const html = mdToHtml(promptText);
+    this.previewContainer.innerHTML = html;
   }
 }

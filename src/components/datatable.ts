@@ -8,21 +8,28 @@ export class DataTable {
   data: Array<any>;
   columns: Array<Column>;
   rows: Array<TableRow> = [];
+  emptyMessage: string = "No data to display";
   rowClicked: (row: TableRow) => void = () => {};
 
   constructor(
     container: HTMLDivElement,
     data: Array<any>,
     columns: Array<Column>,
+    emptyMessage?: string,
     rowClicked: (row: TableRow) => void = () => {}
   ) {
     this.container = container;
     this.data = data;
     this.columns = columns;
+    this.emptyMessage = emptyMessage || this.emptyMessage;
     this.rowClicked = rowClicked;
   }
 
   render() {
+    if (this.data.length === 0) {
+      this.container.innerHTML = `<div class="empty-message">${this.emptyMessage}</div>`;
+      return;
+    }
     const dataTable = document.createElement("table");
     const thead = document.createElement("thead");
     const tr = document.createElement("tr");

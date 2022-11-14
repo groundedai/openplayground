@@ -1,22 +1,18 @@
 import { Record } from "../types";
+import * as db from "./base";
 
 export function getRecords() {
-  const records = localStorage.getItem("records");
-  if (records) {
-    return JSON.parse(records);
-  }
-  return [];
+  return db.getItems("records") || [];
 }
 
 export function createRecord(record: Record) {
-  const recordItems = getRecords();
-  recordItems.push(record);
-  localStorage.setItem("records", JSON.stringify(recordItems));
+  db.createItem("records", record);
 }
 
 export function updateRecord(record: Record) {
-  const recordItems = getRecords();
-  const index = recordItems.findIndex((r: Record) => r.id === record.id);
-  recordItems[index] = record;
-  localStorage.setItem("records", JSON.stringify(recordItems));
+  db.updateItem("records", record);
+}
+
+export function deleteRecord(record: Record) {
+  db.deleteItem("records", record);
 }
