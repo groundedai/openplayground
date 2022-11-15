@@ -33,3 +33,17 @@ export class PromptTemplate {
     this.template = values.template;
   }
 }
+
+
+export interface settingsSchema {
+  [key: string]: {
+    key: string;
+    label: string;
+    type: string;
+    min?: number;
+    max?: number;
+    default?: any;
+    options?: any[];
+    step?: number;
+  };
+}
