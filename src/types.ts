@@ -25,15 +25,61 @@ export class Dataset {
 }
 
 export class PromptTemplate {
+  id: string;
   name: string;
   template: string;
 
-  constructor(values: { name: string; template: string }) {
+  constructor(values: { id: string | number; name: string; template: string }) {
+    this.id = values.id.toString();
     this.name = values.name;
     this.template = values.template;
   }
 }
 
+export class LanguageModelSettings {
+  id: string;
+  name: string;
+  provider: string;
+  settings: any;
+
+  constructor(values: {
+    id: string | number;
+    name: string;
+    provider: string;
+    settings: any;
+  }) {
+    this.id = values.id.toString();
+    this.name = values.name;
+    this.provider = values.provider;
+    this.settings = values.settings;
+  }
+}
+
+export class Job {
+  id: string;
+  name: string;
+  datasetId: string;
+  templateId: string;
+  languageModelSettingsId: string;
+  status: string = "pending";
+  results: { [recordId: string]: any } = {};
+
+  constructor(values: {
+    id: string | number;
+    name: string;
+    datasetId: string;
+    templateId: string;
+    languageModelSettingsId: string;
+    status?: string;
+  }) {
+    this.id = values.id.toString();
+    this.name = values.name;
+    this.datasetId = values.datasetId;
+    this.templateId = values.templateId;
+    this.languageModelSettingsId = values.languageModelSettingsId;
+    this.status = values.status || "pending";
+  }
+}
 
 export interface settingsSchema {
   [key: string]: {

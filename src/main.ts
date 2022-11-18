@@ -4,8 +4,11 @@ import { RecordView } from "./views/record-view";
 import { PlaygroundView } from "./views/playground-view";
 import { DatasetsView } from "./views/datasets-view";
 import { DatasetView } from "./views/dataset-view";
+import { JobsView } from "./views/jobs-view";
+import { JobView } from "./views/job-view";
 import { getRecords } from "./db/records";
 import { getDatasets } from "./db/datasets";
+import { getJobs } from "./db/jobs";
 
 const container = document.querySelector("#view") as HTMLDivElement;
 const routes = [
@@ -33,6 +36,16 @@ const routes = [
     );
     const recordView = new RecordView(container, record);
     recordView.render();
+  }),
+  new Route("/jobs/?$", () => {
+    const jobsView = new JobsView(container);
+    jobsView.render();
+  }),
+  new Route("/jobs/(\\d+)/?$", (path: string) => {
+    const jobId = path.split("/")[2];
+    const job = getJobs().find((j) => j.id === jobId);
+    const jobView = new JobView(container, job);
+    jobView.render();
   }),
 ];
 export const router = new Router(window, routes);

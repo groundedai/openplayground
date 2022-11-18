@@ -1,7 +1,21 @@
 import { settingsSchema } from "../types";
 
-
 export const cohereGenerationSettingsSchema: settingsSchema = {
+  model: {
+    type: "select",
+    options: [
+      { value: "command-xlarge-20221108", label: "command-xlarge-20221108" },
+      { value: "xlarge-20221108", label: "xlarge-20221108" },
+      { value: "xlarge", label: "xlarge-20220609" },
+      { value: "large", label: "large-20220926" },
+      { value: "medium-20221108", label: "medium-20221108" },
+      { value: "medium", label: "medium-20220926" },
+      { value: "small", label: "small-20220926" },
+    ],
+    default: "xlarge-20221108",
+    key: "model",
+    label: "Model",
+  },
   maxTokens: {
     type: "number",
     default: 100,
@@ -44,22 +58,22 @@ export const cohereGenerationSettingsSchema: settingsSchema = {
     label: "Presence Penalty",
   },
   stop: {
-    type: "text",
+    type: "string-array",
     default: "",
-    key: "stop",
-    label: "Stop",
+    key: "stop_sequences",
+    label: "Stop sequences",
   },
 };
 
 export interface CohereGenerationSettings {
+  model: string;
   max_tokens: number;
   temperature: number;
   p: number;
   frequency_penalty: number;
   presence_penalty: number;
-  stop: string[];
+  stop_sequences: string[];
 }
-
 
 export class CohereLanguageModel {
   apiKey: string;

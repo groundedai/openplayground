@@ -26,6 +26,7 @@ export class DataTable {
   }
 
   render() {
+    this.container.innerHTML = "";
     if (this.data.length === 0) {
       this.container.innerHTML = `<div class="empty-message">${this.emptyMessage}</div>`;
       return;

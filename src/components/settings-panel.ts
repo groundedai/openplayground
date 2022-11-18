@@ -81,6 +81,17 @@ export class SettingsPanel {
               .join("")}
           </select>
         `;
+      } else if (type === "string-array") {
+        defaultVal = defaultVal || [];
+        inputHtml = `
+          <input
+            name="${key}"
+            id="${key}"
+            value="${defaultVal.join(", ")}"
+          />
+        `;
+      } else {
+        throw new Error(`Unknown type ${type}`);
       }
       html += `
         <div class="setting">
@@ -107,6 +118,8 @@ export class SettingsPanel {
         this.settings[itemKey] = input.checked;
       } else if (type === "select") {
         this.settings[itemKey] = input.value;
+      } else if (type === "string-array") {
+        this.settings[itemKey] = input.value.split(",").map((x) => x.trim());
       }
     }
     return this.settings;
@@ -126,6 +139,8 @@ export class SettingsPanel {
         input.checked = settings[itemKey];
       } else if (type === "select") {
         input.value = settings[itemKey];
+      } else if (type === "string-array") {
+        input.value = settings[itemKey].join(", ");
       }
     }
   }
@@ -146,7 +161,7 @@ export class SettingsPanel {
           }
         });
       }
-      input.addEventListener("change", () => {
+      input.addEventListener("input", () => {
         const event = new CustomEvent("settings-change", {
           detail: {
             key,
