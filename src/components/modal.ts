@@ -14,15 +14,25 @@ export class Modal {
     body: HTMLDivElement,
     showLeftRightButtons: boolean = false
   ) {
+    if (!(container instanceof HTMLDivElement)) {
+      throw new Error(
+        `Modal container must be of type HTMLDivElement, got ${container}`
+      );
+    }
     this.container = container;
+    if (!(body instanceof HTMLDivElement)) {
+      throw new Error(`Modal body must be of type HTMLDivElement, got ${body}`);
+    }
     this.body = body;
     this.showLeftRightButtons = showLeftRightButtons;
   }
 
   render() {
+    console.log(document.body)
     document.body.appendChild(this.container); // Move container to top level
     this.container.innerHTML = modalHtml;
     this.modalDiv = this.container.querySelector("#modal") as HTMLDivElement;
+    console.log("modalDiv", this.modalDiv);
     this.hide();
     this.bodyContainer = this.container.querySelector(
       "#modal-body"

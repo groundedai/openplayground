@@ -1,29 +1,52 @@
 <div id="playground-view">
-  <div id="editor-container">
-    <textarea id="playground-textarea" rows="20"></textarea>
-    <div id="character-count">0</div>
-  </div>
-  <button id="suggest-button">Suggest</button>
-  <button id="save-template-button">Save Template</button>
-  <button id="save-settings-button">Save Settings</button>
-  <!-- <button id="insert-data-button">Insert Data</button> -->
-  <details id="settings" open>
-    <summary class="h3">Settings</summary>
-    <div id="settings-container"></div>
-    <div id="saved-settings-container"></div>
-  </details>
-  <details id="template-details" open>
-    <summary class="h3">Templates</summary>
-    <div id="templates-container"></div>
-  </details>
-  <!-- <div class="modal" id="insert-data-modal">
-    <div class="modal-content">
-      <button class="modal-close-button" id="insert-data-modal-close-button">&times;</button>
-      <h2>Insert Data</h2>
-      <div class="modal-content">
-        <div id="insert-data-modal-datatable">
+  <h4>Playground</h4>
+  <div class="row" id="editor-row">
+    <div class="col-8" id="editor-col">
+      <div id="editor-col-container">
+        <textarea id="playground-textarea"></textarea>
+        <span
+          id="playground-editable"
+          contenteditable="true"
+          data-suggestion="suggestion"
+        >
+        </span>
+        <!-- <div id="character-count">
+            Characters: <span id="char-count-value">0</span>
+          </div> -->
+        <!-- </div> -->
+        <div id="actions">
+          <div class="switch">
+            <input type="checkbox" id="auto-suggest-switch" />
+            <label for="auto-suggest-switch">Auto suggest</label>
+          </div>
+          <button id="suggest-button">Suggest</button>
+          <button id="save-template-button">Save Template</button>
+          <button id="insert-record-button">Insert Record</button>
+          <button id="save-record-button">Save as Record</button>
         </div>
       </div>
     </div>
-  </div> -->
+    <div class="col-4" id="settings-col">
+      <div id="settings-panel">
+        <h5>Settings</h5>
+        <div>
+          <label for="language-model-provider-select">Provider</label>
+          <select id="language-model-provider-select"></select>
+        </div>
+        <div id="settings-container"></div>
+        <button id="save-settings-button">Save Settings</button>
+        <h5>Saved settings</h5>
+        <div id="saved-settings-container"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row" id="second-row">
+    <div class="col-12">
+      <div id="templates">
+        <h5>Templates</h5>
+        <div id="templates-container" class="mt-1"></div>
+      </div>
+    </div>
+  </div>
+  <div id="insert-record-modal"></div>
 </div>

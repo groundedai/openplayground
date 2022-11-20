@@ -4,24 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Language model trainer</title>
+    <link rel="stylesheet" href="https://unpkg.com/wingcss" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+      integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
   </head>
   <body>
     <div id="app">
-      <div id="nav">
-        <div id="nav-items">
-          <div>
-            <a href="/playground">Playground</a>
-          </div>
-          <div>
-            <a href="/datasets">Datasets</a>
-          </div>
-          <div>
-            <a href="/jobs">Jobs</a>
-          </div>
+      <div id="nav" class="nav">
+        <div class="nav-logo">
+          <img src="/logo.png" alt="logo" id="nav-logo" />
         </div>
+        <!-- <a href="/playground" class="nav-item icon"
+          ><i class="fa-regular fa-pen-to-square"></i
+        ></a>
+        <a href="/datasets" class="nav-item icon"
+          ><i class="fa-regular fa-folder"></i
+        ></a>
+        <a href="/jobs" class="nav-item icon"
+          ><i class="fa-regular fa-circle-play"></i
+        ></a> -->
+        <a href="/playground" class="nav-item"
+          >Playground</a>
+        <a href="/datasets" class="nav-item"
+          >Datasets</a>
+        <a href="/jobs" class="nav-item"
+          >Run</a>
       </div>
       <div id="view"></div>
     </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

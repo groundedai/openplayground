@@ -40,6 +40,7 @@ export class LanguageModelSettings {
   id: string;
   name: string;
   provider: string;
+  apiKey: string;
   settings: any;
 
   constructor(values: {
@@ -47,11 +48,13 @@ export class LanguageModelSettings {
     name: string;
     provider: string;
     settings: any;
+    apiKey: string;
   }) {
     this.id = values.id.toString();
     this.name = values.name;
     this.provider = values.provider;
     this.settings = values.settings;
+    this.apiKey = values.apiKey;
   }
 }
 
@@ -66,14 +69,19 @@ export class Job {
 
   constructor(values: {
     id: string | number;
-    name: string;
+    name?: string;
     datasetId: string;
     templateId: string;
     languageModelSettingsId: string;
     status?: string;
   }) {
     this.id = values.id.toString();
-    this.name = values.name;
+    if (values.name) {
+      this.name = values.name;
+    } else {
+      const datestring = new Date().toISOString().slice(0, 10);
+      this.name = `Job ${this.id} - ${datestring}`;
+    }
     this.datasetId = values.datasetId;
     this.templateId = values.templateId;
     this.languageModelSettingsId = values.languageModelSettingsId;

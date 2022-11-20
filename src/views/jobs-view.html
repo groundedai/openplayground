@@ -1,19 +1,18 @@
 <div id="jobs-view">
-  <h2>Jobs</h2>
+  <h4>Run</h4>
   <div id="jobs-table-container"></div>
-  <div id="new-job">
+  <div id="new-job" style="width: 40%">
     <form id="new-job-form">
-      <label for="job-name">Job name</label>
-      <input type="text" id="job-name" name="job-name" />
-      <label for="job-dataset">Dataset</label>
-      <select id="job-dataset" name="job-dataset">
-      </select>
-      <label for="job-template">Template</label>
-      <select id="job-template" name="job-template">
-      </select>
-      <label for="job-settings">Settings</label>
-      <select id="job-settings" name="job-settings">
-      </select>
+      <h3>New Job</h3>
+      <label for="job-dataset">Dataset:</label>
+      <select id="job-dataset" name="job-dataset" class="mb-1"></select>
+      <br />
+      <label for="job-template">Template:</label>
+      <select id="job-template" name="job-template" class="mb-1"></select>
+      <br />
+      <label for="job-settings">Settings:</label>
+      <select id="job-settings" name="job-settings" class="mb-1"></select>
+      <br />
       <button type="submit">Create</button>
     </form>
   </div>

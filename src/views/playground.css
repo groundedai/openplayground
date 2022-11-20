@@ -1,0 +1,84 @@
+#editor-row {
+  height: 60vh;
+}
+
+#editor-col {
+  margin-right: 3em;
+  margin-bottom: 3em;
+}
+
+#editor-col-container {
+  height: 100%;
+}
+
+#playground-textarea {
+  height: 100%;
+  margin-top: 0;
+}
+
+#settings-col {
+  height: 100%;
+  overflow-y: scroll;
+}
+
+#settings-panel {
+  max-width: fit-content;
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+#settings-panel > h5 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+#settings-panel > * input {
+  max-width: 90%;
+}
+
+#playground-textarea {
+  height: 100%;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: 400;
+}
+
+td[data-column="actions"] > button {
+  padding: 0.5em 1em;
+}
+
+#saved-settings-container > * td[data-column="name"] {
+  font-weight: 500;
+  width: 100%;
+}
+
+#saved-settings-container > * td[data-column="actions"] {
+  width: 1px;
+  white-space: nowrap;
+}
+
+#templates-container > table {
+  width: 100%;
+}
+
+#templates-container > * td[data-column="name"] {
+  font-weight: 500;
+  width: 20%;
+}
+
+#templates-container > * td[data-column="template"] {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#templates-container > * td[data-column="actions"] {
+  width: 1px;
+  white-space: nowrap;
+}
+
+#second-row {
+  margin-top: 5em;
+}

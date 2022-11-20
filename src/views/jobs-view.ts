@@ -1,3 +1,4 @@
+import "./jobs-view.css"
 import { Job } from "../types";
 import { getJobs, createJob, updateJob, deleteJob } from "../db/jobs";
 import { getDatasets } from "../db/datasets";
@@ -8,6 +9,7 @@ import { DataTable } from "../components/datatable";
 import jobsViewHtml from "./jobs-view.html?raw";
 import { renderTemplate } from "../util/string";
 import { CohereLanguageModel } from "../providers/cohere";
+import { OpenAILanguageModel } from "../providers/openai";
 import { router } from "../main";
 import { parseEnv } from "../util/env";
 import env from "../../.env?raw";
@@ -82,14 +84,25 @@ export class JobsView {
       return {
         id: job.id,
         name: job.name,
-        status: job.status,
+        status: job.status[0].toUpperCase() + job.status.slice(1),
         actions: `<button id="start-job-button" data-id="${job.id}">Start</button> <button id="view-job-button" data-id="${job.id}">View</button> <button id="delete-job-button" data-id="${job.id}">Delete</button>`,
+        dataset: getDatasets().find((dataset) => dataset.id === job.datasetId)
+          .name,
+        template: getPromptTemplates().find(
+          (template) => template.id === job.templateId
+        ).name,
+        settings: getLanguageModelSettings().find(
+          (settings) => settings.id === job.languageModelSettingsId
+        )?.name,
       };
     });
     const columns = [
       { key: "id", name: "ID" },
       { key: "name", name: "Name" },
       { key: "status", name: "Status" },
+      { key: "dataset", name: "Dataset" },
+      { key: "template", name: "Template" },
+      { key: "settings", name: "Settings" },
       { key: "actions", name: "Actions" },
     ];
     this.jobsTable = new DataTable(
@@ -132,6 +145,7 @@ export class JobsView {
       return;
     }
     job.status = "running";
+    updateJob(job);
     this.renderJobsTable();
     const dataset = getDatasets().find(
       (dataset) => dataset.id === job.datasetId
@@ -149,10 +163,21 @@ export class JobsView {
     if (!dataset || !template || !settings) {
       return;
     }
-    const model = new CohereLanguageModel({
-      apiKey: envVars.COHERE_API_KEY,
-      settings: settings.settings,
-    });
+    let model: any;
+    switch (settings.provider) {
+      case "cohere":
+        model = new CohereLanguageModel({
+          apiKey: settings.apiKey,
+          settings: settings.settings,
+        });
+        break;
+      case "openai":
+        model = new OpenAILanguageModel({
+          apiKey: settings.apiKey,
+          settings: settings.settings,
+        });
+        break;
+    }
     const promises = records.map((record) => {
       const prompt = renderTemplate(template.template, { text: record.text });
       console.log("Prompt", prompt);
@@ -169,8 +194,8 @@ export class JobsView {
     });
     Promise.all(promises).then(() => {
       job.status = "complete";
-      this.renderJobsTable();
       updateJob(job);
+      this.renderJobsTable();
       console.log("Updated job", job);
     });
   }
@@ -207,7 +232,6 @@ export class JobsView {
       }, 0);
       const newJob = new Job({
         id: highestId + 1,
-        name: "New Job",
         datasetId: datasetId,
         templateId,
         languageModelSettingsId: settingsId,

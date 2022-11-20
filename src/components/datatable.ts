@@ -1,6 +1,7 @@
 type Column = {
   name: string;
   key: string;
+  classes?: string[];
 };
 
 export class DataTable {
@@ -88,6 +89,10 @@ export class TableRow {
     this.columns.forEach((c: Column) => {
       const td = document.createElement("td");
       td.innerHTML = this.data[c.key];
+      const classes = c.classes || [];
+      classes.forEach((c) => td.classList.add(c));
+      td.dataset.column = c.key;
+      td.dataset.value = this.data[c.key];
       tr.appendChild(td);
     });
     return tr;

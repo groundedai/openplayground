@@ -1,0 +1,20 @@
+#jobs-table-container > table {
+  text-align: center;
+}
+
+/* Status conditional formatting */
+#jobs-table-container > * td[data-value="Complete"] {
+  background-color: #d4edda;
+}
+
+#jobs-table-container > * td[data-value="Failed"] {
+  background-color: #f8d7da;
+}
+
+#jobs-table-container > * td[data-value="Running"] {
+  background-color: #fff3cd;
+}
+
+#jobs-table-container > * td[data-value="Pending"] {
+  background-color: #fff3cd;
+}

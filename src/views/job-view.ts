@@ -9,9 +9,7 @@ import { Modal } from "../components/modal";
 
 export class JobView {
   container: HTMLDivElement;
-  job: any;
-  records: any;
-  dataset: any;
+  job: Job;
   recordsContainer: HTMLDivElement | null = null;
   recordsTableContainer: HTMLDivElement | null = null;
   recordModalContainer: HTMLDivElement | null = null;
@@ -56,13 +54,21 @@ export class JobView {
       },
     ];
     const rows = records.map((record: any) => {
-      const textFormatted = mdToHtml(record.text);
+      // Replace newlines or breaks in the text with a space
+      const text = record.text;
       const result = this.job.results[record.id];
-      const resultFormatted = mdToHtml(result);
+      // const text = record.text.replace(/(\r\n|\n|\r)/gm, " ");
+      // const textFormatted = mdToHtml(text);
+      // let result = this.job.results[record.id];
+      // let resultFormatted = "";
+      // if (result) {
+      //   result = result.replace(/(\r\n|\n|\r)/gm, " ");
+      //   resultFormatted = mdToHtml(result);
+      // }
       return {
         id: record.id,
-        text: textFormatted,
-        result: resultFormatted,
+        text: text,
+        result: result,
       };
     });
     const rowClicked = (row: any) => {
@@ -93,27 +99,27 @@ export class JobView {
     const promptWithResult = `${prompt}${result}`;
     const promptWithResultFormatted = `${promptFormatted}${resultFormatted}`;
     const body: HTMLDivElement = document.createElement("div");
-    body.innerHTML = `
-      <details><summary class="h4">Text</summary>
-      <details><summary class="h5">Raw</summary>${record.text}</details>
-      <details><summary class="h5">Markdown</summary>${textFormatted}</details>
-      </details>
-      <details><summary class="h4">Prompt</summary>
-      <details><summary class="h5">Raw</summary>${prompt}</details>
-      <details><summary class="h5">Markdown</summary>${promptFormatted}</details>
-      </details>
-      <details><summary class="h4">Result</summary>
-      <details><summary class="h5">Raw</summary>${result}</details>
-      <details><summary class="h5">Markdown</summary>${resultFormatted}</details>
-      </details>
-      <details><summary class="h4">Prompt + Result</summary>
-      <details><summary class="h5">Raw</summary>${promptWithResult}</details>
-      <details><summary class="h5">Markdown</summary>${promptWithResultFormatted}</details>
-      </details>
-        `;
+    // body.innerHTML = `
+    //   <details><summary class="h4">Text</summary>
+    //   <details><summary class="h5">Raw</summary>${record.text}</details>
+    //   <details><summary class="h5">Markdown</summary>${textFormatted}</details>
+    //   </details>
+    //   <details><summary class="h4">Prompt</summary>
+    //   <details><summary class="h5">Raw</summary>${prompt}</details>
+    //   <details><summary class="h5">Markdown</summary>${promptFormatted}</details>
+    //   </details>
+    //   <details><summary class="h4">Result</summary>
+    //   <details><summary class="h5">Raw</summary>${result}</details>
+    //   <details><summary class="h5">Markdown</summary>${resultFormatted}</details>
+    //   </details>
+    //   <details><summary class="h4">Prompt + Result</summary>
+    //   <details><summary class="h5">Raw</summary>${promptWithResult}</details>
+    //   <details><summary class="h5">Markdown</summary>${promptWithResultFormatted}</details>
+    //   </details>
+    //     `;
+    body.innerHTML = promptWithResult
     const modal = new Modal(this.recordModalContainer!, body);
     modal.render();
     modal.show();
-    console.log(modal)
   }
 }

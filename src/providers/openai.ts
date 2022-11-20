@@ -1,6 +1,6 @@
 import { settingsSchema } from "../types";
 
-export const cohereGenerationSettingsSchema: settingsSchema = {
+export const openaiGenerationSettingsSchema: settingsSchema = {
   apiKey: {
     key: "apiKey",
     type: "password",
@@ -10,15 +10,24 @@ export const cohereGenerationSettingsSchema: settingsSchema = {
   model: {
     type: "select",
     options: [
-      { value: "command-xlarge-20221108", label: "command-xlarge-20221108" },
-      { value: "xlarge-20221108", label: "xlarge-20221108" },
-      { value: "xlarge", label: "xlarge-20220609" },
-      { value: "large", label: "large-20220926" },
-      { value: "medium-20221108", label: "medium-20221108" },
-      { value: "medium", label: "medium-20220926" },
-      { value: "small", label: "small-20220926" },
+      {
+        label: "text-davinci-002",
+        value: "text-davinci-002",
+      },
+      {
+        label: "text-curie-001",
+        value: "text-curie-001",
+      },
+      {
+        label: "text-babbage-001",
+        value: "text-babbage-001",
+      },
+      {
+        label: "text-ada-001",
+        value: "text-ada-001",
+      },
     ],
-    default: "xlarge-20221108",
+    default: "text-davinci-002",
     key: "model",
     label: "Model",
   },
@@ -44,7 +53,7 @@ export const cohereGenerationSettingsSchema: settingsSchema = {
     default: 1,
     min: 0,
     max: 1,
-    key: "p",
+    key: "top_p",
     label: "Top P",
   },
   frequencyPenalty: {
@@ -66,41 +75,41 @@ export const cohereGenerationSettingsSchema: settingsSchema = {
   stop: {
     type: "string-array",
     default: "",
-    key: "stop_sequences",
+    key: "stop",
     label: "Stop sequences",
   },
 };
 
-export interface CohereBaseSettings {
+export interface openaiBaseSettings {
   apiKey: string;
 }
 
-export interface CohereGenerationSettings extends CohereBaseSettings {
+export interface openaiGenerationSettings extends openaiBaseSettings {
   model: string;
   max_tokens: number;
   temperature: number;
-  p: number;
+  top_p: number;
   frequency_penalty: number;
   presence_penalty: number;
-  stop_sequences: string[];
+  stop: string[];
 }
 
-export class CohereLanguageModel {
+export class OpenAILanguageModel {
   apiKey: string;
-  settings: CohereGenerationSettings;
+  settings: openaiGenerationSettings;
 
   constructor({
     apiKey,
     settings,
   }: {
     apiKey: string;
-    settings: CohereGenerationSettings;
+    settings: openaiGenerationSettings;
   }) {
     this.apiKey = apiKey;
     this.settings = settings;
   }
 
-  async getSuggestions(prompt: string, settings?: CohereGenerationSettings) {
+  async getSuggestions(prompt: string, settings?: openaiGenerationSettings) {
     if (settings) {
       this.settings = settings;
     }
@@ -109,7 +118,7 @@ export class CohereLanguageModel {
       ...this.settings,
     };
     console.log(body);
-    const response = fetch("https://api.cohere.ai/generate", {
+    const response = fetch("https://api.openai.com/v1/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -117,9 +126,13 @@ export class CohereLanguageModel {
       },
       body: JSON.stringify(body),
     });
-    return response.then((res) => {
-      const json = res.json();
-      return json;
-    });
+    return response
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        let data = { data: res, text: res.choices[0].text };
+        return data;
+      });
   }
 }

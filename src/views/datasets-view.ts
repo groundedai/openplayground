@@ -1,3 +1,4 @@
+import "./datasets-view.css";
 import { Dataset } from "../types";
 import { getDatasets, createDataset } from "../db/datasets";
 import datasetViewHtml from "./datasets-view.html?raw";

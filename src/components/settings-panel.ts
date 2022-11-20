@@ -1,4 +1,5 @@
 /* Generate a settings panel given a schema. */
+import "./settings-panel.css";
 import { settingsSchema } from "../types";
 
 export class SettingsPanel {
@@ -55,6 +56,16 @@ export class SettingsPanel {
             value="${defaultVal}"
           />
         `;
+      } else if (type === "password") {
+        defaultVal = defaultVal || "";
+        inputHtml = `
+          <input
+            type="password"
+            name="${key}"
+            id="${key}"
+            value="${defaultVal}"
+          /><button class="show-password outline">Show</button>
+        `;
       } else if (type === "checkbox") {
         defaultVal = defaultVal || false;
         inputHtml = `
@@ -88,6 +99,7 @@ export class SettingsPanel {
             name="${key}"
             id="${key}"
             value="${defaultVal.join(", ")}"
+            type="text"
           />
         `;
       } else {
@@ -96,6 +108,7 @@ export class SettingsPanel {
       html += `
         <div class="setting">
           <label for="${key}">${label}</label>
+          <br />
           ${inputHtml}
         </div>
       `;
@@ -113,6 +126,8 @@ export class SettingsPanel {
       if (type === "number") {
         this.settings[itemKey] = Number(input.value);
       } else if (type === "text") {
+        this.settings[itemKey] = input.value;
+      } else if (type === "password") {
         this.settings[itemKey] = input.value;
       } else if (type === "checkbox") {
         this.settings[itemKey] = input.checked;
@@ -134,6 +149,8 @@ export class SettingsPanel {
       if (type === "number") {
         input.value = settings[itemKey].toString();
       } else if (type === "text") {
+        input.value = settings[itemKey];
+      } else if (type === "password") {
         input.value = settings[itemKey];
       } else if (type === "checkbox") {
         input.checked = settings[itemKey];
@@ -170,6 +187,19 @@ export class SettingsPanel {
         });
         this.container.dispatchEvent(event);
       });
+      if (type === "password") {
+        const showPasswordButton =
+          input.nextElementSibling as HTMLButtonElement;
+        showPasswordButton.addEventListener("click", () => {
+          if (input.type === "password") {
+            input.type = "text";
+            showPasswordButton.innerText = "Hide";
+          } else {
+            input.type = "password";
+            showPasswordButton.innerText = "Show";
+          }
+        });
+      }
     }
   }
 }
