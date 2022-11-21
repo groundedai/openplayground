@@ -37,6 +37,7 @@ export class PlaygroundView {
   autoSuggest = false;
   playgroundTextArea: HTMLTextAreaElement | null = null;
   textAreaLoadingDiv: HTMLDivElement | null = null;
+  suggestButtonLoadingDiv: HTMLDivElement | null = null;
   playgroundEditable: HTMLSpanElement | null = null;
   suggestButton: HTMLButtonElement | null = null;
   saveTemplateButton: HTMLButtonElement | null = null;
@@ -51,6 +52,7 @@ export class PlaygroundView {
   autoSuggestSwitch: HTMLInputElement | null = null;
   languageModelProviderSelect: HTMLSelectElement | null = null;
   languageModelProvider: string | null = null;
+  editorCharCountSpan: HTMLSpanElement | null = null;
 
   constructor(
     container: HTMLDivElement,
@@ -64,18 +66,28 @@ export class PlaygroundView {
 
   render() {
     this.container.innerHTML = playgroundViewHtml;
-    this.playgroundTextArea = document.querySelector(
-      "#playground-textarea"
-    ) as HTMLTextAreaElement;
     this.textAreaLoadingDiv = document.querySelector(
       "#playground-textarea-loading"
     ) as HTMLDivElement;
+    this.playgroundTextArea = document.querySelector(
+      "#playground-textarea"
+    ) as HTMLTextAreaElement;
     this.playgroundEditable = document.querySelector(
       "#playground-editable"
     ) as HTMLSpanElement;
+    if (this.useContentEditable) {
+      this.playgroundTextArea!.style.display = "none";
+      // this.playgroundEditable!.style.display = "block";
+    } else {
+      this.playgroundTextArea!.style.display = "block";
+      // this.playgroundEditable!.style.display = "none";
+    }
     this.suggestButton = document.querySelector(
       "#suggest-button"
     ) as HTMLButtonElement;
+    this.suggestButtonLoadingDiv = document.querySelector(
+      "#suggest-button-loading"
+    ) as HTMLDivElement;
     this.saveTemplateButton = document.querySelector(
       "#save-template-button"
     ) as HTMLButtonElement;
@@ -106,13 +118,9 @@ export class PlaygroundView {
     this.rightNavContent = document.querySelector(
       "#right-nav-content"
     ) as HTMLDivElement;
-    if (this.useContentEditable) {
-      this.playgroundTextArea!.style.display = "none";
-      this.playgroundEditable!.style.display = "block";
-    } else {
-      this.playgroundTextArea!.style.display = "block";
-      this.playgroundEditable!.style.display = "none";
-    }
+    this.editorCharCountSpan = document.querySelector(
+      "#char-count-value"
+    ) as HTMLSpanElement;
     // Move settings panel to right nav
     // const settingsDiv = document.querySelector("#settings") as HTMLDivElement;
     // this.rightNavContent.innerHTML = "";
@@ -175,6 +183,8 @@ export class PlaygroundView {
     }
     this.renderTemplates();
     this.renderSavedSettings();
+    this.editorCharCountSpan.innerText =
+      this.getPlaygroundText().length.toString();
     this.addListeners();
   }
 
@@ -195,6 +205,8 @@ export class PlaygroundView {
     } else {
       this.playgroundTextArea!.value += content;
     }
+    this.editorCharCountSpan!.innerText =
+      this.getPlaygroundText().length.toString();
     this.saveToLocalStorage();
   }
 
@@ -223,7 +235,18 @@ export class PlaygroundView {
       const md = htmlToMd(html);
       return md;
     } else {
+      console.log(this.playgroundTextArea!.value);
       return this.playgroundTextArea!.value;
+    }
+  }
+
+  setLoading(isLoading: boolean) {
+    if (isLoading) {
+      this.textAreaLoadingDiv?.classList.remove("hidden");
+      this.suggestButtonLoadingDiv?.classList.remove("hidden");
+    } else {
+      this.textAreaLoadingDiv?.classList.add("hidden");
+      this.suggestButtonLoadingDiv?.classList.add("hidden");
     }
   }
 
@@ -247,7 +270,7 @@ export class PlaygroundView {
         id: pt.name,
         name: pt.name,
         template,
-        actions: `<button data-id="${pt.name}" data-action="load">Load</button> <button data-id="${pt.name}" data-action="delete">Delete</button>`,
+        actions: `<button data-id="${pt.name}" data-action="load" class="outline">Load</button> <button data-id="${pt.name}" data-action="delete" class="outline danger">Delete</button>`,
       };
       return row;
     });
@@ -293,7 +316,7 @@ export class PlaygroundView {
     const rows = getLanguageModelSettings().map((lms) => ({
       id: lms.name,
       name: lms.name,
-      actions: `<button data-action="load" data-id="${lms.name}" class="outline">Load</button> <button data-action="delete" data-id="${lms.name}" class="outline">Delete</button>`,
+      actions: `<button data-action="load" data-id="${lms.name}" class="outline">Load</button> <button data-action="delete" data-id="${lms.name}" class="outline danger">Delete</button>`,
     }));
     const columns = [
       {
@@ -343,7 +366,7 @@ export class PlaygroundView {
   }
 
   getSuggestions() {
-    this.textAreaLoadingDiv?.classList.remove("hidden");
+    this.setLoading(true);
     const settings = this.settingsPanel?.getSettings();
     const text = this.getPlaygroundText();
     console.log("Settings", settings);
@@ -352,7 +375,7 @@ export class PlaygroundView {
     delete settings.apiKey;
     if (!apiKey) {
       alert("Please enter an API key");
-      this.textAreaLoadingDiv?.classList.add("hidden");
+      this.setLoading(false);
       return;
     }
     if (text && settings) {
@@ -377,18 +400,18 @@ export class PlaygroundView {
           .then((res) => {
             console.log("Response", res);
             const responseText = res.text;
-            // this.appendPlaygroundContent(responseText);
-            this.insertSuggestion(responseText);
-            this.textAreaLoadingDiv?.classList.add("hidden");
+            this.appendPlaygroundContent(responseText);
+            // this.insertSuggestion(responseText);
+            this.setLoading(false);
           })
           .catch((err) => {
             console.error(err);
             alert("Error getting suggestions: " + err.message);
-            this.textAreaLoadingDiv?.classList.add("hidden");
+            this.setLoading(false);
           });
       } else {
         alert("Error getting suggestions");
-        this.textAreaLoadingDiv?.classList.add("hidden");
+        this.setLoading(false);
       }
     }
   }
@@ -579,6 +602,8 @@ export class PlaygroundView {
     } else {
       this.playgroundTextArea?.addEventListener("input", () => {
         this.saveToLocalStorage();
+        this.editorCharCountSpan!.innerText =
+          this.getPlaygroundText().length.toString();
         if (this.autoSuggest) {
           console.log("Auto suggest");
           // this.insertSuggestion("suggestion");

@@ -1,55 +1,48 @@
 <div id="playground-view">
   <h4>Playground</h4>
-  <div class="row" id="editor-row">
-    <div class="col-8" id="editor-col">
-      <div id="editor-col-container">
-        <textarea id="playground-textarea"> </textarea>
-        <span
-          id="playground-editable"
-          contenteditable="true"
-          data-suggestion="suggestion"
-        >
-        </span>
-        <!-- <div id="character-count">
-        Characters: <span id="char-count-value">0</span>
-      </div> -->
-        <!-- </div> -->
-        <div id="playground-textarea-loading" class="hidden">
-          <div class="loading-spinner" role="status"></div>
-        </div>
-        <!-- <div id="actions"> -->
-          <div class="switch">
-            <input type="checkbox" id="auto-suggest-switch" />
-            <label for="auto-suggest-switch">Auto suggest</label>
-          </div>
-          <button id="suggest-button">Suggest</button>
-          <button id="save-template-button">Save Template</button>
-          <button id="insert-record-button">Insert Record</button>
-          <button id="save-record-button">Save as Record</button>
-        </div>
-      <!-- </div> -->
+  <div id="editor-grid">
+    <div id="editor-panel">
+      <textarea id="playground-textarea"></textarea>
     </div>
-    <div class="col-4" id="settings-col">
-      <div id="settings-panel">
-        <h5>Settings</h5>
-        <div>
-          <label for="language-model-provider-select">Provider</label>
-          <select id="language-model-provider-select"></select>
-        </div>
-        <div id="settings-container"></div>
-        <button id="save-settings-button">Save Settings</button>
-        <h5>Saved settings</h5>
-        <div id="saved-settings-container"></div>
+    <div id="editor-info">
+      <div id="character-count">
+        Characters: <span id="char-count-value">0</span>
       </div>
+    </div>
+    <div id="actions-panel">
+      <div class="switch">
+        <input type="checkbox" id="auto-suggest-switch" />
+        <label for="auto-suggest-switch">Auto suggest</label>
+      </div>
+      <button id="suggest-button">
+        <div style="display: flex; align-items: center">
+          <span>Suggest</span>
+          <div
+            class="loading-spinner white hidden"
+            id="suggest-button-loading"
+            role="status"
+          ></div>
+        </div>
+      </button>
+      <button id="save-template-button">Save Template</button>
+      <button id="insert-record-button">Insert Record</button>
+      <button id="save-record-button">Save as Record</button>
+    </div>
+    <div id="settings-panel">
+      <h5>Settings</h5>
+      <div>
+        <label for="language-model-provider-select">Provider</label>
+        <select id="language-model-provider-select"></select>
+      </div>
+      <div id="settings-container"></div>
+      <button id="save-settings-button">Save Settings</button>
+      <h5>Saved settings</h5>
+      <div id="saved-settings-container"></div>
     </div>
   </div>
-  <div class="row" id="second-row">
-    <div class="col-12">
-      <div id="templates">
-        <h5>Templates</h5>
-        <div id="templates-container" class="mt-1"></div>
-      </div>
-    </div>
+  <div id="templates">
+    <h5>Templates</h5>
+    <div id="templates-container" class="mt-1"></div>
   </div>
   <div id="insert-record-modal"></div>
 </div>

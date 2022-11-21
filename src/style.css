@@ -1,6 +1,7 @@
 :root {
   --color-primary: #c153fb;
   --color-secondary: #ffab40;
+  --color-danger: #ff453a;
   --color-teal-1: #00ebeb;
   --color-teal-2: #18b9b9;
   --color-teal-3: #0f9f9f;
@@ -18,6 +19,10 @@ img#nav-logo {
   margin-right: 0.5em;
 }
 
+.nav-logo {
+  margin-right: 1.5em;
+}
+
 a.nav-item.icon {
   color: #202020;
   font-size: 1.5em;
@@ -31,9 +36,12 @@ button {
   cursor: pointer;
 }
 
-
 button.outline:hover {
   background-color: var(--color-secondary);
+}
+
+button.danger:hover {
+  background-color: var(--color-danger);
 }
 
 button:hover,
@@ -50,8 +58,8 @@ button#suggest-button:hover {
 }
 
 h4 {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  margin-top: 0.75em;
+  margin-bottom: 1em;
 }
 
 table {
@@ -135,13 +143,18 @@ td:hover {
 /* Loading spinner */
 
 .loading-spinner {
-  /* display: inline-block; */
-  width: 1em;
-  height: 1em;
+  width: 100%;
+  height: 100%;
   border: 2px solid #202020;
   border-radius: 50%;
   border-top-color: transparent;
   animation: spin 0.75s linear infinite;
+  display: inline-block;
+}
+
+.loading-spinner.white {
+  border-color: #ffffff;
+  border-top-color: transparent;
 }
 
 @keyframes spin {
@@ -149,3 +162,4 @@ td:hover {
     transform: rotate(360deg);
   }
 }
+

@@ -1,30 +1,49 @@
-#editor-row {
-  height: 60vh;
+#editor-grid {
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: 8fr 1fr 3fr;
+  grid-template-rows: 7fr 1fr;
+  grid-template-areas:
+    "editor editor settings"
+    "actions editor-info settings";
+  max-height: 75vh;
 }
 
-#editor-col {
+#editor-panel {
+  grid-area: editor;
+  max-height: 100%;
   margin-right: 3em;
   margin-bottom: 3em;
 }
 
-#editor-col-container {
-  height: 100%;
-}
-
-#playground-textarea {
-  height: 100%;
-  margin-top: 0;
-}
-
-#settings-col {
-  height: 100%;
+#settings-panel {
+  grid-area: settings;
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  overflow: hidden;
   overflow-y: scroll;
 }
 
-#settings-panel {
-  max-width: fit-content;
-  padding: 1em;
-  border: 1px solid #ccc;
+#actions-panel {
+  grid-area: actions;
+}
+
+#editor-info-panel {
+  grid-area: editor-info;
+}
+
+#character-count {
+  font-size: 0.8em;
+  color: #666;
+  text-align: right;
+}
+
+#char-count-value {
+  font-size: 1.2em;
+  color: #333;
+  background-color: #eee;
+  padding: 0.2em 0.5em;
   border-radius: 3px;
 }
 
@@ -42,6 +61,7 @@
   font-family: inherit;
   font-size: 1em;
   font-weight: 400;
+  margin-top: 0;
 }
 
 #playground-textarea-loading {
@@ -51,6 +71,17 @@
   width: 2em;
   height: 2em;
   margin: 0.5em;
+  display: inline;
+}
+
+#suggest-button-loading {
+  height: 0.8em;
+  width: 0.8em;
+  margin-left: 0.5em;
+}
+
+#suggest-button-loading.hidden {
+  display: none;
 }
 
 td[data-column="actions"] > button {
@@ -92,8 +123,4 @@ td[data-column="actions"] > button {
 #templates-container > * td[data-column="actions"] {
   width: 1px;
   white-space: nowrap;
-}
-
-#second-row {
-  margin-top: 5em;
 }
