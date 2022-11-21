@@ -1,4 +1,4 @@
-# Open Playground / Language model trainer
+# OpenPlayground
 
 Quickly and easily train a language model to process data and give desired results.
 
