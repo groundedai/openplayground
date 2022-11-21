@@ -1,7 +1,10 @@
 :root {
   --color-primary: #c153fb;
   --color-secondary: #ffab40;
-  --color-tertiary: #00ebeb;
+  --color-teal-1: #00ebeb;
+  --color-teal-2: #18b9b9;
+  --color-teal-3: #0f9f9f;
+  --color-teal-4: #0F8686;
 }
 
 body {
@@ -28,13 +31,21 @@ button {
   cursor: pointer;
 }
 
+
 button.outline:hover {
   background-color: var(--color-secondary);
-  border-color: var(--color-secondary);
 }
 
 button:hover,
 [type="submit"]:hover {
+  background-color: var(--color-secondary);
+}
+
+button#suggest-button {
+  background-color: var(--color-teal-3);
+}
+
+button#suggest-button:hover {
   background-color: var(--color-secondary);
 }
 
@@ -45,6 +56,10 @@ h4 {
 
 table {
   width: 100%;
+}
+
+td {
+  padding: 0.5em;
 }
 
 td:hover {
@@ -115,4 +130,22 @@ td:hover {
 
 .mr-3 {
   margin-right: 3em;
+}
+
+/* Loading spinner */
+
+.loading-spinner {
+  /* display: inline-block; */
+  width: 1em;
+  height: 1em;
+  border: 2px solid #202020;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

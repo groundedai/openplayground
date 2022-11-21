@@ -3,7 +3,7 @@
   <div class="row" id="editor-row">
     <div class="col-8" id="editor-col">
       <div id="editor-col-container">
-        <textarea id="playground-textarea"></textarea>
+        <textarea id="playground-textarea"> </textarea>
         <span
           id="playground-editable"
           contenteditable="true"
@@ -11,10 +11,13 @@
         >
         </span>
         <!-- <div id="character-count">
-            Characters: <span id="char-count-value">0</span>
-          </div> -->
+        Characters: <span id="char-count-value">0</span>
+      </div> -->
         <!-- </div> -->
-        <div id="actions">
+        <div id="playground-textarea-loading" class="hidden">
+          <div class="loading-spinner" role="status"></div>
+        </div>
+        <!-- <div id="actions"> -->
           <div class="switch">
             <input type="checkbox" id="auto-suggest-switch" />
             <label for="auto-suggest-switch">Auto suggest</label>
@@ -24,7 +27,7 @@
           <button id="insert-record-button">Insert Record</button>
           <button id="save-record-button">Save as Record</button>
         </div>
-      </div>
+      <!-- </div> -->
     </div>
     <div class="col-4" id="settings-col">
       <div id="settings-panel">

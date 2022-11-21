@@ -85,7 +85,7 @@ export class JobsView {
         id: job.id,
         name: job.name,
         status: job.status[0].toUpperCase() + job.status.slice(1),
-        actions: `<button id="start-job-button" data-id="${job.id}">Start</button> <button id="view-job-button" data-id="${job.id}">View</button> <button id="delete-job-button" data-id="${job.id}">Delete</button>`,
+        actions: `<button id="start-job-button" data-id="${job.id}" class="outline">Start</button> <button id="view-job-button" data-id="${job.id}" class="outline">View</button> <button id="delete-job-button" data-id="${job.id}" class="outline">Delete</button>`,
         dataset: getDatasets().find((dataset) => dataset.id === job.datasetId)
           .name,
         template: getPromptTemplates().find(

@@ -1,0 +1,7 @@
+#records-table > * td {
+    padding: 0.5em 1em;
+}
+
+#records-table >* [data-column="text"] {
+    width: 70%;
+}

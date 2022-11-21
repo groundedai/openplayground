@@ -44,6 +44,15 @@
   font-weight: 400;
 }
 
+#playground-textarea-loading {
+  position: relative;
+  top: 0;
+  right: 0;
+  width: 2em;
+  height: 2em;
+  margin: 0.5em;
+}
+
 td[data-column="actions"] > button {
   padding: 0.5em 1em;
 }
@@ -51,6 +60,7 @@ td[data-column="actions"] > button {
 #saved-settings-container > * td[data-column="name"] {
   font-weight: 500;
   width: 100%;
+  text-align: center;
 }
 
 #saved-settings-container > * td[data-column="actions"] {
@@ -72,6 +82,11 @@ td[data-column="actions"] > button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#templates-container > * th[data-key="template"] {
+  width: 80%;
+  text-align: left;
 }
 
 #templates-container > * td[data-column="actions"] {

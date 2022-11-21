@@ -47,6 +47,10 @@ const routes = [
     const jobView = new JobView(container, job);
     jobView.render();
   }),
+  new Route("/?$", () => {
+    const playgroundView = new PlaygroundView(container);
+    playgroundView.render();
+  }),
 ];
 export const router = new Router(window, routes);
 router.navigateTo(window.location.pathname);

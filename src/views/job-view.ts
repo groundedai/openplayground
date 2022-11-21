@@ -1,3 +1,4 @@
+import "./job-view.css"
 import jobViewHtml from "./job-view.html?raw";
 import { renderTemplate } from "../util/string";
 import { getRecords } from "../db/records";
@@ -117,7 +118,9 @@ export class JobView {
     //   <details><summary class="h5">Markdown</summary>${promptWithResultFormatted}</details>
     //   </details>
     //     `;
-    body.innerHTML = promptWithResult
+    body.innerHTML = document.createElement(
+      "div"
+    ).innerHTML = `<h4>Prompt</h4>${prompt}<h4>Result</h4>${result}`;
     const modal = new Modal(this.recordModalContainer!, body);
     modal.render();
     modal.show();

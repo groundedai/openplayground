@@ -38,6 +38,7 @@ export class DataTable {
     this.columns.forEach((c) => {
       const th = document.createElement("th");
       th.innerHTML = c.name;
+      th.dataset.key = c.key;
       tr.appendChild(th);
     });
     thead.appendChild(tr);

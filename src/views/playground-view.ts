@@ -36,6 +36,7 @@ export class PlaygroundView {
   useContentEditable = false;
   autoSuggest = false;
   playgroundTextArea: HTMLTextAreaElement | null = null;
+  textAreaLoadingDiv: HTMLDivElement | null = null;
   playgroundEditable: HTMLSpanElement | null = null;
   suggestButton: HTMLButtonElement | null = null;
   saveTemplateButton: HTMLButtonElement | null = null;
@@ -66,6 +67,9 @@ export class PlaygroundView {
     this.playgroundTextArea = document.querySelector(
       "#playground-textarea"
     ) as HTMLTextAreaElement;
+    this.textAreaLoadingDiv = document.querySelector(
+      "#playground-textarea-loading"
+    ) as HTMLDivElement;
     this.playgroundEditable = document.querySelector(
       "#playground-editable"
     ) as HTMLSpanElement;
@@ -251,6 +255,7 @@ export class PlaygroundView {
       {
         name: "Name",
         key: "name",
+        classes: ["text-center"],
       },
       {
         name: "Text",
@@ -338,6 +343,7 @@ export class PlaygroundView {
   }
 
   getSuggestions() {
+    this.textAreaLoadingDiv?.classList.remove("hidden");
     const settings = this.settingsPanel?.getSettings();
     const text = this.getPlaygroundText();
     console.log("Settings", settings);
@@ -346,6 +352,7 @@ export class PlaygroundView {
     delete settings.apiKey;
     if (!apiKey) {
       alert("Please enter an API key");
+      this.textAreaLoadingDiv?.classList.add("hidden");
       return;
     }
     if (text && settings) {
@@ -372,11 +379,16 @@ export class PlaygroundView {
             const responseText = res.text;
             // this.appendPlaygroundContent(responseText);
             this.insertSuggestion(responseText);
+            this.textAreaLoadingDiv?.classList.add("hidden");
           })
           .catch((err) => {
             console.error(err);
             alert("Error getting suggestions: " + err.message);
+            this.textAreaLoadingDiv?.classList.add("hidden");
           });
+      } else {
+        alert("Error getting suggestions");
+        this.textAreaLoadingDiv?.classList.add("hidden");
       }
     }
   }
