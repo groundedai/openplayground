@@ -1,0 +1,117 @@
+.snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #333;
+  color: #fff;
+  border-radius: 4px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+}
+
+.snackbar-body {
+  flex: 1;
+}
+
+.snackbar-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 1em;
+}
+
+.snackbar-top {
+  top: 30px;
+  bottom: auto;
+}
+
+.snackbar.bottom {
+  top: auto;
+  bottom: 30px;
+}
+
+.snackbar.show {
+  visibility: visible;
+}
+
+.snackbar-top.show {
+  -webkit-animation: fadein-top 0.5s;
+  animation: fadein-top 0.5s;
+}
+
+.snackbar-top.hide {
+  -webkit-animation: fadeout-top 0.5s;
+  animation: fadeout-top 0.5s;
+}
+
+@keyframes fadein-top {
+  from {
+    top: 0;
+    opacity: 0;
+  }
+  to {
+    top: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeout-top {
+  from {
+    top: 30px;
+    opacity: 1;
+  }
+  to {
+    top: 0;
+    opacity: 0;
+  }
+}
+
+.snackbar-bottom.show {
+  -webkit-animation: fadein-bottom 0.5s, fadeout-bottom 0.5s 2.5s;
+  animation: fadein-bottom 0.5s, fadeout-bottom 0.5s 2.5s;
+}
+
+@keyframes fadein-bottom {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeout-bottom {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+
+.snackbar-error {
+  background-color: var(--color-error-background);
+}
+
+.snackbar-close-button {
+  font-size: 1em;
+  padding: 0.25em 0.5em;
+  font-weight: 500;
+  opacity: 0.3;
+  cursor: pointer;
+  margin: 0.3em;
+}
+
+.snackbar-close-button:hover {
+  opacity: 0.5;
+  background-color: black;
+}

@@ -95,6 +95,16 @@ export const cohereGenerationBodyKeys = [
   "stop_sequences",
 ];
 
+class CohereException extends Error {
+  body: any;
+  constructor(message: string, body: any) {
+    super(message);
+    this.name = "Cohere Error";
+    this.message = message;
+    this.body = body;
+  }
+}
+
 export class CohereLanguageModel implements LanguageModel {
   apiKey: string;
   settings: CohereGenerationSettings;
@@ -126,10 +136,20 @@ export class CohereLanguageModel implements LanguageModel {
     });
     return response
       .then((res) => {
-        return res.json();
+        if (res.ok) {
+          return res.json();
+        } else {
+          return res.json().then((json) => {
+            throw new CohereException(json.message, json);
+          });
+        }
       })
       .then((json) => {
         return { data: json, text: json.text };
       });
+    // .catch((err) => {
+    //   console.log("Cohere API error", err);
+    //   return { data: err, text: err };
+    // });
   }
 }

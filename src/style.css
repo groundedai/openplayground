@@ -2,6 +2,10 @@
   --color-primary: #c153fb;
   --color-secondary: #ffab40;
   --color-danger: #ff453a;
+  --color-error: #ff453a;
+  --color-error-dark: #b92c28;
+  --color-error-dark-2: #992a25;
+  --color-error-background: #a7000e;
   --color-teal-1: #00ebeb;
   --color-teal-2: #18b9b9;
   --color-teal-3: #0f9f9f;

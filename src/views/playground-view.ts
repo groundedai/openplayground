@@ -2,15 +2,12 @@ import "./playground.css";
 import playgroundViewHtml from "./playground-view.html?raw";
 import {
   cohereGenerationSettingsSchema,
-  CohereGenerationSettings,
   CohereLanguageModel,
 } from "../providers/cohere";
 import {
   openaiGenerationSettingsSchema,
-  openaiGenerationSettings,
   OpenAILanguageModel,
 } from "../providers/openai";
-import { autosizeTextarea } from "../util/dom";
 import { mdToHtml, htmlToMd } from "../util/markdown";
 import { PromptTemplate, LanguageModelSettings } from "../types";
 import {
@@ -28,6 +25,7 @@ import { getRecords } from "../db/records";
 import { DataTable } from "../components/datatable";
 import { SettingsPanel } from "../components/settings-panel";
 import { Modal } from "../components/modal";
+import { Snackbar } from "../components/snackbar";
 
 const languageModelProviders = ["cohere", "openai"];
 const providerToSettingsSchema: {
@@ -382,12 +380,15 @@ export class PlaygroundView {
             console.log("Response", res);
             const responseText = res.text;
             this.appendPlaygroundContent(responseText);
-            // this.insertSuggestion(responseText);
             this.setLoading(false);
           })
           .catch((err: any) => {
-            console.error(err);
-            alert("Error getting suggestions: " + err.message);
+            this.showSnackbar({
+              messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
+              type: "error",
+              position: "top",
+              duration: 5000,
+            });
             this.setLoading(false);
           });
       } else {
@@ -395,6 +396,19 @@ export class PlaygroundView {
         this.setLoading(false);
       }
     }
+  }
+
+  showSnackbar({
+    messageHtml,
+    position = "top",
+    type = "info",
+    duration = 3000,
+  }: any) {
+    const body = document.createElement("div");
+    body.innerHTML = messageHtml;
+    const snackbar = new Snackbar({ body, position, type, duration });
+    snackbar.render();
+    snackbar.show();
   }
 
   getLanguageModelSettings(): LanguageModelSettings {

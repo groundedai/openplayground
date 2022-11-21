@@ -28,7 +28,6 @@ export class Modal {
   }
 
   render() {
-    console.log(document.body)
     document.body.appendChild(this.container); // Move container to top level
     this.container.innerHTML = modalHtml;
     this.modalDiv = this.container.querySelector("#modal") as HTMLDivElement;
