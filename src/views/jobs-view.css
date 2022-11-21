@@ -2,7 +2,7 @@
   text-align: center;
 }
 
-/* Status conditional formatting */
+/* Conditional formatting */
 #jobs-table-container > * td[data-value="Complete"] {
   background-color: #d4edda;
 }
@@ -17,4 +17,8 @@
 
 #jobs-table-container > * td[data-value="Pending"] {
   background-color: #fff3cd;
+}
+
+#jobs-table-container > * td[data-value="Not found"] {
+  color: #6c757d;
 }

@@ -1,4 +1,4 @@
-import { settingsSchema } from "../types";
+import { LanguageModel, settingsSchema } from "../types";
 
 export const cohereGenerationSettingsSchema: settingsSchema = {
   apiKey: {
@@ -85,25 +85,32 @@ export interface CohereGenerationSettings extends CohereBaseSettings {
   stop_sequences: string[];
 }
 
-export class CohereLanguageModel {
+export const cohereGenerationBodyKeys = [
+  "model",
+  "max_tokens",
+  "temperature",
+  "p",
+  "frequency_penalty",
+  "presence_penalty",
+  "stop_sequences",
+];
+
+export class CohereLanguageModel implements LanguageModel {
   apiKey: string;
   settings: CohereGenerationSettings;
 
-  constructor({
-    apiKey,
-    settings,
-  }: {
-    apiKey: string;
-    settings: CohereGenerationSettings;
-  }) {
-    this.apiKey = apiKey;
-    this.settings = settings;
+  constructor(settings: any) {
+    this.apiKey = settings.apiKey;
+    const newSettings: any = {};
+    for (const key of cohereGenerationBodyKeys) {
+      if (settings[key] !== undefined) {
+        newSettings[key] = settings[key];
+      }
+    }
+    this.settings = newSettings;
   }
 
-  async getSuggestions(prompt: string, settings?: CohereGenerationSettings) {
-    if (settings) {
-      this.settings = settings;
-    }
+  async getSuggestions(prompt: string) {
     const body = {
       prompt,
       ...this.settings,
@@ -117,9 +124,12 @@ export class CohereLanguageModel {
       },
       body: JSON.stringify(body),
     });
-    return response.then((res) => {
-      const json = res.json();
-      return json;
-    });
+    return response
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        return { data: json, text: json.text };
+      });
   }
 }

@@ -30,6 +30,25 @@ import { SettingsPanel } from "../components/settings-panel";
 import { Modal } from "../components/modal";
 
 const languageModelProviders = ["cohere", "openai"];
+const providerToSettingsSchema: {
+  [key: string]: any;
+} = {
+  cohere: cohereGenerationSettingsSchema,
+  openai: openaiGenerationSettingsSchema,
+};
+const providerToStorageKey: {
+  [key: string]: string;
+} = {
+  cohere: "playgroundCohereGenerationSettings",
+  openai: "playgroundOpenAIGenerationSettings",
+};
+const providerToClass: {
+  [key: string]: any;
+} = {
+  cohere: CohereLanguageModel,
+  openai: OpenAILanguageModel,
+};
+const defaultProvider = "cohere";
 
 export class PlaygroundView {
   container: HTMLDivElement;
@@ -46,7 +65,6 @@ export class PlaygroundView {
   settingsContainer: HTMLDivElement | null = null;
   settingsPanel: SettingsPanel | null = null;
   savedSettingsContainer: HTMLDivElement | null = null;
-  rightNavContent: HTMLDivElement | null = null;
   insertRecordButton: HTMLButtonElement | null = null;
   insertRecordModalContainer: HTMLDivElement | null = null;
   autoSuggestSwitch: HTMLInputElement | null = null;
@@ -115,67 +133,24 @@ export class PlaygroundView {
     this.autoSuggestSwitch = document.querySelector(
       "#auto-suggest-switch"
     ) as HTMLInputElement;
-    this.rightNavContent = document.querySelector(
-      "#right-nav-content"
-    ) as HTMLDivElement;
     this.editorCharCountSpan = document.querySelector(
       "#char-count-value"
     ) as HTMLSpanElement;
-    // Move settings panel to right nav
-    // const settingsDiv = document.querySelector("#settings") as HTMLDivElement;
-    // this.rightNavContent.innerHTML = "";
-    // this.rightNavContent!.appendChild(settingsDiv);
-    this.languageModelProviderSelect.innerHTML = "";
-    languageModelProviders.forEach((provider) => {
-      const option = document.createElement("option");
-      option.value = provider;
-      option.innerText = provider;
-      this.languageModelProviderSelect!.appendChild(option);
-    });
-    // Get language model provider from local storage
-    const languageModelProvider = localStorage.getItem(
-      "playgroundLanguageModelProvider"
-    );
-    if (languageModelProvider) {
-      this.languageModelProvider = languageModelProvider;
-      this.languageModelProviderSelect!.value = languageModelProvider;
-    } else {
-      this.languageModelProvider = "cohere";
-      this.languageModelProviderSelect!.value = "cohere";
-    }
-    let settings;
-    switch (this.languageModelProvider) {
-      case "cohere":
-        this.settingsPanel = new SettingsPanel(
-          this.settingsContainer,
-          cohereGenerationSettingsSchema
-        );
-        this.settingsPanel.render();
-        settings = localStorage.getItem("playgroundCohereGenerationSettings");
-        if (settings) {
-          console.log(
-            `Loading settings for ${this.languageModelProvider}`,
-            settings
-          );
-          this.settingsPanel.setSettings(JSON.parse(settings));
-        }
-        break;
-      case "openai":
-        this.settingsPanel = new SettingsPanel(
-          this.settingsContainer,
-          openaiGenerationSettingsSchema
-        );
-        this.settingsPanel.render();
-        settings = localStorage.getItem("playgroundOpenAIGenerationSettings");
-        console.log(settings);
-        if (settings) {
-          console.log(
-            `Loading settings for ${this.languageModelProvider}`,
-            settings
-          );
-          this.settingsPanel.setSettings(JSON.parse(settings));
-        }
-        break;
+    this.setupSettingsPanel();
+    // Load settings from local storage
+    const settingsStorageKey =
+      providerToStorageKey[this.languageModelProvider!];
+    const settings = localStorage.getItem(settingsStorageKey);
+    if (settings) {
+      console.log(
+        `Loading settings for ${this.languageModelProvider}`,
+        settings
+      );
+      const lms = new LanguageModelSettings({
+        provider: this.languageModelProvider!,
+        settings: JSON.parse(settings),
+      });
+      this.renderSettings(lms);
     }
     const textareaContent = this.getFromLocalStorage();
     if (textareaContent) {
@@ -186,6 +161,34 @@ export class PlaygroundView {
     this.editorCharCountSpan.innerText =
       this.getPlaygroundText().length.toString();
     this.addListeners();
+  }
+
+  setupSettingsPanel() {
+    this.languageModelProviderSelect!.innerHTML = "";
+    languageModelProviders.forEach((provider) => {
+      const option = document.createElement("option");
+      option.value = provider;
+      option.innerText = provider;
+      this.languageModelProviderSelect!.appendChild(option);
+    });
+    if (!this.languageModelProvider) {
+      this.languageModelProvider =
+        localStorage.getItem("playgroundLanguageModelProvider") ||
+        defaultProvider;
+    }
+    this.languageModelProviderSelect!.value = this.languageModelProvider;
+  }
+
+  renderSettings(settings: LanguageModelSettings) {
+    this.languageModelProvider = settings.provider;
+    this.languageModelProviderSelect!.value = this.languageModelProvider;
+    const settingsSchema = providerToSettingsSchema[this.languageModelProvider];
+    this.settingsPanel = new SettingsPanel(
+      this.settingsContainer!,
+      settingsSchema
+    );
+    this.settingsPanel.render();
+    this.settingsPanel.setSettings(settings.settings);
   }
 
   setPlaygroundContent(content: string) {
@@ -235,7 +238,6 @@ export class PlaygroundView {
       const md = htmlToMd(html);
       return md;
     } else {
-      console.log(this.playgroundTextArea!.value);
       return this.playgroundTextArea!.value;
     }
   }
@@ -265,7 +267,6 @@ export class PlaygroundView {
       //   template = template.substring(0, 200) + "...";
       // }
       // template = mdToHtml(template);
-      console.log(template);
       const row = {
         id: pt.name,
         name: pt.name,
@@ -344,7 +345,7 @@ export class PlaygroundView {
         );
         console.log(settings);
         if (settings) {
-          this.settingsPanel!.setSettings(settings.settings);
+          this.renderSettings(settings);
         }
       });
     });
@@ -367,44 +368,24 @@ export class PlaygroundView {
 
   getSuggestions() {
     this.setLoading(true);
-    const settings = this.settingsPanel?.getSettings();
+    const settings = this.getLanguageModelSettings();
     const text = this.getPlaygroundText();
     console.log("Settings", settings);
     console.log("Text", text);
-    const apiKey = settings.apiKey;
-    delete settings.apiKey;
-    if (!apiKey) {
-      alert("Please enter an API key");
-      this.setLoading(false);
-      return;
-    }
     if (text && settings) {
-      let langModel;
-      switch (this.languageModelProvider) {
-        case "cohere":
-          langModel = new CohereLanguageModel({
-            apiKey: apiKey,
-            settings,
-          });
-          break;
-        case "openai":
-          langModel = new OpenAILanguageModel({
-            apiKey: apiKey,
-            settings,
-          });
-          break;
-      }
+      const langModelClass = providerToClass[settings.provider];
+      const langModel = new langModelClass(settings.settings);
       if (langModel) {
         langModel
           .getSuggestions(text)
-          .then((res) => {
+          .then((res: { data: any; text: string }) => {
             console.log("Response", res);
             const responseText = res.text;
             this.appendPlaygroundContent(responseText);
             // this.insertSuggestion(responseText);
             this.setLoading(false);
           })
-          .catch((err) => {
+          .catch((err: any) => {
             console.error(err);
             alert("Error getting suggestions: " + err.message);
             this.setLoading(false);
@@ -413,6 +394,20 @@ export class PlaygroundView {
         alert("Error getting suggestions");
         this.setLoading(false);
       }
+    }
+  }
+
+  getLanguageModelSettings(): LanguageModelSettings {
+    const settings = this.settingsPanel?.getSettings();
+    if (settings) {
+      const languageModelSettings = new LanguageModelSettings({
+        provider: this.languageModelProvider!,
+        settings,
+      });
+      console.log("Language model settings", languageModelSettings);
+      return languageModelSettings;
+    } else {
+      throw new Error("No settings");
     }
   }
 
@@ -438,23 +433,15 @@ export class PlaygroundView {
       }
     });
     this.saveSettingsButton?.addEventListener("click", () => {
-      const settings = this.settingsPanel?.getSettings();
-      if (settings) {
-        const apiKey = settings.apiKey;
-        delete settings.apiKey;
-        const name = prompt("Name for settings");
-        if (name) {
-          const languageModelSettings = new LanguageModelSettings({
-            id: name,
-            name,
-            provider: "cohere",
-            settings,
-            apiKey,
-          });
-          console.log("Language model settings", languageModelSettings);
-          createLanguageModelSettings(languageModelSettings);
-          this.render();
-        }
+      console.log("Save settings");
+      const lms = this.getLanguageModelSettings();
+      const name = prompt("Name for settings");
+      if (name && lms) {
+        lms.id = name;
+        lms.name = name;
+        createLanguageModelSettings(lms);
+        console.log("Language model settings", lms);
+        this.render();
       }
     });
     this.autoSuggestSwitch?.addEventListener("click", () => {
@@ -535,21 +522,10 @@ export class PlaygroundView {
       (e: any) => {
         console.log("Settings change", e.detail);
         const settings = this.settingsPanel?.getSettings();
-        if (settings) {
-          switch (this.languageModelProvider) {
-            case "cohere":
-              localStorage.setItem(
-                "playgroundCohereGenerationSettings",
-                JSON.stringify(settings)
-              );
-              break;
-            case "openai":
-              localStorage.setItem(
-                "playgroundOpenAIGenerationSettings",
-                JSON.stringify(settings)
-              );
-              break;
-          }
+        const settingsStorageKey =
+          providerToStorageKey[this.languageModelProvider!];
+        if (settings && settingsStorageKey) {
+          localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
         }
       }
     );
@@ -562,42 +538,6 @@ export class PlaygroundView {
     if (this.useContentEditable) {
       this.playgroundEditable?.addEventListener("input", () => {
         this.saveToLocalStorage();
-      });
-      this.playgroundEditable?.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          // e.preventDefault();
-          // const selection = window.getSelection();
-          // if (selection) {
-          //   const nextNode = selection.anchorNode?.nextSibling;
-          //   console.log("Next node", nextNode);
-          //   // const isEndOfLine = nextNode?.nodeName === "BR" || !nextNode;
-          //   // console.log("isEndOfLine", isEndOfLine);
-          //   // const isStartOfLine = selection.anchorOffset === 0;
-          //   // console.log("isStartOfLine", isStartOfLine);
-          //   // // Last two nodes are BRs = isEmptyLine
-          //   // const isEmptyLine =
-          //   //   this.playgroundEditable?.childNodes.length === 2 &&
-          //   //   this.playgroundEditable?.childNodes[0].nodeName === "BR" &&
-          //   //   this.playgroundEditable?.childNodes[1].nodeName === "BR";
-          //   // console.log("isEmptyLine", isEmptyLine);
-          //   // const
-          //   // const isEmptyLine = selection.anchorNode?.textContent === "";
-          //   // console.log("isEmptyLine", isEmptyLine);
-          //   if (!nextNode) {
-          //     document.execCommand("insertText", false, "");
-          //     document.execCommand("insertHTML", false, "<br>");
-          //     const range = selection.getRangeAt(0);
-          //     range.deleteContents();
-          //     const br = document.createElement("br");
-          //     range.insertNode(br);
-          //     range.setStartAfter(br);
-          //     range.setEndAfter(br);
-          //     range.collapse(false);
-          //     selection.removeAllRanges();
-          //     selection.addRange(range);
-          //   }
-          // }
-        }
       });
     } else {
       this.playgroundTextArea?.addEventListener("input", () => {

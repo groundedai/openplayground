@@ -1,4 +1,4 @@
-import "./jobs-view.css"
+import "./jobs-view.css";
 import { Job } from "../types";
 import { getJobs, createJob, updateJob, deleteJob } from "../db/jobs";
 import { getDatasets } from "../db/datasets";
@@ -11,10 +11,13 @@ import { renderTemplate } from "../util/string";
 import { CohereLanguageModel } from "../providers/cohere";
 import { OpenAILanguageModel } from "../providers/openai";
 import { router } from "../main";
-import { parseEnv } from "../util/env";
-import env from "../../.env?raw";
 
-const envVars = parseEnv(env);
+const providerToClass: {
+  [key: string]: any;
+} = {
+  cohere: CohereLanguageModel,
+  openai: OpenAILanguageModel,
+};
 
 export class JobsView {
   container: HTMLDivElement;
@@ -81,19 +84,23 @@ export class JobsView {
 
   renderJobsTable() {
     const rows = getJobs().map((job) => {
+      const dataset = getDatasets().find(
+        (dataset) => dataset.id === job.datasetId
+      );
+      const template = getPromptTemplates().find(
+        (template) => template.id === job.templateId
+      );
+      const settings = getLanguageModelSettings().find(
+        (settings) => settings.id === job.languageModelSettingsId
+      );
       return {
         id: job.id,
         name: job.name,
         status: job.status[0].toUpperCase() + job.status.slice(1),
-        actions: `<button id="start-job-button" data-id="${job.id}" class="outline">Start</button> <button id="view-job-button" data-id="${job.id}" class="outline">View</button> <button id="delete-job-button" data-id="${job.id}" class="outline">Delete</button>`,
-        dataset: getDatasets().find((dataset) => dataset.id === job.datasetId)
-          .name,
-        template: getPromptTemplates().find(
-          (template) => template.id === job.templateId
-        ).name,
-        settings: getLanguageModelSettings().find(
-          (settings) => settings.id === job.languageModelSettingsId
-        )?.name,
+        actions: `<button id="start-job-button" data-id="${job.id}" class="outline">Start</button> <button id="view-job-button" data-id="${job.id}" class="outline">View</button> <button id="delete-job-button" data-id="${job.id}" class="outline danger">Delete</button>`,
+        dataset: dataset?.name || "Not found",
+        template: template?.name || "Not found",
+        settings: settings?.name || "Not found",
       };
     });
     const columns = [
@@ -163,32 +170,21 @@ export class JobsView {
     if (!dataset || !template || !settings) {
       return;
     }
-    let model: any;
-    switch (settings.provider) {
-      case "cohere":
-        model = new CohereLanguageModel({
-          apiKey: settings.apiKey,
-          settings: settings.settings,
-        });
-        break;
-      case "openai":
-        model = new OpenAILanguageModel({
-          apiKey: settings.apiKey,
-          settings: settings.settings,
-        });
-        break;
-    }
+    const langModelClass = providerToClass[settings.provider];
+    const langModel = new langModelClass(settings.settings);
+    console.log(langModel)
     const promises = records.map((record) => {
       const prompt = renderTemplate(template.template, { text: record.text });
       console.log("Prompt", prompt);
-      return model
+      return langModel
         .getSuggestions(prompt)
-        .then((res) => {
+        .then((res: { data: any; text: string }) => {
           const text = res.text;
           console.log("Suggestion", text);
           job.results[record.id] = text;
+          updateJob(job);
         })
-        .catch((err) => {
+        .catch((err: any) => {
           console.log("Error", err);
         });
     });

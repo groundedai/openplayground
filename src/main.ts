@@ -55,22 +55,23 @@ const routes = [
 export const router = new Router(window, routes);
 router.navigateTo(window.location.pathname);
 
-const rightNav = document.querySelector("#right-nav") as HTMLDivElement;
-const rightNavContent = document.querySelector(
-  "#right-nav-content"
-) as HTMLDivElement;
-const rightNavExpandButton = document.querySelector(
-  "#right-nav-expand-button"
-) as HTMLButtonElement;
-const expandLeftNavIcon = document.querySelector(
-  "#expand-left-nav-icon"
-) as HTMLElement;
-const expandRightNavIcon = document.querySelector(
-  "#expand-right-nav-icon"
-) as HTMLElement;
-rightNavExpandButton.addEventListener("click", () => {
-  console.log("click");
-  rightNav.classList.toggle("collapsed");
-  expandLeftNavIcon.classList.toggle("hidden");
-  expandRightNavIcon.classList.toggle("hidden");
-});
+
+// const rightNav = document.querySelector("#right-nav") as HTMLDivElement;
+// const rightNavContent = document.querySelector(
+//   "#right-nav-content"
+// ) as HTMLDivElement;
+// const rightNavExpandButton = document.querySelector(
+//   "#right-nav-expand-button"
+// ) as HTMLButtonElement;
+// const expandLeftNavIcon = document.querySelector(
+//   "#expand-left-nav-icon"
+// ) as HTMLElement;
+// const expandRightNavIcon = document.querySelector(
+//   "#expand-right-nav-icon"
+// ) as HTMLElement;
+// rightNavExpandButton.addEventListener("click", () => {
+//   console.log("click");
+//   rightNav.classList.toggle("collapsed");
+//   expandLeftNavIcon.classList.toggle("hidden");
+//   expandRightNavIcon.classList.toggle("hidden");
+// });

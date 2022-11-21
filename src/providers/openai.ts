@@ -1,4 +1,4 @@
-import { settingsSchema } from "../types";
+import { LanguageModel, settingsSchema } from "../types";
 
 export const openaiGenerationSettingsSchema: settingsSchema = {
   apiKey: {
@@ -94,25 +94,32 @@ export interface openaiGenerationSettings extends openaiBaseSettings {
   stop: string[];
 }
 
-export class OpenAILanguageModel {
+export const openaiGenerationBodyKeys = [
+  "model",
+  "max_tokens",
+  "temperature",
+  "top_p",
+  "frequency_penalty",
+  "presence_penalty",
+  "stop",
+];
+
+export class OpenAILanguageModel implements LanguageModel {
   apiKey: string;
   settings: openaiGenerationSettings;
 
-  constructor({
-    apiKey,
-    settings,
-  }: {
-    apiKey: string;
-    settings: openaiGenerationSettings;
-  }) {
-    this.apiKey = apiKey;
-    this.settings = settings;
+  constructor(settings: any) {
+    this.apiKey = settings.apiKey;
+    const newSettings: any = {};
+    for (const key of openaiGenerationBodyKeys) {
+      if (settings[key] !== undefined) {
+        newSettings[key] = settings[key];
+      }
+    }
+    this.settings = newSettings;
   }
 
-  async getSuggestions(prompt: string, settings?: openaiGenerationSettings) {
-    if (settings) {
-      this.settings = settings;
-    }
+  async getSuggestions(prompt: string) {
     const body = {
       prompt,
       ...this.settings,

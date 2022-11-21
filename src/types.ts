@@ -40,22 +40,24 @@ export class LanguageModelSettings {
   id: string;
   name: string;
   provider: string;
-  apiKey: string;
   settings: any;
 
   constructor(values: {
-    id: string | number;
-    name: string;
+    id?: string | number;
+    name?: string;
     provider: string;
     settings: any;
-    apiKey: string;
   }) {
-    this.id = values.id.toString();
-    this.name = values.name;
+    this.id = values.id ? values.id.toString() : "No ID";
+    this.name = values.name ? values.name : "No name";
     this.provider = values.provider;
     this.settings = values.settings;
-    this.apiKey = values.apiKey;
   }
+}
+
+export interface LanguageModel {
+  settings: any;
+  getSuggestions: (text: string) => Promise<{ data: any; text: string }>;
 }
 
 export class Job {
