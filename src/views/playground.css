@@ -56,12 +56,18 @@
   max-width: 90%;
 }
 
-#playground-textarea {
+textarea#playground-textarea {
   height: 100%;
-  font-family: inherit;
+  /* font-family: inherit; */
+  font-family: var(--font-family-2);
   font-size: 1em;
   font-weight: 400;
   margin-top: 0;
+}
+
+/* No placeholder on focus */
+textarea#playground-textarea:focus::-webkit-input-placeholder {
+  color: transparent;
 }
 
 #playground-textarea-loading {
@@ -84,16 +90,12 @@
   display: none;
 }
 
-td[data-column="actions"] > button {
-  padding: 0.5em 1em;
-}
-
 #saved-settings-container > * td {
   padding: 0;
 }
 
 #saved-settings-container > * td[data-column="name"] {
-  font-weight: 500;
+  font-weight: bold;
   width: 100%;
   text-align: center;
 }
@@ -103,12 +105,16 @@ td[data-column="actions"] > button {
   white-space: nowrap;
 }
 
+#saved-settings-container > * td[data-column="actions"] > button {
+  padding: 0.5em 1em;
+}
+
 #templates-container > table {
   width: 100%;
 }
 
 #templates-container > * td[data-column="name"] {
-  font-weight: 500;
+  font-weight: bold;
   width: 20%;
 }
 

@@ -96,7 +96,7 @@ export class JobsView extends View {
         dataset: dataset?.name || "Not found",
         template: template?.name || "Not found",
         settings: settings?.name || "Not found",
-        actions: `<button id="start-job-button" data-id="${job.id}" class="outline">Start</button> <button id="view-job-button" data-id="${job.id}" class="outline">View</button> <button id="delete-job-button" data-id="${job.id}" class="outline danger">Delete</button>`,
+        actions: `<button id="start-job-button" data-id="${job.id}" class="outline">Start</button> <button id="export-job-button" data-id="${job.id}" class="outline">Export</button> <button id="view-job-button" data-id="${job.id}" class="outline">View</button> <button id="delete-job-button" data-id="${job.id}" class="outline danger">Delete</button>`,
         select: `<input type="checkbox" id="select-job" data-id="${job.id}" />`,
       };
     });
@@ -167,6 +167,17 @@ export class JobsView extends View {
         }
       });
     });
+    const exportButtons = document.querySelectorAll(
+      "#export-job-button"
+    ) as NodeListOf<HTMLButtonElement>;
+    exportButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        console.log("Exporting job");
+        const job = getJobs().find((job) => job.id === button.dataset.id);
+        console.log(job);
+        this.exportJob(button.dataset.id!);
+      });
+    });
   }
 
   getSelectedJobs() {
@@ -204,6 +215,15 @@ export class JobsView extends View {
     const job = getJobs().find((job) => job.id === id);
     if (!job) {
       return;
+    }
+    // If job already has results, confirm
+    if (job.status === "complete") {
+      const confirm = window.confirm(
+        "This job has already been completed. Starting it again will overwrite the existing results. Are you sure you want to continue?"
+      );
+      if (!confirm) {
+        return;
+      }
     }
     job.results = {}; // Clear results
     job.status = "running";
@@ -291,6 +311,39 @@ export class JobsView extends View {
     }
     deleteJob(job);
     this.renderJobsTable();
+  }
+
+  exportJob(id: string) {
+    // Trigger download of a text file containing the results separated by ---
+    const job = getJobs().find((job) => job.id === id);
+    if (!job) {
+      return;
+    }
+    console.log("Exporting job", job);
+    const dataset = getDatasets().find(
+      (dataset) => dataset.id === job.datasetId
+    );
+    const records = getRecords().filter(
+      (record) => record.datasetId === job.datasetId
+    );
+    if (!dataset || !records) {
+      return;
+    }
+    const text = records.map((record) => {
+      const result = job.results[record.id];
+      return `${record.text}\n${result}`;
+    });
+    const blob = new Blob([text.join("\n---\n")], {
+      type: "text/plain;charset=utf-8",
+    });
+    console.log(blob);
+    // Trigger download
+    const element = document.createElement("a");
+    element.href = URL.createObjectURL(blob);
+    element.download = `${dataset.name}-${job.id}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   }
 
   addListeners() {

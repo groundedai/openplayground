@@ -9,7 +9,7 @@
   --color-teal-1: #00ebeb;
   --color-teal-2: #18b9b9;
   --color-teal-3: #0f9f9f;
-  --color-teal-4: #0F8686;
+  --color-teal-4: #0f8686;
 
   --font-family-2: "Consolas", "Monaco", "Menlo", monospace;
 }
@@ -80,8 +80,20 @@ table {
   width: 100%;
 }
 
+td > * button {
+  padding: 0.5em 1em;
+}
+
 td {
   padding: 0.5em;
+}
+
+td {
+  font-family: var(--font-family-2);
+}
+
+td {
+  border-top: 1px solid #cccccc;
 }
 
 td:hover {
@@ -184,4 +196,3 @@ summary.h5 {
     transform: rotate(360deg);
   }
 }
-

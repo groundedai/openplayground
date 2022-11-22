@@ -1,6 +1,6 @@
 import "./job-view.css";
 import jobViewHtml from "./job-view.html?raw";
-import { renderTemplate } from "../util/string";
+import { newlinesToBreaks, renderTemplate } from "../util/string";
 import { getRecords } from "../db/records";
 import { getPromptTemplates } from "../db/prompt-templates";
 import { Job } from "../types";
@@ -52,10 +52,6 @@ export class JobView extends View {
         name: "ID",
       },
       {
-        key: "text",
-        name: "Text",
-      },
-      {
         key: "result",
         name: "Result",
       },
@@ -64,6 +60,8 @@ export class JobView extends View {
       // Replace newlines or breaks in the text with a space
       const text = record.text;
       const result = this.job.results[record.id];
+      let resultHtml = `${text}\n\n<span class="completion">${result}</span>`;
+      resultHtml = newlinesToBreaks(resultHtml);
       // const text = record.text.replace(/(\r\n|\n|\r)/gm, " ");
       // const textFormatted = mdToHtml(text);
       // let result = this.job.results[record.id];
@@ -74,8 +72,7 @@ export class JobView extends View {
       // }
       return {
         id: record.id,
-        text: text,
-        result: result,
+        result: resultHtml,
       };
     });
     const rowClicked = (row: any) => {
