@@ -14,3 +14,7 @@ export function renderTemplate(
   }
   return withProps;
 }
+
+export function newlinesToBreaks(text: string) {
+  return text.replace(/\n/g, "<br>");
+}

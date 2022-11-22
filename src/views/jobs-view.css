@@ -21,3 +21,8 @@
 #jobs-table-container > * td[data-value="Not found"] {
   color: #6c757d;
 }
+
+#start-job-button:hover {
+  background-color: var(--color-teal-2);
+}
+

@@ -1,6 +1,6 @@
 import "./datasets-view.css";
 import { Dataset } from "../types";
-import { getDatasets, createDataset } from "../db/datasets";
+import { getDatasets, createDataset, deleteDataset } from "../db/datasets";
 import datasetViewHtml from "./datasets-view.html?raw";
 import { DataTable } from "../components/datatable";
 import { router } from "../main";
@@ -22,6 +22,7 @@ export class DatasetsView extends View {
     const datasets = getDatasets().map((d: Dataset) => ({
       id: d.id,
       name: d.name,
+      actions: `<button class="outline" data-id="${d.id}" data-action="view">View</button> <button class="outline danger" data-id="${d.id}" data-action="delete">Delete</button>`,
     }));
     const datasetsColumns = [
       {
@@ -32,19 +33,49 @@ export class DatasetsView extends View {
         name: "Name",
         key: "name",
       },
+      {
+        name: "Actions",
+        key: "actions",
+      },
     ];
-    const rowClicked = (row: any) => {
-      router.goTo(`/datasets/${row.id}`);
-    };
     const emptyMessage = "You don't have any datasets yet. Create one";
     const dataTable = new DataTable(
       this.datasetTableContainer,
       datasets,
       datasetsColumns,
-      emptyMessage,
-      rowClicked
+      emptyMessage
     );
     dataTable.render();
+    // Add button listeners
+    const viewButtons = document.querySelectorAll(
+      "#dataset-table-container button[data-action='view']"
+    );
+    viewButtons.forEach((b) => {
+      b.addEventListener("click", (e) => {
+        const id = (e.target as HTMLButtonElement).dataset.id;
+        if (id) {
+          router.goTo(`/datasets/${id}`);
+        }
+      });
+    });
+    const deleteButtons = document.querySelectorAll(
+      "#dataset-table-container button[data-action='delete']"
+    );
+    deleteButtons.forEach((b) => {
+      b.addEventListener("click", (e) => {
+        const id = (e.target as HTMLButtonElement).dataset.id;
+        const dataset = getDatasets().find((d) => d.id === id);
+        if (id) {
+          const confirm = window.confirm(
+            `Are you sure you want to delete dataset ${dataset?.name}?`
+          );
+          if (confirm) {
+            deleteDataset(dataset);
+            this.render();
+          }
+        }
+      });
+    });
     this.addListeners();
   }
 

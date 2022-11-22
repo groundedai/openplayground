@@ -1,0 +1,17 @@
+span.completion {
+  color: #000;
+  border-radius: 3px;
+  padding: 0 3px;
+  margin: 0 3px;
+  font-size: 12px;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.row-compare {
+  margin: 0 0 10px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 10px;
+}

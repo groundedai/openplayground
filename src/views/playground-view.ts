@@ -9,6 +9,7 @@ import {
   OpenAILanguageModel,
 } from "../providers/openai";
 import { mdToHtml, htmlToMd } from "../util/markdown";
+import { newlinesToBreaks } from "../util/string";
 import { PromptTemplate, LanguageModelSettings } from "../types";
 import {
   createPromptTemplate,
@@ -169,7 +170,7 @@ export class PlaygroundView extends View {
 
   setPlaygroundContent(content: string) {
     if (this.useContentEditable) {
-      let html = content.replace(/\n/g, "<br>");
+      let html = newlinesToBreaks(content);
       this.playgroundEditable!.innerHTML = html;
     } else {
       this.playgroundTextArea!.value = content;
@@ -179,7 +180,7 @@ export class PlaygroundView extends View {
 
   appendPlaygroundContent(content: string) {
     if (this.useContentEditable) {
-      let html = content.replace(/\n/g, "<br>");
+      let html = newlinesToBreaks(content);
       this.playgroundEditable!.innerHTML += html;
     } else {
       this.playgroundTextArea!.value += content;

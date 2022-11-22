@@ -48,9 +48,9 @@ const routes = [
     const jobView = new JobView({ container, job });
     jobView.render();
   }),
-  new Route("/compare/(\\d+)+(\\d+)/?$", (path: string) => {
-    const jobIdA = path.split("/")[2].split("+")[0];
-    const jobIdB = path.split("/")[2].split("+")[1];
+  new Route("/jobs/compare/(\\d+)/(\\d+)/?$", (path: string) => {
+    const jobIdA = path.split("/")[3];
+    const jobIdB = path.split("/")[4];
     const jobA = getJobs().find((j) => j.id === jobIdA);
     const jobB = getJobs().find((j) => j.id === jobIdB);
     const compareView = new CompareView({ container, jobA, jobB });

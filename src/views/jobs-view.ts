@@ -40,6 +40,9 @@ export class JobsView extends View {
   newJobForm: HTMLFormElement = document.querySelector(
     "#new-job-form"
   ) as HTMLFormElement;
+  compareButton: HTMLButtonElement = document.querySelector(
+    "#compare-button"
+  ) as HTMLButtonElement;
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: jobsViewHtml });
@@ -90,14 +93,15 @@ export class JobsView extends View {
         id: job.id,
         name: job.name,
         status: job.status[0].toUpperCase() + job.status.slice(1),
-        actions: `<button id="start-job-button" data-id="${job.id}" class="outline">Start</button> <button id="view-job-button" data-id="${job.id}" class="outline">View</button> <button id="delete-job-button" data-id="${job.id}" class="outline danger">Delete</button>`,
         dataset: dataset?.name || "Not found",
         template: template?.name || "Not found",
         settings: settings?.name || "Not found",
+        actions: `<button id="start-job-button" data-id="${job.id}" class="outline">Start</button> <button id="view-job-button" data-id="${job.id}" class="outline">View</button> <button id="delete-job-button" data-id="${job.id}" class="outline danger">Delete</button>`,
+        select: `<input type="checkbox" id="select-job" data-id="${job.id}" />`,
       };
     });
     const columns = [
-      { key: "id", name: "ID" },
+      { key: "select", name: "Select" },
       { key: "name", name: "Name" },
       { key: "status", name: "Status" },
       { key: "dataset", name: "Dataset" },
@@ -112,7 +116,10 @@ export class JobsView extends View {
       "No jobs"
     );
     this.jobsTable.render();
-    // Add listeners to the buttons
+    this.addJobsTableListeners();
+  }
+
+  addJobsTableListeners() {
     const startJobButtons = document.querySelectorAll(
       "#start-job-button"
     ) as NodeListOf<HTMLButtonElement>;
@@ -137,6 +144,60 @@ export class JobsView extends View {
         this.deleteJob(button.dataset.id!);
       });
     });
+    const selectJobCheckboxes = document.querySelectorAll(
+      "#select-job"
+    ) as NodeListOf<HTMLInputElement>;
+    selectJobCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        this.updateCompareButton();
+      });
+    });
+    // Check boxes when clicking on cell
+    const selectJobCells = document.querySelectorAll(
+      "td[data-column='select']"
+    ) as NodeListOf<HTMLTableCellElement>;
+    selectJobCells.forEach((cell) => {
+      cell.addEventListener("click", (event) => {
+        const checkbox = cell.querySelector(
+          "input[type='checkbox']"
+        ) as HTMLInputElement;
+        if (event.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+          this.updateCompareButton();
+        }
+      });
+    });
+  }
+
+  getSelectedJobs() {
+    const selectJobCheckboxes = document.querySelectorAll(
+      "#select-job"
+    ) as NodeListOf<HTMLInputElement>;
+    const selectedJobs: Job[] = [];
+    selectJobCheckboxes.forEach((checkbox) => {
+      if (checkbox.checked) {
+        const jobId = checkbox.dataset.id!;
+        const job = getJobs().find((job) => job.id === jobId);
+        if (job) {
+          selectedJobs.push(job);
+        }
+      }
+    });
+    return selectedJobs;
+  }
+
+  updateCompareButton() {
+    // If two jobs with the same dataset are selected, enable compare
+    const selectedJobs = this.getSelectedJobs();
+    if (selectedJobs.length === 2) {
+      const job1 = selectedJobs[0];
+      const job2 = selectedJobs[1];
+      if (job1?.datasetId === job2?.datasetId) {
+        this.compareButton.disabled = false;
+        return;
+      }
+    }
+    this.compareButton.disabled = true;
   }
 
   startJob(id: string) {
@@ -144,6 +205,7 @@ export class JobsView extends View {
     if (!job) {
       return;
     }
+    job.results = {}; // Clear results
     job.status = "running";
     updateJob(job);
     this.renderJobsTable();
@@ -163,7 +225,6 @@ export class JobsView extends View {
     if (!dataset || !template || !settings) {
       return;
     }
-    delete settings.settings.apiKey;
     const langModelClass = providerToClass[settings.provider];
     const langModel = new langModelClass(settings.settings);
     console.log(langModel);
@@ -175,6 +236,15 @@ export class JobsView extends View {
           const text = res.text;
           job.results[record.id] = text;
           updateJob(job);
+          const nCompleted = Object.keys(job.results).length;
+          this.jobsTable!.updateCell({
+            rowId: job.id,
+            key: "status",
+            value:
+              job.status[0].toUpperCase() +
+              job.status.slice(1) +
+              ` (${nCompleted}/${records.length})`,
+          });
         });
       // .catch((err: any) => {
       // this.showSnackbar({
@@ -211,6 +281,10 @@ export class JobsView extends View {
   }
 
   deleteJob(id: string) {
+    const confirm = window.confirm("Are you sure you want to delete this job?");
+    if (!confirm) {
+      return;
+    }
     const job = getJobs().find((job) => job.id === id);
     if (!job) {
       return;
@@ -240,6 +314,12 @@ export class JobsView extends View {
       });
       createJob(newJob);
       this.renderJobsTable();
+    });
+    this.compareButton?.addEventListener("click", () => {
+      const selectedJobs = this.getSelectedJobs();
+      const job1 = selectedJobs[0];
+      const job2 = selectedJobs[1];
+      router.goTo(`/jobs/compare/${job1.id}/${job2.id}`);
     });
   }
 }

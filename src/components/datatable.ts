@@ -47,7 +47,8 @@ export class DataTable {
     this.data.forEach((d: any) => {
       const row = new TableRow(d.id, d, this.columns);
       this.rows.push(row);
-      tbody.appendChild(row.render());
+      row.render();
+      tbody.appendChild(row.tr);
     });
     dataTable.appendChild(tbody);
     this.container.appendChild(dataTable);
@@ -71,12 +72,28 @@ export class DataTable {
       });
     });
   }
+
+  updateCell({
+    rowId,
+    key,
+    value,
+  }: {
+    rowId: string;
+    key: string;
+    value: string;
+  }) {
+    const row = this.rows.find((r) => r.id === rowId);
+    if (row) {
+      row.updateCell({ key, value });
+    }
+  }
 }
 
 export class TableRow {
   id: string;
   data: any;
   columns: Array<Column>;
+  tr: HTMLTableRowElement = document.createElement("tr");
 
   constructor(id: string, data: any, columns: Array<Column>) {
     this.id = id;
@@ -85,8 +102,7 @@ export class TableRow {
   }
 
   render() {
-    const tr = document.createElement("tr");
-    tr.dataset.id = this.id.toString();
+    this.tr.dataset.id = this.id.toString();
     this.columns.forEach((c: Column) => {
       const td = document.createElement("td");
       td.innerHTML = this.data[c.key];
@@ -94,8 +110,14 @@ export class TableRow {
       classes.forEach((c) => td.classList.add(c));
       td.dataset.column = c.key;
       td.dataset.value = this.data[c.key];
-      tr.appendChild(td);
+      this.tr.appendChild(td);
     });
-    return tr;
+  }
+
+  updateCell({ key, value }: { key: string; value: string }) {
+    const td = this.tr.querySelector(`[data-column="${key}"]`);
+    if (td) {
+      td.innerHTML = value;
+    }
   }
 }
