@@ -2,7 +2,6 @@
   text-align: center;
 }
 
-/* Conditional formatting */
 #jobs-table-container > * td[data-value="Complete"] {
   background-color: #d4edda;
 }

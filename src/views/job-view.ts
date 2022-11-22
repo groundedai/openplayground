@@ -1,4 +1,4 @@
-import "./job-view.css"
+import "./job-view.css";
 import jobViewHtml from "./job-view.html?raw";
 import { renderTemplate } from "../util/string";
 import { getRecords } from "../db/records";
@@ -7,32 +7,38 @@ import { Job } from "../types";
 import { mdToHtml } from "../util/markdown";
 import { DataTable } from "../components/datatable";
 import { Modal } from "../components/modal";
+import { View } from "./view";
 
-export class JobView {
-  container: HTMLDivElement;
+export class JobView extends View {
   job: Job;
-  recordsContainer: HTMLDivElement | null = null;
-  recordsTableContainer: HTMLDivElement | null = null;
-  recordModalContainer: HTMLDivElement | null = null;
+  recordsContainer: HTMLDivElement = document.querySelector(
+    "#records"
+  ) as HTMLDivElement;
+  recordsTableContainer: HTMLDivElement = document.querySelector(
+    "#records-table"
+  ) as HTMLDivElement;
+  recordModalContainer: HTMLDivElement = document.querySelector(
+    "#record-modal"
+  ) as HTMLDivElement;
 
-  constructor(container: HTMLDivElement, job: Job) {
-    this.container = container;
+  constructor({
+    container,
+    job,
+  }: {
+    container: HTMLDivElement;
+    job: Job | undefined;
+  }) {
+    if (!job) {
+      throw new Error("Job is undefined");
+    }
+    const props = {
+      jobName: job.name,
+    };
+    super({ container, html: jobViewHtml, props });
     this.job = job;
   }
 
   render() {
-    this.container.innerHTML = renderTemplate(jobViewHtml, {
-      jobName: this.job.name,
-    });
-    this.recordsContainer = document.querySelector(
-      "#records"
-    ) as HTMLDivElement;
-    this.recordsTableContainer = document.querySelector(
-      "#records-table"
-    ) as HTMLDivElement;
-    this.recordModalContainer = document.querySelector(
-      "#record-modal"
-    ) as HTMLDivElement;
     this.renderRecordsTable();
   }
 
@@ -100,24 +106,6 @@ export class JobView {
     const promptWithResult = `${prompt}${result}`;
     const promptWithResultFormatted = `${promptFormatted}${resultFormatted}`;
     const body: HTMLDivElement = document.createElement("div");
-    // body.innerHTML = `
-    //   <details><summary class="h4">Text</summary>
-    //   <details><summary class="h5">Raw</summary>${record.text}</details>
-    //   <details><summary class="h5">Markdown</summary>${textFormatted}</details>
-    //   </details>
-    //   <details><summary class="h4">Prompt</summary>
-    //   <details><summary class="h5">Raw</summary>${prompt}</details>
-    //   <details><summary class="h5">Markdown</summary>${promptFormatted}</details>
-    //   </details>
-    //   <details><summary class="h4">Result</summary>
-    //   <details><summary class="h5">Raw</summary>${result}</details>
-    //   <details><summary class="h5">Markdown</summary>${resultFormatted}</details>
-    //   </details>
-    //   <details><summary class="h4">Prompt + Result</summary>
-    //   <details><summary class="h5">Raw</summary>${promptWithResult}</details>
-    //   <details><summary class="h5">Markdown</summary>${promptWithResultFormatted}</details>
-    //   </details>
-    //     `;
     body.innerHTML = document.createElement(
       "div"
     ).innerHTML = `<h4>Prompt</h4>${prompt}<h4>Result</h4>${result}`;

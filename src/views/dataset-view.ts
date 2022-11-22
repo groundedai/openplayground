@@ -3,38 +3,41 @@ import { DataTable } from "../components/datatable";
 import { getRecords, createRecord } from "../db/records";
 import { Dataset, Record } from "../types";
 import { router } from "../main";
-import { renderTemplate } from "../util/string";
 import { deleteDataset } from "../db/datasets";
-import { mdToHtml } from "../util/markdown";
+import { View } from "./view";
 
-export class DatasetView {
-  container: HTMLDivElement;
+export class DatasetView extends View {
   dataset: Dataset;
   records: Array<Record> = [];
-  recordsTableContainer: HTMLDivElement | null = null;
-  newDataForm: HTMLFormElement | null = null;
-  deleteDatasetButton: HTMLButtonElement | null = null;
+  recordsTableContainer: HTMLDivElement = document.getElementById(
+    "records-table-container"
+  ) as HTMLDivElement;
+  newDataForm: HTMLFormElement = document.getElementById(
+    "new-data-form"
+  ) as HTMLFormElement;
+  deleteDatasetButton: HTMLButtonElement = document.getElementById(
+    "delete-dataset-button"
+  ) as HTMLButtonElement;
 
-  constructor(container: HTMLDivElement, dataset: Dataset) {
-    this.container = container;
+  constructor({
+    container,
+    dataset,
+  }: {
+    container: HTMLDivElement;
+    dataset: Dataset;
+  }) {
+    const props = {
+      datasetName: dataset.name,
+    };
+    super({
+      container,
+      html: datasetViewHtml,
+      props,
+    });
     this.dataset = dataset;
   }
 
   render() {
-    const props = {
-      datasetName: this.dataset.name,
-    };
-    const htmlWithProps = renderTemplate(datasetViewHtml, props);
-    this.container.innerHTML = htmlWithProps;
-    this.recordsTableContainer = document.getElementById(
-      "records-table-container"
-    ) as HTMLDivElement;
-    this.deleteDatasetButton = document.getElementById(
-      "delete-dataset-button"
-    ) as HTMLButtonElement;
-    this.newDataForm = document.getElementById(
-      "new-data-form"
-    ) as HTMLFormElement;
     this.records = getRecords().filter((r: Record) => {
       return r.datasetId === this.dataset.id;
     });

@@ -4,24 +4,21 @@ import { getDatasets, createDataset } from "../db/datasets";
 import datasetViewHtml from "./datasets-view.html?raw";
 import { DataTable } from "../components/datatable";
 import { router } from "../main";
+import { View } from "./view";
 
-export class DatasetsView {
-  container: HTMLDivElement;
-  datasetTableContainer: HTMLDivElement | null = null;
-  newDatasetForm: HTMLFormElement | null = null;
+export class DatasetsView extends View {
+  datasetTableContainer: HTMLDivElement = document.querySelector(
+    "#dataset-table-container"
+  ) as HTMLDivElement;
+  newDatasetForm: HTMLFormElement = document.querySelector(
+    "#new-dataset-form"
+  ) as HTMLFormElement;
 
-  constructor(container: HTMLDivElement) {
-    this.container = container;
+  constructor({ container }: { container: HTMLDivElement }) {
+    super({ container, html: datasetViewHtml });
   }
 
   render() {
-    this.container.innerHTML = datasetViewHtml;
-    this.datasetTableContainer = document.querySelector(
-      "#dataset-table-container"
-    ) as HTMLDivElement;
-    this.newDatasetForm = document.querySelector(
-      "#new-dataset-form"
-    ) as HTMLFormElement;
     const datasets = getDatasets().map((d: Dataset) => ({
       id: d.id,
       name: d.name,

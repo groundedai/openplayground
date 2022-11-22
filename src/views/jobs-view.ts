@@ -21,40 +21,31 @@ const providerToClass: {
 };
 
 export class JobsView extends View {
-  container: HTMLDivElement;
   jobsTable: DataTable | null = null;
-  jobsTableContainer: HTMLDivElement | null = null;
-  savedSettingsContainer: HTMLDivElement | null = null;
-  newJobSelectDataset: HTMLSelectElement | null = null;
-  newJobSelectTemplate: HTMLSelectElement | null = null;
-  newJobSelectSettings: HTMLSelectElement | null = null;
-  newJobForm: HTMLFormElement | null = null;
+  jobsTableContainer: HTMLDivElement = document.querySelector(
+    "#jobs-table-container"
+  ) as HTMLDivElement;
+  savedSettingsContainer: HTMLDivElement = document.querySelector(
+    "#saved-settings-container"
+  ) as HTMLDivElement;
+  newJobSelectDataset: HTMLSelectElement = document.querySelector(
+    "#job-dataset"
+  ) as HTMLSelectElement;
+  newJobSelectTemplate: HTMLSelectElement = document.querySelector(
+    "#job-template"
+  ) as HTMLSelectElement;
+  newJobSelectSettings: HTMLSelectElement = document.querySelector(
+    "#job-settings"
+  ) as HTMLSelectElement;
+  newJobForm: HTMLFormElement = document.querySelector(
+    "#new-job-form"
+  ) as HTMLFormElement;
 
-  constructor(container: HTMLDivElement) {
-    super();
-    this.container = container;
+  constructor({ container }: { container: HTMLDivElement }) {
+    super({ container, html: jobsViewHtml });
   }
 
   render() {
-    this.container.innerHTML = jobsViewHtml;
-    this.jobsTableContainer = document.querySelector(
-      "#jobs-table-container"
-    ) as HTMLDivElement;
-    this.savedSettingsContainer = document.querySelector(
-      "#saved-settings-container"
-    ) as HTMLDivElement;
-    this.newJobSelectDataset = document.querySelector(
-      "#job-dataset"
-    ) as HTMLSelectElement;
-    this.newJobSelectTemplate = document.querySelector(
-      "#job-template"
-    ) as HTMLSelectElement;
-    this.newJobSelectSettings = document.querySelector(
-      "#job-settings"
-    ) as HTMLSelectElement;
-    this.newJobForm = document.querySelector(
-      "#new-job-form"
-    ) as HTMLFormElement;
     this.fillSelectOptions();
     this.renderJobsTable();
     this.addListeners();

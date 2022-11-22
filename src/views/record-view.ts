@@ -4,55 +4,50 @@ import { autosizeTextarea } from "../util/dom";
 import { getRecords, updateRecord } from "../db/records";
 import { router } from "../main";
 import { mdToHtml } from "../util/markdown";
-import { renderTemplate } from "../util/string";
+import { View } from "./view";
 
-export class RecordView {
-  container: HTMLDivElement;
+export class RecordView extends View {
   record: Record;
-  recordTextArea!: HTMLTextAreaElement;
-  previewContainer!: HTMLDivElement;
-  saveButton: HTMLButtonElement | null = null;
-  deleteButton: HTMLButtonElement | null = null;
-  nextButton: HTMLButtonElement | null = null;
-  prevButton: HTMLButtonElement | null = null;
-  backToDatasetButton: HTMLButtonElement | null = null;
+  recordTextArea: HTMLTextAreaElement = this.container.querySelector(
+    "#record-text-area"
+  ) as HTMLTextAreaElement;
+  previewContainer: HTMLDivElement = this.container.querySelector(
+    "#preview-content"
+  ) as HTMLDivElement;
+  saveButton: HTMLButtonElement = this.container.querySelector(
+    "#save-button"
+  ) as HTMLButtonElement;
+  deleteButton: HTMLButtonElement = this.container.querySelector(
+    "#delete-button"
+  ) as HTMLButtonElement;
+  nextButton: HTMLButtonElement = this.container.querySelector(
+    "#next-button"
+  ) as HTMLButtonElement;
+  prevButton: HTMLButtonElement = this.container.querySelector(
+    "#prev-button"
+  ) as HTMLButtonElement;
+  backToDatasetButton: HTMLButtonElement = this.container.querySelector(
+    "#back-to-dataset-button"
+  ) as HTMLButtonElement;
 
-  constructor(container: HTMLDivElement, record: Record) {
-    this.container = container;
+  constructor({
+    container,
+    record,
+  }: {
+    container: HTMLDivElement;
+    record: Record;
+  }) {
+    const props = {
+      recordText: record.text,
+    };
+    super({ container, html: recordViewHtml, props });
     this.record = record;
   }
 
   render() {
-    const html = recordViewHtml;
-    const props: any = {
-      recordText: this.record.text,
-    };
-    let htmlWithProps = renderTemplate(html, props);
-    this.container.innerHTML = htmlWithProps;
-    this.recordTextArea = this.container.querySelector(
-      "#record-text-area"
-    ) as HTMLTextAreaElement;
     this.recordTextArea.hidden = true;
     this.recordTextArea.value = this.record.text;
     autosizeTextarea(this.recordTextArea);
-    this.previewContainer = this.container.querySelector(
-      "#preview-content"
-    ) as HTMLDivElement;
-    this.saveButton = this.container.querySelector(
-      "#save-button"
-    ) as HTMLButtonElement;
-    this.deleteButton = this.container.querySelector(
-      "#delete-button"
-    ) as HTMLButtonElement;
-    this.nextButton = this.container.querySelector(
-      "#next-button"
-    ) as HTMLButtonElement;
-    this.prevButton = this.container.querySelector(
-      "#prev-button"
-    ) as HTMLButtonElement;
-    this.backToDatasetButton = this.container.querySelector(
-      "#back-to-dataset-button"
-    ) as HTMLButtonElement;
     this.addListeners();
     this.makePreview();
   }
@@ -63,13 +58,13 @@ export class RecordView {
       autosizeTextarea(target);
       this.makePreview();
     });
-    this.recordTextArea.addEventListener("blur", (e: Event) => {
+    this.recordTextArea.addEventListener("blur", () => {
       if (this.recordTextArea) {
         this.recordTextArea.hidden = true;
         this.previewContainer.hidden = false;
       }
     });
-    this.previewContainer?.addEventListener("click", (e: Event) => {
+    this.previewContainer?.addEventListener("click", () => {
       this.previewContainer.hidden = true;
       this.recordTextArea.hidden = false;
       this.recordTextArea.focus();
@@ -90,7 +85,7 @@ export class RecordView {
         (r) => r.datasetId === this.record.datasetId
       );
       let foundCurrentRecord = false;
-      let nextRecord: Record | null = null;
+      let nextRecord: Record;
       records.forEach((record) => {
         if (record.id === this.record.id) {
           foundCurrentRecord = true;
@@ -99,8 +94,8 @@ export class RecordView {
           foundCurrentRecord = false; // stop loop
         }
       });
-      console.log("next record", nextRecord);
-      if (nextRecord) {
+      if (nextRecord!) {
+        console.log("next record", nextRecord);
         router.goTo(
           `/datasets/${this.record.datasetId}/record/${nextRecord.id}`
         );
@@ -108,7 +103,7 @@ export class RecordView {
     });
     this.prevButton?.addEventListener("click", (e: Event) => {
       e.preventDefault();
-      let prevRecord: Record | null = null;
+      let prevRecord: Record;
       let foundCurrentRecord = false;
       getRecords().forEach((record: Record) => {
         if (!foundCurrentRecord) {
@@ -119,8 +114,8 @@ export class RecordView {
           }
         }
       });
-      console.log("prev record", prevRecord);
-      if (prevRecord) {
+      if (prevRecord!) {
+        console.log("prev record", prevRecord);
         router.goTo(
           `/datasets/${this.record.datasetId}/record/${prevRecord.id}`
         );

@@ -49,46 +49,59 @@ const providerToClass: {
 const defaultProvider = "cohere";
 
 export class PlaygroundView extends View {
-  container: HTMLDivElement;
-  useContentEditable = false;
-  autoSuggest = false;
-  playgroundTextArea: HTMLTextAreaElement | null = null;
-  textAreaLoadingDiv: HTMLDivElement | null = null;
-  suggestButtonLoadingDiv: HTMLDivElement | null = null;
+  useContentEditable: boolean = false;
+  autoSuggest: boolean = false;
+  playgroundTextArea: HTMLTextAreaElement = document.querySelector(
+    "#playground-textarea"
+  ) as HTMLTextAreaElement;
+  textAreaLoadingDiv: HTMLDivElement = document.querySelector(
+    "#playground-textarea-loading"
+  ) as HTMLDivElement;
+  suggestButtonLoadingDiv: HTMLDivElement = document.querySelector(
+    "#suggest-button-loading"
+  ) as HTMLDivElement;
   playgroundEditable: HTMLSpanElement | null = null;
-  suggestButton: HTMLButtonElement | null = null;
-  saveTemplateButton: HTMLButtonElement | null = null;
-  saveSettingsButton: HTMLButtonElement | null = null;
-  templateContainer: HTMLDivElement | null = null;
-  settingsContainer: HTMLDivElement | null = null;
-  settingsPanel: SettingsPanel | null = null;
-  savedSettingsContainer: HTMLDivElement | null = null;
-  insertRecordButton: HTMLButtonElement | null = null;
-  insertRecordModalContainer: HTMLDivElement | null = null;
-  autoSuggestSwitch: HTMLInputElement | null = null;
-  languageModelProviderSelect: HTMLSelectElement | null = null;
+  suggestButton: HTMLButtonElement = document.querySelector(
+    "#suggest-button"
+  ) as HTMLButtonElement;
+  saveTemplateButton: HTMLButtonElement = document.querySelector(
+    "#save-template-button"
+  ) as HTMLButtonElement;
+  saveSettingsButton: HTMLButtonElement = document.querySelector(
+    "#save-settings-button"
+  ) as HTMLButtonElement;
+  templateContainer: HTMLDivElement = document.querySelector(
+    "#templates-container"
+  ) as HTMLDivElement;
+  settingsContainer: HTMLDivElement = document.querySelector(
+    "#settings-container"
+  ) as HTMLDivElement;
+  savedSettingsContainer: HTMLDivElement = document.querySelector(
+    "#saved-settings-container"
+  ) as HTMLDivElement;
+  insertRecordButton: HTMLButtonElement = document.querySelector(
+    "#insert-record-button"
+  ) as HTMLButtonElement;
+  insertRecordModalContainer: HTMLDivElement = document.querySelector(
+    "#insert-record-modal-container"
+  ) as HTMLDivElement;
+  autoSuggestSwitch: HTMLInputElement = document.querySelector(
+    "#auto-suggest-switch"
+  ) as HTMLInputElement;
+  languageModelProviderSelect: HTMLSelectElement = document.querySelector(
+    "#language-model-provider-select"
+  ) as HTMLSelectElement;
+  editorCharCountSpan: HTMLSpanElement = document.querySelector(
+    "#char-count-value"
+  ) as HTMLSpanElement;
   languageModelProvider: string | null = null;
-  editorCharCountSpan: HTMLSpanElement | null = null;
+  settingsPanel: SettingsPanel | null = null;
 
-  constructor(
-    container: HTMLDivElement,
-    useContentEditable = false,
-    autoSuggest = false
-  ) {
-    super();
-    this.container = container;
-    this.useContentEditable = useContentEditable;
-    this.autoSuggest = autoSuggest;
+  constructor({ container }: { container: HTMLDivElement }) {
+    super({ container, html: playgroundViewHtml });
   }
 
   render() {
-    this.container.innerHTML = playgroundViewHtml;
-    this.textAreaLoadingDiv = document.querySelector(
-      "#playground-textarea-loading"
-    ) as HTMLDivElement;
-    this.playgroundTextArea = document.querySelector(
-      "#playground-textarea"
-    ) as HTMLTextAreaElement;
     this.playgroundEditable = document.querySelector(
       "#playground-editable"
     ) as HTMLSpanElement;
@@ -99,42 +112,6 @@ export class PlaygroundView extends View {
       this.playgroundTextArea!.style.display = "block";
       // this.playgroundEditable!.style.display = "none";
     }
-    this.suggestButton = document.querySelector(
-      "#suggest-button"
-    ) as HTMLButtonElement;
-    this.suggestButtonLoadingDiv = document.querySelector(
-      "#suggest-button-loading"
-    ) as HTMLDivElement;
-    this.saveTemplateButton = document.querySelector(
-      "#save-template-button"
-    ) as HTMLButtonElement;
-    this.saveSettingsButton = document.querySelector(
-      "#save-settings-button"
-    ) as HTMLButtonElement;
-    this.templateContainer = document.querySelector(
-      "#templates-container"
-    ) as HTMLDivElement;
-    this.languageModelProviderSelect = document.querySelector(
-      "#language-model-provider-select"
-    ) as HTMLSelectElement;
-    this.settingsContainer = document.querySelector(
-      "#settings-container"
-    ) as HTMLDivElement;
-    this.savedSettingsContainer = document.querySelector(
-      "#saved-settings-container"
-    ) as HTMLDivElement;
-    this.insertRecordButton = document.querySelector(
-      "#insert-record-button"
-    ) as HTMLButtonElement;
-    this.insertRecordModalContainer = document.querySelector(
-      "#insert-record-modal"
-    ) as HTMLDivElement;
-    this.autoSuggestSwitch = document.querySelector(
-      "#auto-suggest-switch"
-    ) as HTMLInputElement;
-    this.editorCharCountSpan = document.querySelector(
-      "#char-count-value"
-    ) as HTMLSpanElement;
     this.setupSettingsPanel();
     // Load settings from local storage
     const settingsStorageKey =
@@ -186,8 +163,8 @@ export class PlaygroundView extends View {
       this.settingsContainer!,
       settingsSchema
     );
-    this.settingsPanel.render();
-    this.settingsPanel.setSettings(settings.settings);
+    this.settingsPanel?.render();
+    this.settingsPanel?.setSettings(settings.settings);
   }
 
   setPlaygroundContent(content: string) {
@@ -243,11 +220,11 @@ export class PlaygroundView extends View {
 
   setLoading(isLoading: boolean) {
     if (isLoading) {
-      this.textAreaLoadingDiv?.classList.remove("hidden");
-      this.suggestButtonLoadingDiv?.classList.remove("hidden");
+      // this.textAreaLoadingDiv.classList.remove("hidden");
+      this.suggestButtonLoadingDiv.classList.remove("hidden");
     } else {
-      this.textAreaLoadingDiv?.classList.add("hidden");
-      this.suggestButtonLoadingDiv?.classList.add("hidden");
+      // this.textAreaLoadingDiv.classList.add("hidden");
+      this.suggestButtonLoadingDiv.classList.add("hidden");
     }
   }
 
@@ -422,10 +399,10 @@ export class PlaygroundView extends View {
   }
 
   addListeners() {
-    this.suggestButton?.addEventListener("click", () => {
+    this.suggestButton.addEventListener("click", () => {
       this.getSuggestions();
     });
-    this.saveTemplateButton?.addEventListener("click", () => {
+    this.saveTemplateButton.addEventListener("click", () => {
       console.log("Save template");
       const template = this.getPlaygroundText();
       if (template) {
@@ -442,7 +419,7 @@ export class PlaygroundView extends View {
         }
       }
     });
-    this.saveSettingsButton?.addEventListener("click", () => {
+    this.saveSettingsButton.addEventListener("click", () => {
       console.log("Save settings");
       const lms = this.getLanguageModelSettings();
       const name = prompt("Name for settings");
@@ -454,11 +431,11 @@ export class PlaygroundView extends View {
         this.render();
       }
     });
-    this.autoSuggestSwitch?.addEventListener("click", () => {
-      const value = this.autoSuggestSwitch?.checked || false;
+    this.autoSuggestSwitch.addEventListener("click", () => {
+      const value = this.autoSuggestSwitch.checked || false;
       this.autoSuggest = value;
     });
-    this.insertRecordButton?.addEventListener("click", () => {
+    this.insertRecordButton.addEventListener("click", () => {
       const datasets = getDatasets();
       const datasetOptions = datasets.map((d) => ({
         value: d.id,
@@ -539,7 +516,7 @@ export class PlaygroundView extends View {
         }
       }
     );
-    this.languageModelProviderSelect?.addEventListener("change", (e) => {
+    this.languageModelProviderSelect.addEventListener("change", (e) => {
       const provider = (e.target as HTMLSelectElement).value;
       this.languageModelProvider = provider;
       localStorage.setItem("playgroundLanguageModelProvider", provider);
@@ -550,7 +527,7 @@ export class PlaygroundView extends View {
         this.saveToLocalStorage();
       });
     } else {
-      this.playgroundTextArea?.addEventListener("input", () => {
+      this.playgroundTextArea.addEventListener("input", () => {
         this.saveToLocalStorage();
         this.editorCharCountSpan!.innerText =
           this.getPlaygroundText().length.toString();
