@@ -68,6 +68,8 @@ export class Job {
   languageModelSettingsId: string;
   status: string = "pending";
   results: { [recordId: string]: any } = {};
+  stripInitialWhiteSpace: boolean = false;
+  injectStartText: string = "";
 
   constructor(values: {
     id: string | number;
@@ -76,6 +78,9 @@ export class Job {
     templateId: string;
     languageModelSettingsId: string;
     status?: string;
+    results?: { [recordId: string]: any };
+    stripInitialWhiteSpace?: boolean;
+    injectStartText?: string;
   }) {
     this.id = values.id.toString();
     if (values.name) {
@@ -88,6 +93,24 @@ export class Job {
     this.templateId = values.templateId;
     this.languageModelSettingsId = values.languageModelSettingsId;
     this.status = values.status || "pending";
+    this.results = values.results || {};
+    this.stripInitialWhiteSpace = values.stripInitialWhiteSpace || false;
+    this.injectStartText = values.injectStartText || "";
+  }
+
+  getFormattedResults() {
+    let results = { ...this.results };
+    for (const recordId in results) {
+      let result = results[recordId];
+      if (this.stripInitialWhiteSpace) {
+        result = result.replace(/^(\s*)/, "");
+      }
+      if (this.injectStartText) {
+        result = `${this.injectStartText}${result}`;
+      }
+      results[recordId] = result;
+    }
+    return results;
   }
 }
 

@@ -84,7 +84,7 @@ export class PlaygroundView extends View {
     "#insert-record-button"
   ) as HTMLButtonElement;
   insertRecordModalContainer: HTMLDivElement = document.querySelector(
-    "#insert-record-modal-container"
+    "#insert-record-modal"
   ) as HTMLDivElement;
   autoSuggestSwitch: HTMLInputElement = document.querySelector(
     "#auto-suggest-switch"

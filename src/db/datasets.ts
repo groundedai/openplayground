@@ -1,5 +1,6 @@
 import * as db from "./base";
 import { Dataset } from "../types";
+import { deleteRecord } from "./records";
 
 export function getDatasets() {
   return db.getItems("datasets") || [];
@@ -15,4 +16,11 @@ export function updateDataset(dataset: Dataset) {
 
 export function deleteDataset(dataset: Dataset) {
   db.deleteItem("datasets", dataset);
+  // Delete all records for this dataset
+  const records = db.getItems("records");
+  records.forEach((r) => {
+    if (r.datasetId === dataset.id) {
+      deleteRecord(r);
+    }
+  });
 }

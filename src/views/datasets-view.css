@@ -1,3 +1,8 @@
 #dataset-table-container > table {
   text-align: center;
 }
+
+#dataset-table-container >* td[data-column="name"] {
+  font-weight: bold;
+  font-size: 1.2em;
+}

@@ -11,7 +11,8 @@
   --color-teal-3: #0f9f9f;
   --color-teal-4: #0f8686;
 
-  --font-family-2: "Consolas", "Monaco", "Menlo", monospace;
+  /* --font-family-2: "Consolas", "Monaco", "Menlo", monospace; */
+  --font-family-2: monospace;
 }
 
 body {

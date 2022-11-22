@@ -8,6 +8,8 @@ import { mdToHtml } from "../util/markdown";
 import { DataTable } from "../components/datatable";
 import { Modal } from "../components/modal";
 import { View } from "./view";
+import { updateJob } from "../db/jobs";
+import { SettingsPanel } from "../components/settings-panel";
 
 export class JobView extends View {
   job: Job;
@@ -20,6 +22,16 @@ export class JobView extends View {
   recordModalContainer: HTMLDivElement = document.querySelector(
     "#record-modal"
   ) as HTMLDivElement;
+  formatResultsSettingsPanelContainer: HTMLDivElement = document.querySelector(
+    "#format-results-settings-panel"
+  ) as HTMLDivElement;
+  formatResultsSettingsPanel: SettingsPanel;
+  // stripInitialWhiteSpaceCheckbox: HTMLInputElement = document.querySelector(
+  //   "#strip-initial-whitespace"
+  // ) as HTMLInputElement;
+  // injectStartTextInput: HTMLInputElement = document.querySelector(
+  //   "#inject-start-text"
+  // ) as HTMLInputElement;
 
   constructor({
     container,
@@ -36,10 +48,34 @@ export class JobView extends View {
     };
     super({ container, html: jobViewHtml, props });
     this.job = job;
+    const formatResultsSettingsSchema = {
+      stripInitialWhiteSpace: {
+        label: "Strip initial whitespace",
+        type: "checkbox",
+        default: false,
+        key: "stripInitialWhiteSpace",
+      },
+      injectStartText: {
+        label: "Inject start text",
+        type: "text",
+        default: "",
+        key: "injectStartText",
+      },
+    };
+    this.formatResultsSettingsPanel = new SettingsPanel(
+      this.formatResultsSettingsPanelContainer,
+      formatResultsSettingsSchema
+    );
   }
 
   render() {
+    this.formatResultsSettingsPanel.render();
+    this.formatResultsSettingsPanel.setSettings({
+      stripInitialWhiteSpace: this.job.stripInitialWhiteSpace,
+      injectStartText: this.job.injectStartText,
+    });
     this.renderRecordsTable();
+    this.addListeners();
   }
 
   renderRecordsTable() {
@@ -56,11 +92,13 @@ export class JobView extends View {
         name: "Result",
       },
     ];
+    console.log(this.job);
+    const resultsFormatted = this.job.getFormattedResults();
     const rows = records.map((record: any) => {
       // Replace newlines or breaks in the text with a space
       const text = record.text;
-      const result = this.job.results[record.id];
-      let resultHtml = `${text}\n\n<span class="completion">${result}</span>`;
+      const resultFormatted = resultsFormatted[record.id];
+      let resultHtml = `${text}\n\n<span class="completion">${resultFormatted}</span>`;
       resultHtml = newlinesToBreaks(resultHtml);
       // const text = record.text.replace(/(\r\n|\n|\r)/gm, " ");
       // const textFormatted = mdToHtml(text);
@@ -109,5 +147,23 @@ export class JobView extends View {
     const modal = new Modal(this.recordModalContainer!, body);
     modal.render();
     modal.show();
+  }
+
+  addListeners() {
+    const stripInitialWhiteSpaceCheckbox: HTMLInputElement =
+      document.querySelector("#stripInitialWhiteSpace") as HTMLInputElement;
+    stripInitialWhiteSpaceCheckbox.addEventListener("change", () => {
+      this.job.stripInitialWhiteSpace = stripInitialWhiteSpaceCheckbox.checked;
+      updateJob(this.job);
+      this.renderRecordsTable();
+    });
+    const injectStartTextInput: HTMLInputElement = document.querySelector(
+      "#injectStartText"
+    ) as HTMLInputElement;
+    injectStartTextInput.addEventListener("input", () => {
+      this.job.injectStartText = injectStartTextInput.value;
+      updateJob(this.job);
+      this.renderRecordsTable();
+    });
   }
 }

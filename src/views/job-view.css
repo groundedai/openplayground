@@ -5,3 +5,17 @@
 #records-table >* [data-column="text"] {
     width: 70%;
 }
+
+#format-panel {
+    border: 1px solid #ccc;
+    padding: 1em 0.5em;
+    border-radius: 5px;
+}
+
+#format-panel > summary.h5 {
+    margin: 0.5em;
+}
+
+#format-panel > * input[type="text"] {
+    width: 80%;
+}

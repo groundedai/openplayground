@@ -248,6 +248,14 @@ export class JobsView extends View {
     const langModelClass = providerToClass[settings.provider];
     const langModel = new langModelClass(settings.settings);
     console.log(langModel);
+    this.jobsTable!.updateCell({
+      rowId: job.id,
+      key: "status",
+      value:
+        job.status[0].toUpperCase() +
+        job.status.slice(1) +
+        ` (0/${records.length})`,
+    });
     const promises = records.map((record) => {
       const prompt = renderTemplate(template.template, { text: record.text });
       return langModel

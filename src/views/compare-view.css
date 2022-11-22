@@ -2,8 +2,6 @@ span.completion {
   color: #000;
   border-radius: 2px;
   /* background-color: var(--color-teal-1); */
-  padding: 0 3px;
-  margin: 0 3px;
   font-weight: bold;
 }
 

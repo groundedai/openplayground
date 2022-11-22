@@ -2,7 +2,9 @@ import { Job } from "../types";
 import * as db from "./base";
 
 export function getJobs(): Job[] {
-  return db.getItems("jobs") || [];
+  const jobs = db.getItems("jobs") || [];
+  const objs = jobs.map((j) => new Job(j));
+  return objs;
 }
 
 export function createJob(job: Job) {
