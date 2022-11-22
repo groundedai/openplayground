@@ -1,10 +1,9 @@
 span.completion {
   color: #000;
-  border-radius: 3px;
+  border-radius: 2px;
+  /* background-color: var(--color-teal-1); */
   padding: 0 3px;
   margin: 0 3px;
-  font-size: 12px;
-  font-family: monospace;
   font-weight: bold;
 }
 
@@ -14,4 +13,30 @@ span.completion {
   border: 1px solid #ccc;
   border-radius: 3px;
   padding: 10px;
+}
+
+#compare-view > * td[data-column="name"] {
+  font-weight: bold;
+}
+
+#compare-view > * tr[data-id="template"] td[data-column="name"] {
+  font-weight: bold;
+  vertical-align: top;
+  padding-top: 3em;
+}
+
+#compare-view > * tr[data-id="lms-name"] {
+  text-align: center;
+}
+
+#compare-view > * tr[data-id="template-name"] {
+  text-align: center;
+}
+
+#compare-view > * td > pre {
+  white-space: pre-wrap;
+}
+
+#compare-view > * td {
+  border-top: 1px solid #ccc;
 }

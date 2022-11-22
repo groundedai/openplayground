@@ -1,10 +1,11 @@
 import { View } from "./view";
 import compareViewHtml from "./compare-view.html?raw";
 import "./compare-view.css";
-import { Job, Record, PromptTemplate } from "../types";
+import { Job, Record, PromptTemplate, LanguageModelSettings } from "../types";
 import { getDatasets } from "../db/datasets";
 import { getRecords } from "../db/records";
 import { getPromptTemplates } from "../db/prompt-templates";
+import { getLanguageModelSettings } from "../db/language-model-settings";
 import { DataTable } from "../components/datatable";
 import { renderTemplate, newlinesToBreaks } from "../util/string";
 
@@ -13,6 +14,9 @@ export class CompareView extends View {
   jobB: Job;
   resultsContainer: HTMLDivElement = document.querySelector(
     "#results"
+  ) as HTMLDivElement;
+  settingsContainer: HTMLDivElement = document.querySelector(
+    "#settings"
   ) as HTMLDivElement;
   showFullPrompt: boolean = false;
 
@@ -49,7 +53,72 @@ export class CompareView extends View {
     const records = getRecords().filter((r) => r.datasetId === dataset.id);
     const resultsA = this.jobA.results;
     const resultsB = this.jobB.results;
+    this.renderSettingsTable();
     this.renderResultsTable({ records, resultsA, resultsB });
+  }
+
+  renderSettingsTable() {
+    const settingsA = getLanguageModelSettings().find(
+      (s) => s.id === this.jobA.languageModelSettingsId
+    );
+    const settingsB = getLanguageModelSettings().find(
+      (s) => s.id === this.jobB.languageModelSettingsId
+    );
+    const templateA = getPromptTemplates().find(
+      (t) => t.id === this.jobA.templateId
+    );
+    const templateB = getPromptTemplates().find(
+      (t) => t.id === this.jobB.templateId
+    );
+    const renderSettingsCell = (settings: LanguageModelSettings) => {
+      return `<pre>${JSON.stringify(settings.settings, null, 2)}</pre>`;
+    };
+    const renderTemplateCell = (template: PromptTemplate) => {
+      let templateHtml = newlinesToBreaks(template.template);
+      return `<pre>${templateHtml}</pre>`;
+    };
+    const rows = [
+      {
+        id: "lms-name",
+        name: "Settings Name",
+        valueA: `<h5><pre>${settingsA!.name}</pre></h5>`,
+        valueB: `<h5><pre>${settingsB!.name}</pre></h5>`,
+      },
+      {
+        id: "lms",
+        name: "Settings",
+        valueA: renderSettingsCell(settingsA!),
+        valueB: renderSettingsCell(settingsB!),
+      },
+      {
+        id: "template-name",
+        name: "Template Name",
+        valueA: `<h5><pre>${templateA!.name}</pre></h5>`,
+        valueB: `<h5><pre>${templateB!.name}</pre></h5>`,
+      },
+      {
+        id: "template",
+        name: "Template",
+        valueA: renderTemplateCell(templateA!),
+        valueB: renderTemplateCell(templateB!),
+      },
+    ];
+    const columns = [
+      {
+        name: "",
+        key: "name",
+      },
+      {
+        name: this.jobA.name,
+        key: "valueA",
+      },
+      {
+        name: this.jobB.name,
+        key: "valueB",
+      },
+    ];
+    const table = new DataTable(this.settingsContainer, rows, columns);
+    table.render();
   }
 
   renderResultsTable({
@@ -107,12 +176,12 @@ export class CompareView extends View {
   }): string {
     let text: string;
     if (!promptTemplate) {
-      text = `${record.text}\n\n<span class="completion">${result}</span>`;
+      text = `<pre>${record.text}\n\n<span class="completion">${result}</span></pre>`;
     } else {
       let prompt = renderTemplate(promptTemplate.template, {
         text: record.text,
       });
-      text = `${prompt}<span class="completion">${result}</span>`;
+      text = `<pre>${prompt}<span class="completion">${result}</span></pre>`;
     }
     let html = newlinesToBreaks(text);
     return html;

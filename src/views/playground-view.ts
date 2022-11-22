@@ -276,13 +276,18 @@ export class PlaygroundView extends View {
     );
     dataTable.render();
     this.templateContainer!.querySelectorAll("button").forEach((button) => {
-      button.addEventListener("click", (e) => {
+      button.addEventListener("click", () => {
         const id = button.dataset.id;
         const action = button.dataset.action;
         const pt = getPromptTemplates().find((pt) => pt.name === id);
         if (action === "delete") {
-          deletePromptTemplate(pt);
-          this.renderTemplates();
+          const confirm = window.confirm(
+            `Are you sure you want to delete the template "${pt?.name}"?`
+          );
+          if (confirm) {
+            deletePromptTemplate(pt);
+            this.renderTemplates();
+          }
         } else if (action === "load") {
           this.setPlaygroundContent(pt.template);
         }
