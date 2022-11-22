@@ -11,6 +11,7 @@ import { renderTemplate } from "../util/string";
 import { CohereLanguageModel } from "../providers/cohere";
 import { OpenAILanguageModel } from "../providers/openai";
 import { router } from "../main";
+import { View } from "./view";
 
 const providerToClass: {
   [key: string]: any;
@@ -19,7 +20,7 @@ const providerToClass: {
   openai: OpenAILanguageModel,
 };
 
-export class JobsView {
+export class JobsView extends View {
   container: HTMLDivElement;
   jobsTable: DataTable | null = null;
   jobsTableContainer: HTMLDivElement | null = null;
@@ -30,6 +31,7 @@ export class JobsView {
   newJobForm: HTMLFormElement | null = null;
 
   constructor(container: HTMLDivElement) {
+    super();
     this.container = container;
   }
 
@@ -170,30 +172,43 @@ export class JobsView {
     if (!dataset || !template || !settings) {
       return;
     }
+    delete settings.settings.apiKey;
     const langModelClass = providerToClass[settings.provider];
     const langModel = new langModelClass(settings.settings);
-    console.log(langModel)
+    console.log(langModel);
     const promises = records.map((record) => {
       const prompt = renderTemplate(template.template, { text: record.text });
-      console.log("Prompt", prompt);
       return langModel
         .getSuggestions(prompt)
         .then((res: { data: any; text: string }) => {
           const text = res.text;
-          console.log("Suggestion", text);
           job.results[record.id] = text;
           updateJob(job);
-        })
-        .catch((err: any) => {
-          console.log("Error", err);
         });
+      // .catch((err: any) => {
+      // this.showSnackbar({
+      //   messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
+      //   type: "error",
+      //   duration: 4000,
+      // });
+      // });
     });
-    Promise.all(promises).then(() => {
-      job.status = "complete";
-      updateJob(job);
-      this.renderJobsTable();
-      console.log("Updated job", job);
-    });
+    Promise.all(promises)
+      .then(() => {
+        job.status = "complete";
+        updateJob(job);
+        this.renderJobsTable();
+      })
+      .catch((err: any) => {
+        this.showSnackbar({
+          messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
+          type: "error",
+          duration: 4000,
+        });
+        job.status = "failed";
+        updateJob(job);
+        this.renderJobsTable();
+      });
   }
 
   viewJob(id: string) {

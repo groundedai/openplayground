@@ -88,6 +88,10 @@ td[data-column="actions"] > button {
   padding: 0.5em 1em;
 }
 
+#saved-settings-container > * td {
+  padding: 0;
+}
+
 #saved-settings-container > * td[data-column="name"] {
   font-weight: 500;
   width: 100%;

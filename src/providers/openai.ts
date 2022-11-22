@@ -104,6 +104,16 @@ export const openaiGenerationBodyKeys = [
   "stop",
 ];
 
+class OpenAIException extends Error {
+  body: any;
+  constructor(message: string, body: any) {
+    super(message);
+    this.name = "OpenAI Error";
+    this.message = message;
+    this.body = body;
+  }
+}
+
 export class OpenAILanguageModel implements LanguageModel {
   apiKey: string;
   settings: openaiGenerationSettings;
@@ -135,11 +145,20 @@ export class OpenAILanguageModel implements LanguageModel {
     });
     return response
       .then((res) => {
-        return res.json();
+        if (res.ok) {
+          return res.json();
+        } else {
+          return res.json().then((body) => {
+            throw new OpenAIException(res.statusText, body);
+          });
+        }
       })
       .then((res) => {
         let data = { data: res, text: res.choices[0].text };
         return data;
+      })
+      .catch((err) => {
+        throw new OpenAIException(err.message, err);
       });
   }
 }

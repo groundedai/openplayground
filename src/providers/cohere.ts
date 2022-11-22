@@ -146,10 +146,9 @@ export class CohereLanguageModel implements LanguageModel {
       })
       .then((json) => {
         return { data: json, text: json.text };
+      })
+      .catch((err) => {
+        throw new CohereException(err.message, err);
       });
-    // .catch((err) => {
-    //   console.log("Cohere API error", err);
-    //   return { data: err, text: err };
-    // });
   }
 }

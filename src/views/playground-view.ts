@@ -25,7 +25,7 @@ import { getRecords } from "../db/records";
 import { DataTable } from "../components/datatable";
 import { SettingsPanel } from "../components/settings-panel";
 import { Modal } from "../components/modal";
-import { Snackbar } from "../components/snackbar";
+import { View } from "./view";
 
 const languageModelProviders = ["cohere", "openai"];
 const providerToSettingsSchema: {
@@ -48,7 +48,7 @@ const providerToClass: {
 };
 const defaultProvider = "cohere";
 
-export class PlaygroundView {
+export class PlaygroundView extends View {
   container: HTMLDivElement;
   useContentEditable = false;
   autoSuggest = false;
@@ -75,6 +75,7 @@ export class PlaygroundView {
     useContentEditable = false,
     autoSuggest = false
   ) {
+    super();
     this.container = container;
     this.useContentEditable = useContentEditable;
     this.autoSuggest = autoSuggest;
@@ -370,7 +371,11 @@ export class PlaygroundView {
     const text = this.getPlaygroundText();
     console.log("Settings", settings);
     console.log("Text", text);
-    if (text && settings) {
+    if (text.length === 0) {
+      this.setLoading(false);
+      this.showSnackbar({ messageHtml: "Please enter some text" });
+      return;
+    } else if (settings) {
       const langModelClass = providerToClass[settings.provider];
       const langModel = new langModelClass(settings.settings);
       if (langModel) {
@@ -383,32 +388,23 @@ export class PlaygroundView {
             this.setLoading(false);
           })
           .catch((err: any) => {
+            console.log("Error", err);
             this.showSnackbar({
               messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
               type: "error",
-              position: "top",
-              duration: 5000,
+              duration: 4000,
             });
             this.setLoading(false);
           });
       } else {
-        alert("Error getting suggestions");
+        this.showSnackbar({
+          messageHtml: `Error getting suggestions`,
+          type: "error",
+          duration: 4000,
+        });
         this.setLoading(false);
       }
     }
-  }
-
-  showSnackbar({
-    messageHtml,
-    position = "top",
-    type = "info",
-    duration = 3000,
-  }: any) {
-    const body = document.createElement("div");
-    body.innerHTML = messageHtml;
-    const snackbar = new Snackbar({ body, position, type, duration });
-    snackbar.render();
-    snackbar.show();
   }
 
   getLanguageModelSettings(): LanguageModelSettings {
