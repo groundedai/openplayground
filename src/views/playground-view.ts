@@ -100,6 +100,7 @@ export class PlaygroundView extends View {
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: playgroundViewHtml, css: playgroundCss });
+    this.initListeners();
   }
 
   render() {
@@ -136,7 +137,7 @@ export class PlaygroundView extends View {
     }
     this.renderTemplates();
     this.renderSavedSettings();
-    this.addListeners();
+    this.updateListeners();
   }
 
   setupSettingsPanel() {
@@ -338,13 +339,18 @@ export class PlaygroundView extends View {
     );
     deleteSettingsButtons.forEach((button) => {
       button.addEventListener("click", (e) => {
-        const id = (e.target as HTMLButtonElement).dataset.id;
-        const settings = getLanguageModelSettings().find(
-          (lms) => lms.name === id
+        const confirm = window.confirm(
+          "Are you sure you want to delete this settings?"
         );
-        if (settings) {
-          deleteLanguageModelSettings(settings);
-          this.renderSavedSettings();
+        if (confirm) {
+          const id = (e.target as HTMLButtonElement).dataset.id;
+          const settings = getLanguageModelSettings().find(
+            (lms) => lms.name === id
+          );
+          if (settings) {
+            deleteLanguageModelSettings(settings);
+            this.renderSavedSettings();
+          }
         }
       });
     });
@@ -425,7 +431,7 @@ export class PlaygroundView extends View {
     }
   }
 
-  addListeners() {
+  initListeners() {
     this.suggestButton.addEventListener("click", () => {
       this.getSuggestions();
     });
@@ -433,30 +439,33 @@ export class PlaygroundView extends View {
       console.log("Save template");
       const template = this.getPlaygroundText();
       if (template) {
-        const name = prompt("Name for template");
-        if (name) {
-          const promptTemplate = new PromptTemplate({
-            id: name,
-            name,
-            template,
-          });
-          console.log("Prompt template", promptTemplate);
-          createPromptTemplate(promptTemplate);
-          this.render();
-        }
+        this.prompt("Name for template:", (name) => {
+          if (name) {
+            const promptTemplate = new PromptTemplate({
+              id: name,
+              name,
+              template,
+            });
+            console.log("Prompt template", promptTemplate);
+            createPromptTemplate(promptTemplate);
+            this.render();
+          }
+        });
       }
     });
     this.saveSettingsButton.addEventListener("click", () => {
       console.log("Save settings");
       const lms = this.getLanguageModelSettings();
-      const name = prompt("Name for settings");
-      if (name && lms) {
-        lms.id = name;
-        lms.name = name;
-        createLanguageModelSettings(lms);
-        console.log("Language model settings", lms);
-        this.render();
-      }
+      this.prompt("Name for settings:", (name) => {
+        if (name && lms) {
+          console.log("Saving settings", name, lms);
+          lms.id = name;
+          lms.name = name;
+          createLanguageModelSettings(lms);
+          console.log("Language model settings", lms);
+          this.render();
+        }
+      });
     });
     this.autoSuggestSwitch.addEventListener("click", () => {
       const value = this.autoSuggestSwitch.checked || false;
@@ -531,30 +540,30 @@ export class PlaygroundView extends View {
       modal.render();
       modal.show();
     });
-    this.settingsPanel?.on(
-      "settings-change",
-      (e: any) => {
-        console.log("Settings change", e.detail);
-        const settings = this.settingsPanel?.getSettings();
-        const settingsStorageKey =
-          providerToStorageKey[this.languageModelProvider!];
-        if (settings && settingsStorageKey) {
-          localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
-        }
-      }
-    );
-    this.languageModelProviderSelect.addEventListener("change", (e) => {
-      const provider = (e.target as HTMLSelectElement).value;
-      this.languageModelProvider = provider;
-      localStorage.setItem("playgroundLanguageModelProvider", provider);
-      this.render();
-    });
     // Control+Enter to get suggestions
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && e.ctrlKey) {
         e.preventDefault();
         this.getSuggestions();
       }
+    });
+  }
+
+  updateListeners() {
+    this.settingsPanel?.on("settings-change", (e: any) => {
+      console.log("Settings change", e.detail);
+      const settings = this.settingsPanel?.getSettings();
+      const settingsStorageKey =
+        providerToStorageKey[this.languageModelProvider!];
+      if (settings && settingsStorageKey) {
+        localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+      }
+    });
+    this.languageModelProviderSelect.addEventListener("change", (e) => {
+      const provider = (e.target as HTMLSelectElement).value;
+      this.languageModelProvider = provider;
+      localStorage.setItem("playgroundLanguageModelProvider", provider);
+      this.render();
     });
   }
 }
