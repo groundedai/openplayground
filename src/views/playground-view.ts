@@ -180,8 +180,6 @@ export class PlaygroundView extends View {
       this.playgroundTextArea!.value = content;
     }
     this.playgroundTextArea.dispatchEvent(new Event("input"));
-    console.log("Playground content set");
-    this.saveToLocalStorage();
   }
 
   appendPlaygroundContent(content: string) {
@@ -192,7 +190,6 @@ export class PlaygroundView extends View {
       this.playgroundTextArea!.value += content;
     }
     this.playgroundTextArea.dispatchEvent(new Event("input"));
-    this.saveToLocalStorage();
   }
 
   insertSuggestion(suggestion: string) {
@@ -418,8 +415,8 @@ export class PlaygroundView extends View {
       this.playgroundTextArea.addEventListener("input", () => {
         console.log("Playground text area input");
         this.saveToLocalStorage();
-        // this.editorCharCountComponent.count = this.getPlaygroundText().length;
-        this.editorCharCountSpan.textContent = this.getPlaygroundText().length.toString();
+        this.editorCharCountSpan.textContent =
+          this.getPlaygroundText().length.toString();
         if (this.autoSuggest) {
           console.log("Auto suggest");
           this.getSuggestions();

@@ -122,8 +122,16 @@ export class OpenAILanguageModel implements LanguageModel {
     this.apiKey = settings.apiKey;
     const newSettings: any = {};
     for (const key of openaiGenerationBodyKeys) {
-      if (settings[key] !== undefined) {
-        newSettings[key] = settings[key];
+      const val = settings[key];
+      if (val !== undefined) {
+        if (key === "stop") {
+          console.log(val);
+          if (val.length > 0 && val[0].length > 0) {
+            newSettings[key] = val;
+          }
+        } else {
+          newSettings[key] = val;
+        }
       }
     }
     this.settings = newSettings;

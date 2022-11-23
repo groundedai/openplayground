@@ -113,8 +113,15 @@ export class CohereLanguageModel implements LanguageModel {
     this.apiKey = settings.apiKey;
     const newSettings: any = {};
     for (const key of cohereGenerationBodyKeys) {
-      if (settings[key] !== undefined) {
-        newSettings[key] = settings[key];
+      const val = settings[key];
+      if (val !== undefined) {
+        if (key === "stop_sequences") {
+          if (val.length > 0 && val[0].length > 0) {
+            newSettings[key] = val;
+          }
+        } else {
+          newSettings[key] = val;
+        }
       }
     }
     this.settings = newSettings;
