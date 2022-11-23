@@ -9,7 +9,10 @@ import { DataTable } from "../components/datatable";
 import { Modal } from "../components/modal";
 import { View } from "./view";
 import { updateJob } from "../db/jobs";
-import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
+import {
+  FormatResultsSettingsPanel,
+  FormatResultsSettings,
+} from "../components/format-results-settings-panel";
 
 export class JobView extends View {
   job: Job;
@@ -52,6 +55,7 @@ export class JobView extends View {
     this.formatResultsSettingsPanel.setSettings({
       stripInitialWhiteSpace: this.job.stripInitialWhiteSpace,
       injectStartText: this.job.injectStartText,
+      stripEndText: this.job.stripEndText,
     });
     this.renderRecordsTable();
     this.addListeners();
@@ -71,68 +75,59 @@ export class JobView extends View {
         name: "Result",
       },
     ];
-    console.log(this.job);
     const resultsFormatted = this.job.getFormattedResults();
     const rows = records.map((record: any) => {
-      // Replace newlines or breaks in the text with a space
       const text = record.text;
-      const resultFormatted = resultsFormatted[record.id];
+      let resultFormatted = resultsFormatted[record.id];
       let resultHtml = `${text}\n\n<span class="completion">${resultFormatted}</span>`;
       resultHtml = newlinesToBreaks(resultHtml);
-      // const text = record.text.replace(/(\r\n|\n|\r)/gm, " ");
-      // const textFormatted = mdToHtml(text);
-      // let result = this.job.results[record.id];
-      // let resultFormatted = "";
-      // if (result) {
-      //   result = result.replace(/(\r\n|\n|\r)/gm, " ");
-      //   resultFormatted = mdToHtml(result);
-      // }
       return {
         id: record.id,
         result: resultHtml,
       };
     });
-    const rowClicked = (row: any) => {
-      const record = records.find((r: any) => r.id === row.id);
-      this.renderRecordModal(record);
-    };
+    // const rowClicked = (row: any) => {
+    //   const record = records.find((r: any) => r.id === row.id);
+    //   this.renderRecordModal(record);
+    // };
     const datatable = new DataTable(
       this.recordsTableContainer!,
       rows,
       columns,
-      "No records found",
-      rowClicked
+      "No records found"
+      // rowClicked
     );
     datatable.render();
   }
 
-  renderRecordModal(record: any) {
-    const template = getPromptTemplates().find(
-      (t) => t.id === this.job.templateId
-    );
-    const textFormatted = mdToHtml(record.text);
-    const prompt = renderTemplate(template.template, {
-      text: record.text,
-    });
-    const promptFormatted = mdToHtml(prompt);
-    const result = this.job.results[record.id];
-    const resultFormatted = mdToHtml(result);
-    const promptWithResult = `${prompt}${result}`;
-    const promptWithResultFormatted = `${promptFormatted}${resultFormatted}`;
-    const body: HTMLDivElement = document.createElement("div");
-    body.innerHTML = document.createElement(
-      "div"
-    ).innerHTML = `<h4>Prompt</h4>${prompt}<h4>Result</h4>${result}`;
-    const modal = new Modal(this.recordModalContainer!, body);
-    modal.render();
-    modal.show();
-  }
+  // renderRecordModal(record: any) {
+  //   const template = getPromptTemplates().find(
+  //     (t) => t.id === this.job.templateId
+  //   );
+  //   const textFormatted = mdToHtml(record.text);
+  //   const prompt = renderTemplate(template.template, {
+  //     text: record.text,
+  //   });
+  //   const promptFormatted = mdToHtml(prompt);
+  //   const result = this.job.results[record.id];
+  //   const resultFormatted = mdToHtml(result);
+  //   const promptWithResult = `${prompt}${result}`;
+  //   const promptWithResultFormatted = `${promptFormatted}${resultFormatted}`;
+  //   const body: HTMLDivElement = document.createElement("div");
+  //   body.innerHTML = document.createElement(
+  //     "div"
+  //   ).innerHTML = `<h4>Prompt</h4>${prompt}<h4>Result</h4>${result}`;
+  //   const modal = new Modal(this.recordModalContainer!, body);
+  //   modal.render();
+  //   modal.show();
+  // }
 
   addListeners() {
     this.formatResultsSettingsPanel.on("settings-change", () => {
       const settings = this.formatResultsSettingsPanel.getSettings();
       this.job.stripInitialWhiteSpace = settings.stripInitialWhiteSpace;
       this.job.injectStartText = settings.injectStartText;
+      this.job.stripEndText = settings.stripEndText;
       updateJob(this.job);
       this.renderRecordsTable();
     });

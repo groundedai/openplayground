@@ -70,6 +70,7 @@ export class Job {
   results: { [recordId: string]: any } = {};
   stripInitialWhiteSpace: boolean = false;
   injectStartText: string = "";
+  stripEndText: string[] = [];
 
   constructor(values: {
     id: string | number;
@@ -81,6 +82,7 @@ export class Job {
     results?: { [recordId: string]: any };
     stripInitialWhiteSpace?: boolean;
     injectStartText?: string;
+    stripEndText?: string[];
   }) {
     this.id = values.id.toString();
     if (values.name) {
@@ -96,6 +98,7 @@ export class Job {
     this.results = values.results || {};
     this.stripInitialWhiteSpace = values.stripInitialWhiteSpace || false;
     this.injectStartText = values.injectStartText || "";
+    this.stripEndText = values.stripEndText || [];
   }
 
   getFormattedResults() {
@@ -107,6 +110,12 @@ export class Job {
       }
       if (this.injectStartText) {
         result = `${this.injectStartText}${result}`;
+      }
+      if (this.stripEndText.length > 0) {
+        for (const stripText of this.stripEndText) {
+          const regex = new RegExp(`${stripText}$`);
+          result = result.replace(regex, "");
+        }
       }
       results[recordId] = result;
     }

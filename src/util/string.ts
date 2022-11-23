@@ -16,5 +16,8 @@ export function renderTemplate(
 }
 
 export function newlinesToBreaks(text: string) {
-  return text.replace(/\n/g, "<br>");
+  return text
+    .replace(/\n/g, "<br>")
+    .replace(/\r/g, "<br>")
+    .replace("\\n", "<br>");
 }

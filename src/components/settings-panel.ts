@@ -145,18 +145,22 @@ export class SettingsPanel extends Component {
       const itemKey = item.key;
       const type = item.type;
       const input = this.container.querySelector(`#${key}`) as HTMLInputElement;
-      if (type === "number") {
-        input.value = settings[itemKey].toString();
-      } else if (type === "text") {
-        input.value = settings[itemKey];
-      } else if (type === "password") {
-        input.value = settings[itemKey];
-      } else if (type === "checkbox") {
-        input.checked = settings[itemKey];
-      } else if (type === "select") {
-        input.value = settings[itemKey];
-      } else if (type === "string-array") {
-        input.value = settings[itemKey].join(", ");
+      if (settings[itemKey] === undefined) {
+        input.value = item.default;
+      } else {
+        if (type === "number") {
+          input.value = settings[itemKey].toString();
+        } else if (type === "text") {
+          input.value = settings[itemKey];
+        } else if (type === "password") {
+          input.value = settings[itemKey];
+        } else if (type === "checkbox") {
+          input.checked = settings[itemKey];
+        } else if (type === "select") {
+          input.value = settings[itemKey];
+        } else if (type === "string-array") {
+          input.value = settings[itemKey].join(", ");
+        }
       }
     }
   }

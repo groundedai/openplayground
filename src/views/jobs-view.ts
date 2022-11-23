@@ -385,6 +385,7 @@ export class JobsView extends View {
         languageModelSettingsId: settingsId,
         stripInitialWhiteSpace: formatResultsSettings.stripInitialWhiteSpace,
         injectStartText: formatResultsSettings.injectStartText,
+        stripEndText: formatResultsSettings.stripEndText,
       });
       createJob(newJob);
       this.renderJobsTable();
