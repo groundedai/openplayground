@@ -52,8 +52,8 @@ export class CompareView extends View {
   render() {
     const dataset = getDatasets().find((d) => d.id === this.jobA.datasetId);
     const records = getRecords().filter((r) => r.datasetId === dataset.id);
-    const resultsA = this.jobA.results;
-    const resultsB = this.jobB.results;
+    const resultsA = this.jobA.getFormattedResults();
+    const resultsB = this.jobB.getFormattedResults();
     this.renderSettingsTable();
     this.renderResultsTable({ records, resultsA, resultsB });
   }
