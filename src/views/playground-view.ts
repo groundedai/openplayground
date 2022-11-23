@@ -531,7 +531,7 @@ export class PlaygroundView extends View {
       modal.render();
       modal.show();
     });
-    this.settingsPanel?.container.addEventListener(
+    this.settingsPanel?.on(
       "settings-change",
       (e: any) => {
         console.log("Settings change", e.detail);

@@ -26,3 +26,17 @@
   background-color: var(--color-teal-2);
 }
 
+#format-panel {
+  border: 1px solid #ccc;
+  padding: 1em 0.5em;
+  border-radius: 5px;
+}
+
+#format-panel > summary.h5 {
+  margin: 0.5em;
+  font-size: 1.2em;
+}
+
+#format-panel > * input[type="text"] {
+  width: 80%;
+}

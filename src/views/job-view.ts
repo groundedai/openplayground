@@ -9,7 +9,7 @@ import { DataTable } from "../components/datatable";
 import { Modal } from "../components/modal";
 import { View } from "./view";
 import { updateJob } from "../db/jobs";
-import { SettingsPanel } from "../components/settings-panel";
+import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
 
 export class JobView extends View {
   job: Job;
@@ -25,7 +25,7 @@ export class JobView extends View {
   formatResultsSettingsPanelContainer: HTMLDivElement = document.querySelector(
     "#format-results-settings-panel"
   ) as HTMLDivElement;
-  formatResultsSettingsPanel: SettingsPanel;
+  formatResultsSettingsPanel: FormatResultsSettingsPanel;
 
   constructor({
     container,
@@ -42,23 +42,8 @@ export class JobView extends View {
     };
     super({ container, html: jobViewHtml, props, css: jobViewCss });
     this.job = job;
-    const formatResultsSettingsSchema = {
-      stripInitialWhiteSpace: {
-        label: "Strip initial whitespace",
-        type: "checkbox",
-        default: false,
-        key: "stripInitialWhiteSpace",
-      },
-      injectStartText: {
-        label: "Inject start text",
-        type: "text",
-        default: "",
-        key: "injectStartText",
-      },
-    };
-    this.formatResultsSettingsPanel = new SettingsPanel(
-      this.formatResultsSettingsPanelContainer,
-      formatResultsSettingsSchema
+    this.formatResultsSettingsPanel = new FormatResultsSettingsPanel(
+      this.formatResultsSettingsPanelContainer
     );
   }
 
@@ -144,18 +129,10 @@ export class JobView extends View {
   }
 
   addListeners() {
-    const stripInitialWhiteSpaceCheckbox: HTMLInputElement =
-      document.querySelector("#stripInitialWhiteSpace") as HTMLInputElement;
-    stripInitialWhiteSpaceCheckbox.addEventListener("change", () => {
-      this.job.stripInitialWhiteSpace = stripInitialWhiteSpaceCheckbox.checked;
-      updateJob(this.job);
-      this.renderRecordsTable();
-    });
-    const injectStartTextInput: HTMLInputElement = document.querySelector(
-      "#injectStartText"
-    ) as HTMLInputElement;
-    injectStartTextInput.addEventListener("input", () => {
-      this.job.injectStartText = injectStartTextInput.value;
+    this.formatResultsSettingsPanel.on("settings-change", () => {
+      const settings = this.formatResultsSettingsPanel.getSettings();
+      this.job.stripInitialWhiteSpace = settings.stripInitialWhiteSpace;
+      this.job.injectStartText = settings.injectStartText;
       updateJob(this.job);
       this.renderRecordsTable();
     });

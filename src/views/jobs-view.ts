@@ -12,6 +12,7 @@ import { CohereLanguageModel } from "../providers/cohere";
 import { OpenAILanguageModel } from "../providers/openai";
 import { router } from "../main";
 import { View } from "./view";
+import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
 
 const providerToClass: {
   [key: string]: any;
@@ -43,14 +44,22 @@ export class JobsView extends View {
   compareButton: HTMLButtonElement = document.querySelector(
     "#compare-button"
   ) as HTMLButtonElement;
+  formatResultsSettingsPanelContainer: HTMLDivElement = document.querySelector(
+    "#format-results-settings-panel"
+  ) as HTMLDivElement;
+  formatResultsSettingsPanel: FormatResultsSettingsPanel;
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: jobsViewHtml, css: jobsViewCss });
+    this.formatResultsSettingsPanel = new FormatResultsSettingsPanel(
+      this.formatResultsSettingsPanelContainer
+    );
   }
 
   render() {
     this.fillSelectOptions();
     this.renderJobsTable();
+    this.formatResultsSettingsPanel.render();
     this.addListeners();
   }
 
@@ -367,11 +376,15 @@ export class JobsView extends View {
       const highestId = getJobs().reduce((acc, job) => {
         return Math.max(acc, parseInt(job.id));
       }, 0);
+      const formatResultsSettings =
+        this.formatResultsSettingsPanel.getSettings();
       const newJob = new Job({
         id: highestId + 1,
         datasetId: datasetId,
         templateId,
         languageModelSettingsId: settingsId,
+        stripInitialWhiteSpace: formatResultsSettings.stripInitialWhiteSpace,
+        injectStartText: formatResultsSettings.injectStartText,
       });
       createJob(newJob);
       this.renderJobsTable();

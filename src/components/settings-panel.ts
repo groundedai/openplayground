@@ -1,14 +1,13 @@
-/* Generate a settings panel given a schema. */
+import { Component } from "./component";
 import "./settings-panel.css";
 import { settingsSchema } from "../types";
 
-export class SettingsPanel {
-  container: HTMLDivElement;
+export class SettingsPanel extends Component {
   schema: settingsSchema;
   settings: any;
 
   constructor(container: HTMLDivElement, schema: settingsSchema) {
-    this.container = container;
+    super(container);
     this.schema = schema;
     this.settings = {};
   }
