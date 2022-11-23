@@ -1,4 +1,4 @@
-import "./jobs-view.css";
+import jobsViewCss from "./jobs-view.css?raw";
 import { Job } from "../types";
 import { getJobs, createJob, updateJob, deleteJob } from "../db/jobs";
 import { getDatasets } from "../db/datasets";
@@ -45,7 +45,7 @@ export class JobsView extends View {
   ) as HTMLButtonElement;
 
   constructor({ container }: { container: HTMLDivElement }) {
-    super({ container, html: jobsViewHtml });
+    super({ container, html: jobsViewHtml, css: jobsViewCss });
   }
 
   render() {

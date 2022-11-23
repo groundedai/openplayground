@@ -1,4 +1,4 @@
-import "./playground.css";
+import playgroundCss from "./playground.css?raw";
 import playgroundViewHtml from "./playground-view.html?raw";
 import {
   cohereGenerationSettingsSchema,
@@ -99,7 +99,7 @@ export class PlaygroundView extends View {
   settingsPanel: SettingsPanel | null = null;
 
   constructor({ container }: { container: HTMLDivElement }) {
-    super({ container, html: playgroundViewHtml });
+    super({ container, html: playgroundViewHtml, css: playgroundCss });
   }
 
   render() {

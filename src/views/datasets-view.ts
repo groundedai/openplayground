@@ -1,4 +1,4 @@
-import "./datasets-view.css";
+import datasetsViewCss from "./datasets-view.css?raw";
 import { Dataset } from "../types";
 import { getDatasets, createDataset, deleteDataset } from "../db/datasets";
 import datasetViewHtml from "./datasets-view.html?raw";
@@ -15,7 +15,7 @@ export class DatasetsView extends View {
   ) as HTMLFormElement;
 
   constructor({ container }: { container: HTMLDivElement }) {
-    super({ container, html: datasetViewHtml });
+    super({ container, html: datasetViewHtml, css: datasetsViewCss });
   }
 
   render() {

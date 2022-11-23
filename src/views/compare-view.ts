@@ -1,6 +1,6 @@
 import { View } from "./view";
 import compareViewHtml from "./compare-view.html?raw";
-import "./compare-view.css";
+import compareViewCss from "./compare-view.css?raw";
 import { Job, Record, PromptTemplate, LanguageModelSettings } from "../types";
 import { getDatasets } from "../db/datasets";
 import { getRecords } from "../db/records";
@@ -43,6 +43,7 @@ export class CompareView extends View {
       container,
       html: compareViewHtml,
       props,
+      css: compareViewCss,
     });
     this.jobA = jobA;
     this.jobB = jobB;

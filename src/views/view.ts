@@ -8,14 +8,21 @@ export class View {
     container,
     html = "",
     props = {},
+    css = "",
   }: {
     container: HTMLDivElement;
     html?: string;
     props?: any;
+    css?: string;
   }) {
     this.container = container;
     const htmlWithProps = renderTemplate(html, props);
     this.container.innerHTML = htmlWithProps;
+    if (css) {
+      const style = document.createElement("style");
+      style.textContent = css;
+      this.container.appendChild(style);
+    }
   }
 
   showSnackbar({

@@ -1,4 +1,4 @@
-import "./job-view.css";
+import jobViewCss from "./job-view.css?raw";
 import jobViewHtml from "./job-view.html?raw";
 import { newlinesToBreaks, renderTemplate } from "../util/string";
 import { getRecords } from "../db/records";
@@ -26,12 +26,6 @@ export class JobView extends View {
     "#format-results-settings-panel"
   ) as HTMLDivElement;
   formatResultsSettingsPanel: SettingsPanel;
-  // stripInitialWhiteSpaceCheckbox: HTMLInputElement = document.querySelector(
-  //   "#strip-initial-whitespace"
-  // ) as HTMLInputElement;
-  // injectStartTextInput: HTMLInputElement = document.querySelector(
-  //   "#inject-start-text"
-  // ) as HTMLInputElement;
 
   constructor({
     container,
@@ -46,7 +40,7 @@ export class JobView extends View {
     const props = {
       jobName: job.name,
     };
-    super({ container, html: jobViewHtml, props });
+    super({ container, html: jobViewHtml, props, css: jobViewCss });
     this.job = job;
     const formatResultsSettingsSchema = {
       stripInitialWhiteSpace: {

@@ -109,6 +109,13 @@ summary.h5 {
   margin-top: 1.5em;
 }
 
+span.completion {
+  color: #000;
+  border-radius: 2px;
+  /* background-color: var(--color-teal-1); */
+  font-weight: bold;
+}
+
 .hidden {
   display: none;
 }

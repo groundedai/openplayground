@@ -14,6 +14,7 @@
 
 #format-panel > summary.h5 {
     margin: 0.5em;
+    font-size: 1.2em;
 }
 
 #format-panel > * input[type="text"] {
