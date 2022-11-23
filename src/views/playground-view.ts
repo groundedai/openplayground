@@ -154,6 +154,11 @@ export class PlaygroundView extends View {
         defaultProvider;
     }
     this.languageModelProviderSelect!.value = this.languageModelProvider;
+    this.settingsPanel = new SettingsPanel(
+      this.settingsContainer,
+      providerToSettingsSchema[this.languageModelProvider]
+    );
+    this.settingsPanel.render();
   }
 
   renderSettings(settings: LanguageModelSettings) {
