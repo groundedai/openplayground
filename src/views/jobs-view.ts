@@ -181,9 +181,6 @@ export class JobsView extends View {
     ) as NodeListOf<HTMLButtonElement>;
     exportButtons.forEach((button) => {
       button.addEventListener("click", () => {
-        console.log("Exporting job");
-        const job = getJobs().find((job) => job.id === button.dataset.id);
-        console.log(job);
         this.exportJob(button.dataset.id!);
       });
     });
@@ -331,12 +328,10 @@ export class JobsView extends View {
   }
 
   exportJob(id: string) {
-    // Trigger download of a text file containing the results separated by ---
     const job = getJobs().find((job) => job.id === id);
     if (!job) {
       return;
     }
-    console.log("Exporting job", job);
     const dataset = getDatasets().find(
       (dataset) => dataset.id === job.datasetId
     );
@@ -346,14 +341,17 @@ export class JobsView extends View {
     if (!dataset || !records) {
       return;
     }
+    const resultsFormatted = job.getFormattedResults();
     const text = records.map((record) => {
-      const result = job.results[record.id];
-      return `${record.text}\n${result}`;
+      let result = resultsFormatted[record.id];
+      result = `${record.text}${result}`;
+      result = result.replace(/\\n/g, "\n");
+      result = result.trimEnd();
+      return result;
     });
-    const blob = new Blob([text.join("\n---\n")], {
+    const blob = new Blob([text.join("\n\n---\n\n")], {
       type: "text/plain;charset=utf-8",
     });
-    console.log(blob);
     // Trigger download
     const element = document.createElement("a");
     element.href = URL.createObjectURL(blob);

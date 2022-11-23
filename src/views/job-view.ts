@@ -79,7 +79,7 @@ export class JobView extends View {
     const rows = records.map((record: any) => {
       const text = record.text;
       let resultFormatted = resultsFormatted[record.id];
-      let resultHtml = `${text}\n\n<span class="completion">${resultFormatted}</span>`;
+      let resultHtml = `${text}<span class="completion">${resultFormatted}</span>`;
       resultHtml = newlinesToBreaks(resultHtml);
       return {
         id: record.id,

@@ -19,5 +19,5 @@ export function newlinesToBreaks(text: string) {
   return text
     .replace(/\n/g, "<br>")
     .replace(/\r/g, "<br>")
-    .replace("\\n", "<br>");
+    .replace(/\\n/g, "<br>");
 }
