@@ -113,6 +113,7 @@ export class PlaygroundView extends View {
       this.playgroundTextArea!.style.display = "block";
       // this.playgroundEditable!.style.display = "none";
     }
+    this.addEditorListeners();
     this.setupSettingsPanel();
     // Load settings from local storage
     const settingsStorageKey =
@@ -135,8 +136,6 @@ export class PlaygroundView extends View {
     }
     this.renderTemplates();
     this.renderSavedSettings();
-    this.editorCharCountSpan.innerText =
-      this.getPlaygroundText().length.toString();
     this.addListeners();
   }
 
@@ -180,6 +179,8 @@ export class PlaygroundView extends View {
     } else {
       this.playgroundTextArea!.value = content;
     }
+    this.playgroundTextArea.dispatchEvent(new Event("input"));
+    console.log("Playground content set");
     this.saveToLocalStorage();
   }
 
@@ -190,8 +191,7 @@ export class PlaygroundView extends View {
     } else {
       this.playgroundTextArea!.value += content;
     }
-    this.editorCharCountSpan!.innerText =
-      this.getPlaygroundText().length.toString();
+    this.playgroundTextArea.dispatchEvent(new Event("input"));
     this.saveToLocalStorage();
   }
 
@@ -409,6 +409,25 @@ export class PlaygroundView extends View {
     }
   }
 
+  addEditorListeners() {
+    if (this.useContentEditable) {
+      this.playgroundEditable?.addEventListener("input", () => {
+        this.saveToLocalStorage();
+      });
+    } else {
+      this.playgroundTextArea.addEventListener("input", () => {
+        console.log("Playground text area input");
+        this.saveToLocalStorage();
+        // this.editorCharCountComponent.count = this.getPlaygroundText().length;
+        this.editorCharCountSpan.textContent = this.getPlaygroundText().length.toString();
+        if (this.autoSuggest) {
+          console.log("Auto suggest");
+          this.getSuggestions();
+        }
+      });
+    }
+  }
+
   addListeners() {
     this.suggestButton.addEventListener("click", () => {
       this.getSuggestions();
@@ -533,22 +552,6 @@ export class PlaygroundView extends View {
       localStorage.setItem("playgroundLanguageModelProvider", provider);
       this.render();
     });
-    if (this.useContentEditable) {
-      this.playgroundEditable?.addEventListener("input", () => {
-        this.saveToLocalStorage();
-      });
-    } else {
-      this.playgroundTextArea.addEventListener("input", () => {
-        this.saveToLocalStorage();
-        this.editorCharCountSpan!.innerText =
-          this.getPlaygroundText().length.toString();
-        if (this.autoSuggest) {
-          console.log("Auto suggest");
-          // this.insertSuggestion("suggestion");
-          this.getSuggestions();
-        }
-      });
-    }
     // Control+Enter to get suggestions
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && e.ctrlKey) {
