@@ -6,9 +6,12 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "playwright test",
+    "test-debug": "playwright test --debug"
   },
   "devDependencies": {
+    "@playwright/test": "^1.28.0",
     "@types/node": "^18.11.9",
     "@types/showdown": "^2.0.0",
     "typescript": "^4.6.4",
