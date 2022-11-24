@@ -1,4 +1,4 @@
-import playgroundCss from "./playground.css?raw";
+import playgroundCss from "./playground-view.css?raw";
 import playgroundViewHtml from "./playground-view.html?raw";
 import {
   cohereGenerationSettingsSchema,
@@ -48,6 +48,7 @@ const providerToClass: {
   openai: OpenAILanguageModel,
 };
 const defaultProvider = "cohere";
+const errorMessageDuration = 6000;
 
 export class PlaygroundView extends View {
   useContentEditable: boolean = false;
@@ -383,7 +384,7 @@ export class PlaygroundView extends View {
             this.showSnackbar({
               messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
               type: "error",
-              duration: 4000,
+              duration: errorMessageDuration,
             });
             this.setLoading(false);
           });
@@ -391,7 +392,7 @@ export class PlaygroundView extends View {
         this.showSnackbar({
           messageHtml: `Error getting suggestions`,
           type: "error",
-          duration: 4000,
+          duration: errorMessageDuration,
         });
         this.setLoading(false);
       }

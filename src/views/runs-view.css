@@ -1,28 +1,28 @@
-#jobs-table-container > table {
+#runs-table-container > table {
   text-align: center;
 }
 
-#jobs-table-container > * td[data-value="Complete"] {
+#runs-table-container > * td[data-value*="Complete"] {
   background-color: #d4edda;
 }
 
-#jobs-table-container > * td[data-value="Failed"] {
+#runs-table-container > * td[data-value*="Failed"] {
   background-color: #f8d7da;
 }
 
-#jobs-table-container > * td[data-value="Running"] {
+#runs-table-container > * td[data-value="Running"] {
   background-color: #fff3cd;
 }
 
-#jobs-table-container > * td[data-value="Pending"] {
+#runs-table-container > * td[data-value="Pending"] {
   background-color: #fff3cd;
 }
 
-#jobs-table-container > * td[data-value="Not found"] {
+#runs-table-container > * td[data-value="Not found"] {
   color: #6c757d;
 }
 
-#start-job-button:hover {
+#start-run-button:hover {
   background-color: var(--color-teal-2);
 }
 

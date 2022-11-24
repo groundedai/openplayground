@@ -1,15 +1,14 @@
-// import "./style.css";
 import { Route, Router } from "./util/router";
 import { RecordView } from "./views/record-view";
 import { PlaygroundView } from "./views/playground-view";
 import { DatasetsView } from "./views/datasets-view";
 import { DatasetView } from "./views/dataset-view";
-import { JobsView } from "./views/jobs-view";
-import { JobView } from "./views/job-view";
+import { RunsView } from "./views/runs-view";
+import { RunView } from "./views/run-view";
 import { CompareView } from "./views/compare-view";
 import { getRecords } from "./db/records";
 import { getDatasets } from "./db/datasets";
-import { getJobs } from "./db/jobs";
+import { getRuns } from "./db/runs";
 
 const container = document.querySelector("#view") as HTMLDivElement;
 const routes = [
@@ -38,22 +37,22 @@ const routes = [
     const recordView = new RecordView({ container, record });
     recordView.render();
   }),
-  new Route("/jobs/?$", () => {
-    const jobsView = new JobsView({ container });
-    jobsView.render();
+  new Route("/runs/?$", () => {
+    const runsView = new RunsView({ container });
+    runsView.render();
   }),
-  new Route("/jobs/(\\d+)/?$", (path: string) => {
-    const jobId = path.split("/")[2];
-    const job = getJobs().find((j) => j.id === jobId);
-    const jobView = new JobView({ container, job });
-    jobView.render();
+  new Route("/runs/(\\d+)/?$", (path: string) => {
+    const runId = path.split("/")[2];
+    const run = getRuns().find((j) => j.id === runId);
+    const runView = new RunView({ container, run });
+    runView.render();
   }),
-  new Route("/jobs/compare/(\\d+)/(\\d+)/?$", (path: string) => {
-    const jobIdA = path.split("/")[3];
-    const jobIdB = path.split("/")[4];
-    const jobA = getJobs().find((j) => j.id === jobIdA);
-    const jobB = getJobs().find((j) => j.id === jobIdB);
-    const compareView = new CompareView({ container, jobA, jobB });
+  new Route("/runs/compare/(\\d+)/(\\d+)/?$", (path: string) => {
+    const runIdA = path.split("/")[3];
+    const runIdB = path.split("/")[4];
+    const runA = getRuns().find((j) => j.id === runIdA);
+    const runB = getRuns().find((j) => j.id === runIdB);
+    const compareView = new CompareView({ container, runA, runB });
     compareView.render();
   }),
   new Route("/?$", () => {

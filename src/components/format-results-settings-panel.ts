@@ -1,24 +1,24 @@
 import { SettingsPanel } from "./settings-panel";
-import { Job } from "../types";
+import { run } from "../types";
 
 const formatResultsSettingsSchema = {
   stripInitialWhiteSpace: {
     label: "Strip initial whitespace",
     type: "checkbox",
     default: false,
-    key: "stripInitialWhiteSpace" as keyof Job,
+    key: "stripInitialWhiteSpace" as keyof run,
   },
   injectStartText: {
     label: "Inject start text",
     type: "text",
     default: "",
-    key: "injectStartText" as keyof Job,
+    key: "injectStartText" as keyof run,
   },
   stripEndText: {
     label: "Strip end text",
     type: "string-array",
     default: [],
-    key: "stripEndText" as keyof Job,
+    key: "stripEndText" as keyof run,
   },
 };
 

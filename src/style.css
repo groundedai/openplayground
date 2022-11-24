@@ -116,6 +116,14 @@ span.completion {
   font-weight: bold;
 }
 
+span.failed {
+  /* color: #000; */
+  color: var(--color-error-dark);
+  border-radius: 2px;
+  /* background-color: #ff453a;
+  font-weight: bold;
+}
+
 .hidden {
   display: none;
 }

@@ -60,14 +60,32 @@ export interface LanguageModel {
   getSuggestions: (text: string) => Promise<{ data: any; text: string }>;
 }
 
-export class Job {
+/* Run status options */
+export enum RunStatus {
+  pending = "pending",
+  running = "running",
+  completed = "completed",
+  failed = "failed",
+}
+
+export enum ResultTypes {
+  text = "text",
+  error = "error",
+}
+
+export interface Result {
+  text: string;
+  status: RunStatus;
+}
+
+export class Run {
   id: string;
   name: string;
   datasetId: string;
   templateId: string;
   languageModelSettingsId: string;
-  status: string = "pending";
-  results: { [recordId: string]: any } = {};
+  status: RunStatus = RunStatus.pending;
+  results: { [recordId: string]: Result } = {};
   stripInitialWhiteSpace: boolean = false;
   injectStartText: string = "";
   stripEndText: string[] = [];
@@ -78,7 +96,7 @@ export class Job {
     datasetId: string;
     templateId: string;
     languageModelSettingsId: string;
-    status?: string;
+    status?: RunStatus;
     results?: { [recordId: string]: any };
     stripInitialWhiteSpace?: boolean;
     injectStartText?: string;
@@ -89,12 +107,12 @@ export class Job {
       this.name = values.name;
     } else {
       const datestring = new Date().toISOString().slice(0, 10);
-      this.name = `Job ${this.id} - ${datestring}`;
+      this.name = `run ${this.id} - ${datestring}`;
     }
     this.datasetId = values.datasetId;
     this.templateId = values.templateId;
     this.languageModelSettingsId = values.languageModelSettingsId;
-    this.status = values.status || "pending";
+    this.status = values.status ? values.status : RunStatus.pending;
     this.results = values.results || {};
     this.stripInitialWhiteSpace = values.stripInitialWhiteSpace || false;
     this.injectStartText = values.injectStartText || "";
@@ -106,15 +124,15 @@ export class Job {
     for (const recordId in results) {
       let result = results[recordId];
       if (this.stripInitialWhiteSpace) {
-        result = result.replace(/^(\s*)/, "");
+        result.text = result.text.replace(/^(\s*)/, "");
       }
       if (this.injectStartText) {
-        result = `${this.injectStartText}${result}`;
+        result.text = `${this.injectStartText}${result.text}`;
       }
       if (this.stripEndText.length > 0) {
         for (const stripText of this.stripEndText) {
           const regex = new RegExp(`${stripText}$`);
-          result = result.replace(regex, "");
+          result.text = result.text.replace(regex, "");
         }
       }
       results[recordId] = result;

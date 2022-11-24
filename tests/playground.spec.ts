@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
 
-const port = 5173; // Todo: get from env
+const port = process.env.PORT;
 const rootUrl = `http://localhost:${port}`;
 
 test("Suggest with no API key shows error", async ({ page }) => {

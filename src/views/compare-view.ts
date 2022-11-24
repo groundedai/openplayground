@@ -1,7 +1,7 @@
 import { View } from "./view";
 import compareViewHtml from "./compare-view.html?raw";
 import compareViewCss from "./compare-view.css?raw";
-import { Job, Record, PromptTemplate, LanguageModelSettings } from "../types";
+import { run, Record, PromptTemplate, LanguageModelSettings } from "../types";
 import { getDatasets } from "../db/datasets";
 import { getRecords } from "../db/records";
 import { getPromptTemplates } from "../db/prompt-templates";
@@ -10,8 +10,8 @@ import { DataTable } from "../components/datatable";
 import { renderTemplate, newlinesToBreaks } from "../util/string";
 
 export class CompareView extends View {
-  jobA: Job;
-  jobB: Job;
+  runA: run;
+  runB: run;
   resultsContainer: HTMLDivElement = document.querySelector(
     "#results"
   ) as HTMLDivElement;
@@ -22,22 +22,22 @@ export class CompareView extends View {
 
   constructor({
     container,
-    jobA,
-    jobB,
+    runA,
+    runB,
   }: {
     container: HTMLDivElement;
-    jobA: Job | undefined;
-    jobB: Job | undefined;
+    runA: run | undefined;
+    runB: run | undefined;
   }) {
-    if (!jobA) {
-      throw new Error("Job A is undefined");
+    if (!runA) {
+      throw new Error("run A is undefined");
     }
-    if (!jobB) {
-      throw new Error("Job B is undefined");
+    if (!runB) {
+      throw new Error("run B is undefined");
     }
     const props = {
-      jobAName: jobA.name,
-      jobBName: jobB.name,
+      runAName: runA.name,
+      runBName: runB.name,
     };
     super({
       container,
@@ -45,31 +45,31 @@ export class CompareView extends View {
       props,
       css: compareViewCss,
     });
-    this.jobA = jobA;
-    this.jobB = jobB;
+    this.runA = runA;
+    this.runB = runB;
   }
 
   render() {
-    const dataset = getDatasets().find((d) => d.id === this.jobA.datasetId);
+    const dataset = getDatasets().find((d) => d.id === this.runA.datasetId);
     const records = getRecords().filter((r) => r.datasetId === dataset.id);
-    const resultsA = this.jobA.getFormattedResults();
-    const resultsB = this.jobB.getFormattedResults();
+    const resultsA = this.runA.getFormattedResults();
+    const resultsB = this.runB.getFormattedResults();
     this.renderSettingsTable();
     this.renderResultsTable({ records, resultsA, resultsB });
   }
 
   renderSettingsTable() {
     const settingsA = getLanguageModelSettings().find(
-      (s) => s.id === this.jobA.languageModelSettingsId
+      (s) => s.id === this.runA.languageModelSettingsId
     );
     const settingsB = getLanguageModelSettings().find(
-      (s) => s.id === this.jobB.languageModelSettingsId
+      (s) => s.id === this.runB.languageModelSettingsId
     );
     const templateA = getPromptTemplates().find(
-      (t) => t.id === this.jobA.templateId
+      (t) => t.id === this.runA.templateId
     );
     const templateB = getPromptTemplates().find(
-      (t) => t.id === this.jobB.templateId
+      (t) => t.id === this.runB.templateId
     );
     const renderSettingsCell = (settings: LanguageModelSettings) => {
       return `<pre>${JSON.stringify(settings.settings, null, 2)}</pre>`;
@@ -110,11 +110,11 @@ export class CompareView extends View {
         key: "name",
       },
       {
-        name: this.jobA.name,
+        name: this.runA.name,
         key: "valueA",
       },
       {
-        name: this.jobB.name,
+        name: this.runB.name,
         key: "valueB",
       },
     ];
@@ -155,11 +155,11 @@ export class CompareView extends View {
       },
       {
         key: "resultA",
-        name: this.jobA.name,
+        name: this.runA.name,
       },
       {
         key: "resultB",
-        name: this.jobB.name,
+        name: this.runB.name,
       },
     ];
     const table = new DataTable(this.resultsContainer, rows, columns);

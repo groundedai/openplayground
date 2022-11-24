@@ -1,21 +1,15 @@
-import jobViewCss from "./job-view.css?raw";
-import jobViewHtml from "./job-view.html?raw";
-import { newlinesToBreaks, renderTemplate } from "../util/string";
+import runViewCss from "./run-view.css?raw";
+import runViewHtml from "./run-view.html?raw";
+import { newlinesToBreaks } from "../util/string";
 import { getRecords } from "../db/records";
-import { getPromptTemplates } from "../db/prompt-templates";
-import { Job } from "../types";
-import { mdToHtml } from "../util/markdown";
+import { Run } from "../types";
 import { DataTable } from "../components/datatable";
-import { Modal } from "../components/modal";
 import { View } from "./view";
-import { updateJob } from "../db/jobs";
-import {
-  FormatResultsSettingsPanel,
-  FormatResultsSettings,
-} from "../components/format-results-settings-panel";
+import { updateRun } from "../db/runs";
+import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
 
-export class JobView extends View {
-  job: Job;
+export class RunView extends View {
+  run: Run;
   recordsContainer: HTMLDivElement = document.querySelector(
     "#records"
   ) as HTMLDivElement;
@@ -32,19 +26,19 @@ export class JobView extends View {
 
   constructor({
     container,
-    job,
+    run,
   }: {
     container: HTMLDivElement;
-    job: Job | undefined;
+    run: Run | undefined;
   }) {
-    if (!job) {
-      throw new Error("Job is undefined");
+    if (!run) {
+      throw new Error("run is undefined");
     }
     const props = {
-      jobName: job.name,
+      runName: run.name,
     };
-    super({ container, html: jobViewHtml, props, css: jobViewCss });
-    this.job = job;
+    super({ container, html: runViewHtml, props, css: runViewCss });
+    this.run = run;
     this.formatResultsSettingsPanel = new FormatResultsSettingsPanel(
       this.formatResultsSettingsPanelContainer
     );
@@ -53,9 +47,9 @@ export class JobView extends View {
   render() {
     this.formatResultsSettingsPanel.render();
     this.formatResultsSettingsPanel.setSettings({
-      stripInitialWhiteSpace: this.job.stripInitialWhiteSpace,
-      injectStartText: this.job.injectStartText,
-      stripEndText: this.job.stripEndText,
+      stripInitialWhiteSpace: this.run.stripInitialWhiteSpace,
+      injectStartText: this.run.injectStartText,
+      stripEndText: this.run.stripEndText,
     });
     this.renderRecordsTable();
     this.addListeners();
@@ -63,7 +57,7 @@ export class JobView extends View {
 
   renderRecordsTable() {
     const records = getRecords().filter(
-      (r) => r.datasetId === this.job.datasetId
+      (r) => r.datasetId === this.run.datasetId
     );
     const columns = [
       {
@@ -75,11 +69,12 @@ export class JobView extends View {
         name: "Result",
       },
     ];
-    const resultsFormatted = this.job.getFormattedResults();
+    const resultsFormatted = this.run.getFormattedResults();
     const rows = records.map((record: any) => {
       const text = record.text;
-      let resultFormatted = resultsFormatted[record.id];
-      let resultHtml = `${text}<span class="completion">${resultFormatted}</span>`;
+      let resultText = resultsFormatted[record.id].text;
+      let resultStatus = resultsFormatted[record.id].status;
+      let resultHtml = `${text}<span class="completion ${resultStatus}">${resultText}</span>`;
       resultHtml = newlinesToBreaks(resultHtml);
       return {
         id: record.id,
@@ -102,14 +97,14 @@ export class JobView extends View {
 
   // renderRecordModal(record: any) {
   //   const template = getPromptTemplates().find(
-  //     (t) => t.id === this.job.templateId
+  //     (t) => t.id === this.run.templateId
   //   );
   //   const textFormatted = mdToHtml(record.text);
   //   const prompt = renderTemplate(template.template, {
   //     text: record.text,
   //   });
   //   const promptFormatted = mdToHtml(prompt);
-  //   const result = this.job.results[record.id];
+  //   const result = this.run.results[record.id];
   //   const resultFormatted = mdToHtml(result);
   //   const promptWithResult = `${prompt}${result}`;
   //   const promptWithResultFormatted = `${promptFormatted}${resultFormatted}`;
@@ -125,10 +120,10 @@ export class JobView extends View {
   addListeners() {
     this.formatResultsSettingsPanel.on("settings-change", () => {
       const settings = this.formatResultsSettingsPanel.getSettings();
-      this.job.stripInitialWhiteSpace = settings.stripInitialWhiteSpace;
-      this.job.injectStartText = settings.injectStartText;
-      this.job.stripEndText = settings.stripEndText;
-      updateJob(this.job);
+      this.run.stripInitialWhiteSpace = settings.stripInitialWhiteSpace;
+      this.run.injectStartText = settings.injectStartText;
+      this.run.stripEndText = settings.stripEndText;
+      updateRun(this.run);
       this.renderRecordsTable();
     });
   }
