@@ -1,6 +1,7 @@
 import { Snackbar } from "../components/snackbar";
 import { renderTemplate } from "../util/string";
 import { Modal } from "../components/modal";
+import promptModalHtml from "../components/prompt-modal.html?raw";
 
 export class View {
   container: HTMLDivElement;
@@ -44,37 +45,36 @@ export class View {
     snackbar.show();
   }
 
-  prompt(message: string, onConfirm: (value: string) => void) {
-    const promptBody = document.createElement("div");
-    const promptLabel = document.createElement("label");
-    promptLabel.textContent = message;
-    promptLabel.style.fontWeight = "bold";
-    const promptInput = document.createElement("input");
-    promptInput.type = "text";
-    promptInput.id = "settings-name";
-    promptBody.appendChild(promptLabel);
-    promptBody.appendChild(promptInput);
-    const confirmButton = document.createElement("button");
-    confirmButton.textContent = "Confirm";
-    const container = document.createElement("div");
-    const modal = new Modal(container, promptBody);
-    const actions = document.createElement("div");
-    actions.classList.add("row");
-    actions.classList.add("right");
+  promptUserInput({
+    title,
+    message,
+    onConfirm,
+  }: {
+    title: string;
+    message?: string;
+    onConfirm: (value: string) => void;
+  }) {
+    const body = document.createElement("div");
+    message = message || "";
+    const html = renderTemplate(promptModalHtml, { message });
+    body.innerHTML = html;
+    const confirmButton = body.querySelector(
+      "#confirm-button"
+    ) as HTMLButtonElement;
     confirmButton.onclick = () => {
-      onConfirm?.(promptInput.value);
+      onConfirm(input.value);
       modal.hide();
     };
-    confirmButton.classList.add("right");
-    promptInput.addEventListener("keyup", (event) => {
+    const input = body.querySelector("#input") as HTMLInputElement;
+    input.addEventListener("keyup", (event) => {
       if (event.key === "Enter") {
         confirmButton.click();
       }
     });
-    actions.appendChild(confirmButton);
-    promptBody.appendChild(actions);
+    const container = document.createElement("div");
+    const modal = new Modal({ container, title, body });
     modal.render();
     modal.show();
-    promptInput.focus();
+    input.focus();
   }
 }

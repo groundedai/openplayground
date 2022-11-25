@@ -7,7 +7,7 @@ export class SettingsPanel extends Component {
   settings: any;
 
   constructor(container: HTMLDivElement, schema: settingsSchema) {
-    super(container);
+    super({ container });
     this.schema = schema;
     this.settings = {};
   }

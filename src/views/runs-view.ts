@@ -1,5 +1,5 @@
 import runsViewCss from "./runs-view.css?raw";
-import { Run, RunStatus } from "../types";
+import { Run, ResultStatus } from "../types";
 import { getRuns, createRun, updateRun, deleteRun } from "../db/runs";
 import { getDatasets } from "../db/datasets";
 import { getLanguageModelSettings } from "../db/language-model-settings";
@@ -7,22 +7,16 @@ import { getPromptTemplates } from "../db/prompt-templates";
 import { getRecords } from "../db/records";
 import { DataTable } from "../components/datatable";
 import runsViewHtml from "./runs-view.html?raw";
-import { renderTemplate } from "../util/string";
+import { renderTemplate, titleCase } from "../util/string";
 import { CohereLanguageModel } from "../providers/cohere";
 import { OpenAILanguageModel } from "../providers/openai";
 import { router } from "../main";
 import { View } from "./view";
-import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
-
-const providerToClass: {
-  [key: string]: any;
-} = {
-  cohere: CohereLanguageModel,
-  openai: OpenAILanguageModel,
-};
-
-const errorMessageDuration = 6000;
-
+import { NewRunForm } from "../components/new-run-form";
+import { Modal } from "../components/modal";
+import { startRun, exportRun } from "../runs";
+import { providerToClass } from "../providers";
+import { errorMessageDuration } from "../globals";
 export class RunsView extends View {
   runsTable: DataTable | null = null;
   runsTableContainer: HTMLDivElement = document.querySelector(
@@ -31,71 +25,35 @@ export class RunsView extends View {
   savedSettingsContainer: HTMLDivElement = document.querySelector(
     "#saved-settings-container"
   ) as HTMLDivElement;
-  newRunSelectDataset: HTMLSelectElement = document.querySelector(
-    "#run-dataset"
-  ) as HTMLSelectElement;
-  newRunSelectTemplate: HTMLSelectElement = document.querySelector(
-    "#run-template"
-  ) as HTMLSelectElement;
-  newRunSelectSettings: HTMLSelectElement = document.querySelector(
-    "#run-settings"
-  ) as HTMLSelectElement;
-  newRunForm: HTMLFormElement = document.querySelector(
-    "#new-run-form"
-  ) as HTMLFormElement;
   compareButton: HTMLButtonElement = document.querySelector(
     "#compare-button"
   ) as HTMLButtonElement;
-  formatResultsSettingsPanelContainer: HTMLDivElement = document.querySelector(
-    "#format-results-settings-panel"
-  ) as HTMLDivElement;
-  newRunDetails: HTMLDetailsElement = document.querySelector(
-    "#new-run-details"
-  ) as HTMLDetailsElement;
-  formatResultsSettingsPanel: FormatResultsSettingsPanel;
+  createRunButton: HTMLButtonElement = document.querySelector(
+    "#create-run-button"
+  ) as HTMLButtonElement;
+  newRunModal: Modal;
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: runsViewHtml, css: runsViewCss });
-    this.formatResultsSettingsPanel = new FormatResultsSettingsPanel(
-      this.formatResultsSettingsPanelContainer
-    );
-    if (getRuns().length === 0) {
-      this.newRunDetails.open = true;
-    }
+    const newRunForm = this.makeNewRunForm();
+    this.newRunModal = new Modal({
+      title: "New Run",
+      body: newRunForm.container,
+    });
+    this.initListeners();
   }
 
   render() {
-    this.fillSelectOptions();
     this.renderRunsTable();
-    this.formatResultsSettingsPanel.render();
-    this.addListeners();
-  }
-
-  fillSelectOptions() {
-    const datasets = getDatasets();
-    const templates = getPromptTemplates();
-    const settings = getLanguageModelSettings();
-    datasets.forEach((dataset) => {
-      const option = document.createElement("option");
-      option.value = dataset.id;
-      option.innerText = dataset.name;
-      this.newRunSelectDataset?.appendChild(option);
-    });
-    templates.forEach((template) => {
-      const option = document.createElement("option");
-      option.value = template.id;
-      option.innerText = template.name;
-      this.newRunSelectTemplate?.appendChild(option);
-    });
-    settings.forEach((setting) => {
-      const option = document.createElement("option");
-      option.value = setting.id;
-      option.innerText = setting.name;
-      this.newRunSelectSettings?.appendChild(option);
-    });
   }
 
   renderRunsTable() {
+    const runs = getRuns();
+    console.log("runs", runs);
+    // Sort by most recent first
+    runs.sort((a, b) => {
+      return b.createdAt - a.createdAt;
+    });
     const rows = getRuns().map((run) => {
       const dataset = getDatasets().find(
         (dataset) => dataset.id === run.datasetId
@@ -106,30 +64,28 @@ export class RunsView extends View {
       const settings = getLanguageModelSettings().find(
         (settings) => settings.id === run.languageModelSettingsId
       );
-      const nFailed = Object.values(run.results).filter(
-        (result) => result.status === RunStatus.failed
-      ).length;
-      if (nFailed > 0) {
-        run.status = RunStatus.failed;
-      } else {
-        run.status = RunStatus.completed;
-      }
+      const runStatus = run.getStatus();
       let statusMessage = "";
-      if (run.status === RunStatus.failed) {
-        statusMessage = `Failed (${nFailed})`
+      if (runStatus.status === ResultStatus.failed) {
+        const nFailed = runStatus.failedRecords.length;
+        statusMessage = `Failed (${nFailed})`;
+      } else if (runStatus.status === ResultStatus.running) {
+        const nCompleted = runStatus.completedRecords.length;
+        const nTotal = runStatus.totalRecords;
+        statusMessage = `Running (${nCompleted}/${nTotal})`;
       } else {
-        statusMessage = run.status
+        statusMessage = runStatus.status;
       }
-      statusMessage = statusMessage.charAt(0).toUpperCase() + statusMessage.slice(1);
       return {
         id: run.id,
         name: run.name,
-        status: statusMessage,
+        status: titleCase(statusMessage),
         dataset: dataset?.name || "Not found",
         template: template?.name || "Not found",
         settings: settings?.name || "Not found",
         actions: `<button id="start-run-button" data-id="${run.id}" class="outline">Start</button> <button id="export-run-button" data-id="${run.id}" class="outline">Export</button> <button id="view-run-button" data-id="${run.id}" class="outline">View</button> <button id="delete-run-button" data-id="${run.id}" class="outline danger">Delete</button>`,
         select: `<input type="checkbox" id="select-run" data-id="${run.id}" />`,
+        createdAt: run.createdAt,
       };
     });
     const columns = [
@@ -140,6 +96,7 @@ export class RunsView extends View {
       { key: "template", name: "Template" },
       { key: "settings", name: "Settings" },
       { key: "actions", name: "Actions" },
+      { key: "createdAt", name: "Created At" },
     ];
     this.runsTable = new DataTable(
       this.runsTableContainer!,
@@ -227,17 +184,12 @@ export class RunsView extends View {
   }
 
   updateCompareButton() {
-    // If two runs with the same dataset are selected, enable compare
     const selectedRuns = this.getSelectedRuns();
-    if (selectedRuns.length === 2) {
-      const run1 = selectedRuns[0];
-      const run2 = selectedRuns[1];
-      if (run1?.datasetId === run2?.datasetId) {
-        this.compareButton.disabled = false;
-        return;
-      }
+    if (selectedRuns.length > 1) {
+      this.compareButton.disabled = false;
+    } else {
+      this.compareButton.disabled = true;
     }
-    this.compareButton.disabled = true;
   }
 
   startRun(id: string) {
@@ -245,82 +197,27 @@ export class RunsView extends View {
     if (!run) {
       return;
     }
-    // If run already has results, confirm
-    if (run.status === RunStatus.completed) {
-      const confirm = window.confirm(
-        "This run has already been completed. Starting it again will overwrite the existing results. Are you sure you want to continue?"
-      );
-      if (!confirm) {
-        return;
-      }
-    }
-    run.results = {}; // Clear results
-    run.status = RunStatus.running;
-    updateRun(run);
-    this.renderRunsTable();
-    const dataset = getDatasets().find(
-      (dataset) => dataset.id === run.datasetId
-    );
-    const records = getRecords().filter(
-      (record) => record.datasetId === run.datasetId
-    );
-    const template = getPromptTemplates().find(
-      (template) => template.id === run.templateId
-    );
-    const settings = getLanguageModelSettings().find(
-      (settings) => settings.id === run.languageModelSettingsId
-    );
-    console.log("Starting run", run, dataset, template, settings, records);
-    if (!dataset || !template || !settings) {
-      return;
-    }
-    const langModelClass = providerToClass[settings.provider];
-    // delete settings.settings.apiKey;
-    const langModel = new langModelClass(settings.settings);
-    console.log(langModel);
-    this.runsTable!.updateCell({
-      rowId: run.id,
-      key: "status",
-      value:
-        run.status[0].toUpperCase() +
-        run.status.slice(1) +
-        ` (0/${records.length})`,
+    this.showSnackbar({
+      messageHtml: `Starting <strong>${run.name}</strong>`,
     });
-    const promises = records.map((record) => {
-      const prompt = renderTemplate(template.template, { text: record.text });
-      return langModel
-        .getSuggestions(prompt)
-        .then((res: { data: any; text: string }) => {
-          const text = res.text;
-          run.results[record.id] = { text, status: RunStatus.completed };
-          updateRun(run);
-          const nCompleted = Object.keys(run.results).length;
-          this.runsTable!.updateCell({
-            rowId: run.id,
-            key: "status",
-            value:
-              run.status[0].toUpperCase() +
-              run.status.slice(1) +
-              ` (${nCompleted}/${records.length})`,
-          });
-        })
-        .catch((err: any) => {
-          this.showSnackbar({
-            messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
-            type: "error",
-            duration: errorMessageDuration,
-          });
-          run.results[record.id] = {
-            text: err.message,
-            status: RunStatus.failed,
-          };
-          updateRun(run);
-        });
-    });
-    Promise.all(promises).then(() => {
-      updateRun(run);
+    const onUpdate = () => {
       this.renderRunsTable();
-    });
+    };
+    const onError = (err: Error) => {
+      this.showSnackbar({
+        messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
+        type: "error",
+        duration: errorMessageDuration,
+      });
+    };
+    const onComplete = (run: Run) => {
+      this.showSnackbar({
+        messageHtml: `Finished <strong>${run.name}</strong>`,
+        type: "success",
+      });
+      this.renderRunsTable();
+    };
+    startRun({ run, onUpdate, onError, onComplete });
   }
 
   viewRun(id: string) {
@@ -349,66 +246,58 @@ export class RunsView extends View {
     if (!run) {
       return;
     }
-    const dataset = getDatasets().find(
-      (dataset) => dataset.id === run.datasetId
-    );
-    const records = getRecords().filter(
-      (record) => record.datasetId === run.datasetId
-    );
-    if (!dataset || !records) {
-      return;
-    }
-    const resultsFormatted = run.getFormattedResults();
-    const text = records.map((record) => {
-      let result = resultsFormatted[record.id];
-      result = `${record.text}${result}`;
-      result = result.replace(/\\n/g, "\n");
-      result = result.trimEnd();
-      return result;
-    });
-    const blob = new Blob([text.join("\n\n---\n\n")], {
-      type: "text/plain;charset=utf-8",
-    });
-    // Trigger download
-    const element = document.createElement("a");
-    element.href = URL.createObjectURL(blob);
-    element.download = `${dataset.name}-${run.id}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    exportRun(run);
   }
 
-  addListeners() {
-    this.newRunForm?.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const datasetId = this.newRunSelectDataset?.value;
-      const templateId = this.newRunSelectTemplate?.value;
-      const settingsId = this.newRunSelectSettings?.value;
-      console.log(datasetId, templateId, settingsId);
-      if (!datasetId || !templateId || !settingsId) {
-        return;
-      }
-      const highestId = getRuns().reduce((acc, run) => {
-        return Math.max(acc, parseInt(run.id));
-      }, 0);
-      const formatResultsSettings =
-        this.formatResultsSettingsPanel.getSettings();
-      const newRun = new Run({
-        id: highestId + 1,
-        datasetId: datasetId,
-        templateId,
-        languageModelSettingsId: settingsId,
-        stripInitialWhiteSpace: formatResultsSettings.stripInitialWhiteSpace,
-        injectStartText: formatResultsSettings.injectStartText,
-        stripEndText: formatResultsSettings.stripEndText,
-      });
-      createRun(newRun);
-      this.renderRunsTable();
+  makeNewRunForm(): NewRunForm {
+    const datasets = getDatasets();
+    const templates = getPromptTemplates();
+    const settings = getLanguageModelSettings();
+    const newRunForm = new NewRunForm({
+      datasets,
+      templates,
+      settings,
+      onSubmit: (run: Run) => {
+        createRun(run);
+        run.name = `Run ${run.id}`;
+        updateRun(run);
+        this.renderRunsTable();
+        this.showSnackbar({
+          messageHtml: "Run created",
+          type: "success",
+        });
+        this.newRunModal.hide();
+      },
+    });
+    newRunForm.render();
+    return newRunForm;
+  }
+
+  initListeners() {
+    this.createRunButton!.addEventListener("click", () => {
+      this.newRunModal.render();
+      this.newRunModal.show();
     });
     this.compareButton?.addEventListener("click", () => {
       const selectedRuns = this.getSelectedRuns();
+      if (selectedRuns.length > 2) {
+        this.showSnackbar({
+          messageHtml: "Please select at most two runs",
+          type: "error",
+          duration: errorMessageDuration,
+        });
+        return;
+      }
       const run1 = selectedRuns[0];
       const run2 = selectedRuns[1];
+      if (run1?.datasetId !== run2?.datasetId) {
+        this.showSnackbar({
+          messageHtml: "Runs must be from the same dataset",
+          type: "error",
+          duration: errorMessageDuration,
+        });
+        return;
+      }
       router.goTo(`/runs/compare/${run1.id}/${run2.id}`);
     });
   }

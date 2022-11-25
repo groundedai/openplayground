@@ -10,8 +10,10 @@
   --color-teal-2: #18b9b9;
   --color-teal-3: #0f9f9f;
   --color-teal-4: #0f8686;
-
-  /* --font-family-2: "Consolas", "Monaco", "Menlo", monospace; */
+  --color-success: #32d74b;
+  --color-success-dark: #28a745;
+  --color-success-dark-2: #218838;
+  --color-success-background: #28a745;
   --font-family-2: monospace;
 }
 
@@ -65,11 +67,15 @@ button#suggest-button:hover {
   background-color: var(--color-secondary);
 }
 
-/* Disabled button */
 button:disabled {
   background-color: #cccccc;
   color: #666666;
   cursor: pointer;
+}
+
+button:disabled:hover {
+  background-color: #cccccc;
+  color: #666666;
 }
 
 h4 {
@@ -117,10 +123,7 @@ span.completion {
 }
 
 span.failed {
-  /* color: #000; */
-  color: var(--color-error-dark);
   border-radius: 2px;
-  /* background-color: #ff453a;
   font-weight: bold;
 }
 
@@ -128,7 +131,7 @@ span.failed {
   display: none;
 }
 
-/* Spacing utilities */
+/* Spacing */
 
 .ma-1 {
   margin: 1em;

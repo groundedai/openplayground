@@ -21,3 +21,10 @@ export function newlinesToBreaks(text: string) {
     .replace(/\r/g, "<br>")
     .replace(/\\n/g, "<br>");
 }
+
+export function titleCase(text: string) {
+  return text
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}

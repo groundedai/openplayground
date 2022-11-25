@@ -1,11 +1,26 @@
 <div id="run-view">
   <div class="row">
-    <h4>{{ runName }}</h4>
+    <div class="col">
+      <h4>{{ runName }}</h4>
+    </div>
     <div class="col right">
-      <details id="format-panel">
-        <summary class="h5">Format results</summary>
-        <div id="format-results-settings-panel"></div>
-      </details>
+      <div class="row center">
+        <div class="col">
+          <span id="status" data-value="{{ status }}">{{ statusTitle }}</span>
+        </div>
+        <div class="col">
+          <button id="start-button" class="outline">Start</button>
+        </div>
+        <div class="col">
+          <button id="export-button" class="outline">Export</button>
+        </div>
+        <div class="col-2">
+          <details id="format-panel">
+            <summary class="h5">Format results</summary>
+            <div id="format-results-settings-panel"></div>
+          </details>
+        </div>
+      </div>
     </div>
   </div>
   <div id="records-table"></div>

@@ -2,11 +2,14 @@ import runViewCss from "./run-view.css?raw";
 import runViewHtml from "./run-view.html?raw";
 import { newlinesToBreaks } from "../util/string";
 import { getRecords } from "../db/records";
-import { Run } from "../types";
+import { Run, ResultStatus } from "../types";
+import { titleCase } from "../util/string";
 import { DataTable } from "../components/datatable";
 import { View } from "./view";
 import { updateRun } from "../db/runs";
 import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
+import { startRun, exportRun } from "../runs";
+import { errorMessageDuration } from "../globals";
 
 export class RunView extends View {
   run: Run;
@@ -19,6 +22,12 @@ export class RunView extends View {
   recordModalContainer: HTMLDivElement = document.querySelector(
     "#record-modal"
   ) as HTMLDivElement;
+  startButton: HTMLButtonElement = document.querySelector(
+    "#start-button"
+  ) as HTMLButtonElement;
+  exportButton: HTMLButtonElement = document.querySelector(
+    "#export-button"
+  ) as HTMLButtonElement;
   formatResultsSettingsPanelContainer: HTMLDivElement = document.querySelector(
     "#format-results-settings-panel"
   ) as HTMLDivElement;
@@ -34,8 +43,11 @@ export class RunView extends View {
     if (!run) {
       throw new Error("run is undefined");
     }
+    const runStatus = run.getStatus();
     const props = {
       runName: run.name,
+      status: runStatus.status,
+      statusTitle: titleCase(runStatus.status),
     };
     super({ container, html: runViewHtml, props, css: runViewCss });
     this.run = run;
@@ -72,8 +84,13 @@ export class RunView extends View {
     const resultsFormatted = this.run.getFormattedResults();
     const rows = records.map((record: any) => {
       const text = record.text;
-      let resultText = resultsFormatted[record.id].text;
-      let resultStatus = resultsFormatted[record.id].status;
+      const result = resultsFormatted[record.id];
+      let resultText = "[No result]";
+      let resultStatus = ResultStatus.pending;
+      if (result !== undefined) {
+        resultText = resultsFormatted[record.id].text;
+        resultStatus = resultsFormatted[record.id].status;
+      }
       let resultHtml = `${text}<span class="completion ${resultStatus}">${resultText}</span>`;
       resultHtml = newlinesToBreaks(resultHtml);
       return {
@@ -81,41 +98,38 @@ export class RunView extends View {
         result: resultHtml,
       };
     });
-    // const rowClicked = (row: any) => {
-    //   const record = records.find((r: any) => r.id === row.id);
-    //   this.renderRecordModal(record);
-    // };
     const datatable = new DataTable(
       this.recordsTableContainer!,
       rows,
       columns,
       "No records found"
-      // rowClicked
     );
     datatable.render();
   }
 
-  // renderRecordModal(record: any) {
-  //   const template = getPromptTemplates().find(
-  //     (t) => t.id === this.run.templateId
-  //   );
-  //   const textFormatted = mdToHtml(record.text);
-  //   const prompt = renderTemplate(template.template, {
-  //     text: record.text,
-  //   });
-  //   const promptFormatted = mdToHtml(prompt);
-  //   const result = this.run.results[record.id];
-  //   const resultFormatted = mdToHtml(result);
-  //   const promptWithResult = `${prompt}${result}`;
-  //   const promptWithResultFormatted = `${promptFormatted}${resultFormatted}`;
-  //   const body: HTMLDivElement = document.createElement("div");
-  //   body.innerHTML = document.createElement(
-  //     "div"
-  //   ).innerHTML = `<h4>Prompt</h4>${prompt}<h4>Result</h4>${result}`;
-  //   const modal = new Modal(this.recordModalContainer!, body);
-  //   modal.render();
-  //   modal.show();
-  // }
+  startRun() {
+    this.showSnackbar({
+      messageHtml: `Starting <strong>${this.run.name}</strong>`,
+    });
+    const onUpdate = () => {
+      this.renderRecordsTable();
+    };
+    const onError = (err: Error) => {
+      this.showSnackbar({
+        messageHtml: `<strong>${err.name}</strong>: "${err.message}"`,
+        type: "error",
+        duration: errorMessageDuration,
+      });
+    };
+    const onComplete = (run: Run) => {
+      this.showSnackbar({
+        messageHtml: `Finished <strong>${run.name}</strong>`,
+        type: "success",
+      });
+      this.renderRecordsTable();
+    };
+    startRun({ run: this.run, onUpdate, onError, onComplete });
+  }
 
   addListeners() {
     this.formatResultsSettingsPanel.on("settings-change", () => {
@@ -125,6 +139,12 @@ export class RunView extends View {
       this.run.stripEndText = settings.stripEndText;
       updateRun(this.run);
       this.renderRecordsTable();
+    });
+    this.startButton.addEventListener("click", () => {
+      this.startRun();
+    });
+    this.exportButton.addEventListener("click", () => {
+      exportRun({ run: this.run });
     });
   }
 }

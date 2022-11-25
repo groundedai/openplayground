@@ -1,16 +1,11 @@
 <div id="data-view">
   <h4>Datasets</h4>
+  <div class="row mb-3">
+    <button id="create-dataset-button">Create Dataset</button>
+  </div>
   <div class="row">
-    <div class="col-10">
-      <div id="dataset-table-container" style="width: 50%"></div>
-      <div id="new-dataset" style="width: 40%" class="mt-2">
-        <form id="new-dataset-form">
-          <label for="new-dataset-name">New dataset name</label>
-          <input type="text" id="new-dataset-name" name="new-dataset-name" />
-          <button type="submit">Create</button>
-        </form>
-      </div>
+    <div class="col" style="max-width: 700px">
+      <div id="dataset-table-container"></div>
     </div>
-    <div class="col-2"></div>
   </div>
 </div>

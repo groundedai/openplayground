@@ -1,8 +1,8 @@
 export class Component {
   container: HTMLElement;
 
-  constructor(container: HTMLElement) {
-    this.container = container;
+  constructor({ container }: { container?: HTMLElement }) {
+    this.container = container || document.createElement("div");
   }
 
   on(event: string, callback: (e: any) => void) {

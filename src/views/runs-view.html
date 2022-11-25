@@ -1,26 +1,12 @@
 <div id="runs-view">
-  <div id="new-run" style="width: 40%">
-    <form id="new-run-form">
-      <details id="new-run-details">
-        <summary class="h5">New Run</summary>
-        <label for="run-dataset">Dataset:</label>
-        <select id="run-dataset" name="run-dataset" class="mb-1"></select>
-        <br />
-        <label for="run-template">Template:</label>
-        <select id="run-template" name="run-template" class="mb-1"></select>
-        <br />
-        <label for="run-settings">Settings:</label>
-        <select id="run-settings" name="run-settings" class="mb-1"></select>
-        <br />
-        <details id="format-panel">
-          <summary class="h5">Format results</summary>
-          <div id="format-results-settings-panel"></div>
-        </details>
-        <button type="submit">Create</button>
-      </details>
-    </form>
-  </div>
   <h4>Runs</h4>
-  <div id="runs-table-container"></div>
-  <button id="compare-button" class="mt-2" disabled>Compare</button>
+  <div class="row mb-3">
+    <button id="create-run-button">Create Run</button>
+  </div>
+  <div class="row">
+    <div id="runs-table-container"></div>
+  </div>
+  <div class="row mt-2">
+    <button id="compare-button" disabled>Compare</button>
+  </div>
 </div>

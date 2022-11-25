@@ -9,6 +9,16 @@ export function getItems(key: string): Array<any> {
 
 export function createItem(key: string, item: any) {
   const items = getItems(key);
+  if (!item.id) {
+    const highestId = items.reduce((highest, item) => {
+      if (parseInt(item.id) > highest) {
+        return parseInt(item.id);
+      }
+      return highest;
+    }, 0);
+    const id = highestId + 1;
+    item.id = id.toString();
+  }
   items.push(item);
   localStorage.setItem(key, JSON.stringify(items));
 }

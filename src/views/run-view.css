@@ -1,22 +1,51 @@
 #records-table > * td {
-    padding: 0.5em 1em;
-}
-
-#records-table >* [data-column="text"] {
-    width: 70%;
+  padding: 0.5em 1em;
 }
 
 #format-panel {
-    border: 1px solid #ccc;
-    padding: 1em 0.5em;
-    border-radius: 5px;
+  border: 1px solid #ccc;
+  padding: 1em 0.5em;
+  border-radius: 5px;
 }
 
 #format-panel > summary.h5 {
-    margin: 0.5em;
-    font-size: 1.2em;
+  margin: 0.5em;
+  font-size: 1.2em;
 }
 
 #format-panel > * input[type="text"] {
-    width: 80%;
+  width: 80%;
+}
+
+#start-button:hover {
+  background-color: var(--color-teal-2);
+}
+
+#actions > * button {
+  padding: 0.4em;
+  margin: 0.2em;
+}
+
+#status {
+  font-size: 1.1em;
+  margin: 1rem 0;
+  padding: 1.2rem;
+  border-radius: 5px;
+  font-family: var(--font-family-2);
+}
+
+#status[data-value*="pending"] {
+  background-color: #fff3cd;
+}
+
+#status[data-value*="running"] {
+  background-color: #fff3cd;
+}
+
+#status[data-value*="complete"] {
+  background-color: #d4edda;
+}
+
+#status[data-value*="failed"] {
+  background-color: #f8d7da;
 }

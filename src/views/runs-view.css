@@ -10,11 +10,11 @@
   background-color: #f8d7da;
 }
 
-#runs-table-container > * td[data-value="Running"] {
+#runs-table-container > * td[data-value*="Running"] {
   background-color: #fff3cd;
 }
 
-#runs-table-container > * td[data-value="Pending"] {
+#runs-table-container > * td[data-value*="Pending"] {
   background-color: #fff3cd;
 }
 

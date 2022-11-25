@@ -6,6 +6,7 @@ import { router } from "../main";
 import { deleteDataset } from "../db/datasets";
 import { View } from "./view";
 
+
 export class DatasetView extends View {
   dataset: Dataset;
   records: Array<Record> = [];
@@ -109,30 +110,4 @@ export class DatasetView extends View {
     });
   }
 
-  parseRecords(data: string, separator: string): Array<Record> {
-    let records = data.split(separator);
-    records = records.map((record) => {
-      return record.trim();
-    });
-    records = records.filter((record) => {
-      return record.length > 0;
-    });
-    let highestId = 0;
-    this.records.forEach((record) => {
-      const id = parseInt(record.id);
-      if (id > highestId) {
-        highestId = id;
-      }
-    });
-    const recordObjs = records.map((record) => {
-      const newId = highestId + 1;
-      highestId = newId;
-      return new Record({
-        text: record,
-        datasetId: this.dataset.id,
-        id: newId,
-      });
-    });
-    return recordObjs;
-  }
 }

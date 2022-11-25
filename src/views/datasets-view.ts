@@ -1,21 +1,39 @@
 import datasetsViewCss from "./datasets-view.css?raw";
 import { Dataset } from "../types";
-import { getDatasets, createDataset, deleteDataset } from "../db/datasets";
+import { getDatasets, deleteDataset } from "../db/datasets";
 import datasetViewHtml from "./datasets-view.html?raw";
 import { DataTable } from "../components/datatable";
 import { router } from "../main";
 import { View } from "./view";
+import { Modal } from "../components/modal";
+import { NewDatasetForm } from "../components/new-dataset-form";
 
 export class DatasetsView extends View {
   datasetTableContainer: HTMLDivElement = document.querySelector(
     "#dataset-table-container"
   ) as HTMLDivElement;
-  newDatasetForm: HTMLFormElement = document.querySelector(
-    "#new-dataset-form"
-  ) as HTMLFormElement;
+  createDatasetButton: HTMLButtonElement = document.querySelector(
+    "#create-dataset-button"
+  ) as HTMLButtonElement;
+  newDatasetModal: Modal;
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: datasetViewHtml, css: datasetsViewCss });
+    const newDatasetForm = new NewDatasetForm({
+      onSubmit: (dataset: Dataset) => {
+        this.render();
+        this.showSnackbar({
+          messageHtml: `Dataset <strong>${dataset.name}</strong> created`,
+          type: "success",
+        });
+        this.newDatasetModal.hide();
+      },
+    });
+    this.newDatasetModal = new Modal({
+      title: "New Dataset",
+      body: newDatasetForm.container,
+    });
+    this.initListeners();
   }
 
   render() {
@@ -46,7 +64,6 @@ export class DatasetsView extends View {
       emptyMessage
     );
     dataTable.render();
-    // Add button listeners
     const viewButtons = document.querySelectorAll(
       "#dataset-table-container button[data-action='view']"
     );
@@ -76,24 +93,12 @@ export class DatasetsView extends View {
         }
       });
     });
-    this.addListeners();
   }
 
-  addListeners() {
-    this.newDatasetForm?.addEventListener("submit", (e: Event) => {
-      e.preventDefault();
-      const name = (
-        document.querySelector("#new-dataset-name") as HTMLInputElement
-      ).value;
-      const highestId = getDatasets().reduce((acc: number, d: Dataset) => {
-        const id = parseInt(d.id);
-        return id > acc ? id : acc;
-      }, 0);
-      const newId = highestId + 1;
-      const dataset = new Dataset({ name, id: newId.toString() });
-      createDataset(dataset);
-      console.log("Dataset created", dataset);
-      this.render();
+  initListeners() {
+    this.createDatasetButton.addEventListener("click", () => {
+      this.newDatasetModal.render();
+      this.newDatasetModal.show();
     });
   }
 }

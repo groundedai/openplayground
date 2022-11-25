@@ -1,57 +1,86 @@
-export class Record {
-  id: string;
-  text: string = "";
-  datasetId: string;
+import { getRecords } from "./db/records";
 
-  constructor(values: {
-    id: string | number;
-    text: string;
-    datasetId: string;
-  }) {
-    this.id = values.id.toString();
-    this.text = values.text;
-    this.datasetId = values.datasetId;
+export type ID = string | number | null;
+
+export class DBItem {
+  id: ID;
+
+  constructor({ id = null }: { id?: ID }) {
+    this.id = id ? id.toString() : null;
   }
 }
 
-export class Dataset {
-  id: string;
+export class Record extends DBItem {
+  text: string = "";
+  datasetId: ID = null;
+
+  constructor({
+    id,
+    text,
+    datasetId,
+  }: {
+    id?: ID;
+    text: string;
+    datasetId?: string;
+  }) {
+    super({ id });
+    this.text = text;
+    this.datasetId = datasetId ? datasetId.toString() : null;
+  }
+}
+
+export class Dataset extends DBItem {
   name: string;
 
-  constructor(values: { name: string; id: string | number }) {
-    this.id = values.id.toString();
-    this.name = values.name;
+  constructor({ id, name }: { id?: ID; name: string }) {
+    super({ id });
+    this.name = name;
+  }
+
+  getRecords() {
+    return getRecords().filter((record) => record.datasetId === this.id);
   }
 }
 
-export class PromptTemplate {
-  id: string;
+export class PromptTemplate extends DBItem {
   name: string;
   template: string;
 
-  constructor(values: { id: string | number; name: string; template: string }) {
-    this.id = values.id.toString();
-    this.name = values.name;
-    this.template = values.template;
+  constructor({
+    id,
+    name,
+    template,
+  }: {
+    id?: ID;
+    name: string;
+    template: string;
+  }) {
+    super({ id });
+    this.name = name;
+    this.template = template;
   }
 }
 
-export class LanguageModelSettings {
-  id: string;
+export class LanguageModelSettings extends DBItem {
   name: string;
   provider: string;
   settings: any;
 
-  constructor(values: {
-    id?: string | number;
+  constructor({
+    id,
+    name,
+    provider,
+    settings,
+  }: {
+    id?: ID;
     name?: string;
     provider: string;
     settings: any;
   }) {
-    this.id = values.id ? values.id.toString() : "No ID";
-    this.name = values.name ? values.name : "No name";
-    this.provider = values.provider;
-    this.settings = values.settings;
+    super({ id });
+    this.name = name ? name : "No name";
+    this.provider = provider;
+    this.settings = settings;
   }
 }
 
@@ -60,63 +89,90 @@ export interface LanguageModel {
   getSuggestions: (text: string) => Promise<{ data: any; text: string }>;
 }
 
-/* Run status options */
-export enum RunStatus {
+export enum ResultStatus {
   pending = "pending",
   running = "running",
   completed = "completed",
   failed = "failed",
 }
 
-export enum ResultTypes {
-  text = "text",
-  error = "error",
-}
-
 export interface Result {
   text: string;
-  status: RunStatus;
+  status: ResultStatus;
 }
 
-export class Run {
-  id: string;
+export interface RunStatus {
+  status: ResultStatus;
+  completedRecords: Array<string>;
+  failedRecords: Array<string>;
+  totalRecords: number;
+}
+
+export class Run extends DBItem {
   name: string;
   datasetId: string;
+  datasetLength: number;
   templateId: string;
   languageModelSettingsId: string;
-  status: RunStatus = RunStatus.pending;
-  results: { [recordId: string]: Result } = {};
+  results: { [recordId: string | number]: Result };
   stripInitialWhiteSpace: boolean = false;
   injectStartText: string = "";
   stripEndText: string[] = [];
+  createdAt: Date;
 
-  constructor(values: {
-    id: string | number;
+  constructor({
+    id,
+    name,
+    datasetId,
+    datasetLength,
+    templateId,
+    languageModelSettingsId,
+    results,
+    stripInitialWhiteSpace,
+    injectStartText,
+    stripEndText,
+    createdAt,
+  }: {
+    id?: ID;
     name?: string;
     datasetId: string;
+    datasetLength: number;
     templateId: string;
     languageModelSettingsId: string;
-    status?: RunStatus;
-    results?: { [recordId: string]: any };
+    results?: { [recordId: string | number]: Result };
     stripInitialWhiteSpace?: boolean;
     injectStartText?: string;
     stripEndText?: string[];
+    createdAt?: Date;
   }) {
-    this.id = values.id.toString();
-    if (values.name) {
-      this.name = values.name;
+    super({ id });
+    this.name = name ? name : `Run ${this.id}`;
+    this.datasetId = datasetId;
+    this.datasetLength = datasetLength;
+    this.templateId = templateId;
+    this.languageModelSettingsId = languageModelSettingsId;
+    this.stripInitialWhiteSpace = stripInitialWhiteSpace || false;
+    this.injectStartText = injectStartText || "";
+    this.stripEndText = stripEndText || [];
+    this.createdAt = createdAt || new Date();
+    if (results) {
+      this.results = results;
     } else {
-      const datestring = new Date().toISOString().slice(0, 10);
-      this.name = `run ${this.id} - ${datestring}`;
+      this.results = {};
+      this.resetResults();
     }
-    this.datasetId = values.datasetId;
-    this.templateId = values.templateId;
-    this.languageModelSettingsId = values.languageModelSettingsId;
-    this.status = values.status ? values.status : RunStatus.pending;
-    this.results = values.results || {};
-    this.stripInitialWhiteSpace = values.stripInitialWhiteSpace || false;
-    this.injectStartText = values.injectStartText || "";
-    this.stripEndText = values.stripEndText || [];
+  }
+
+  resetResults() {
+    const records = getRecords().filter(
+      (record) => record.datasetId === this.datasetId
+    );
+    for (const record of records) {
+      this.results[record.id] = {
+        text: "",
+        status: ResultStatus.pending,
+      };
+    }
   }
 
   getFormattedResults() {
@@ -138,6 +194,31 @@ export class Run {
       results[recordId] = result;
     }
     return results;
+  }
+
+  getStatus(): RunStatus {
+    let status = ResultStatus.pending;
+    let completedRecords = [];
+    let failedRecords = [];
+    for (const recordId in this.results) {
+      const result = this.results[recordId];
+      if (result.status === ResultStatus.failed) {
+        failedRecords.push(recordId);
+      } else if (result.status === ResultStatus.completed) {
+        completedRecords.push(recordId);
+      }
+    }
+    let totalRecords = Object.keys(this.results).length;
+    if (failedRecords.length > 0) {
+      status = ResultStatus.failed;
+    }
+    if (completedRecords.length === totalRecords) {
+      status = ResultStatus.completed;
+    }
+    if (completedRecords.length > 0 && completedRecords.length < totalRecords) {
+      status = ResultStatus.running;
+    }
+    return { status, completedRecords, failedRecords, totalRecords };
   }
 }
 

@@ -1,13 +1,5 @@
 import playgroundCss from "./playground-view.css?raw";
 import playgroundViewHtml from "./playground-view.html?raw";
-import {
-  cohereGenerationSettingsSchema,
-  CohereLanguageModel,
-} from "../providers/cohere";
-import {
-  openaiGenerationSettingsSchema,
-  OpenAILanguageModel,
-} from "../providers/openai";
 import { mdToHtml, htmlToMd } from "../util/markdown";
 import { newlinesToBreaks } from "../util/string";
 import { PromptTemplate, LanguageModelSettings } from "../types";
@@ -27,28 +19,14 @@ import { DataTable } from "../components/datatable";
 import { SettingsPanel } from "../components/settings-panel";
 import { Modal } from "../components/modal";
 import { View } from "./view";
-
-const languageModelProviders = ["cohere", "openai"];
-const providerToSettingsSchema: {
-  [key: string]: any;
-} = {
-  cohere: cohereGenerationSettingsSchema,
-  openai: openaiGenerationSettingsSchema,
-};
-const providerToStorageKey: {
-  [key: string]: string;
-} = {
-  cohere: "playgroundCohereGenerationSettings",
-  openai: "playgroundOpenAIGenerationSettings",
-};
-const providerToClass: {
-  [key: string]: any;
-} = {
-  cohere: CohereLanguageModel,
-  openai: OpenAILanguageModel,
-};
-const defaultProvider = "cohere";
-const errorMessageDuration = 6000;
+import {
+  languageModelProviders,
+  providerToSettingsSchema,
+  providerToStorageKey,
+  providerToClass,
+  defaultProvider,
+} from "../providers";
+import { errorMessageDuration } from "../globals";
 
 export class PlaygroundView extends View {
   useContentEditable: boolean = false;
@@ -322,7 +300,8 @@ export class PlaygroundView extends View {
       "No saved settings"
     );
     dataTable.render();
-    const loadSettingsButtons = document.querySelectorAll("[data-action=load]");
+    const loadSettingsButtons =
+      this.savedSettingsContainer.querySelectorAll("[data-action=load]");
     loadSettingsButtons.forEach((button) => {
       button.addEventListener("click", (e) => {
         const id = (e.target as HTMLButtonElement).dataset.id;
@@ -335,7 +314,7 @@ export class PlaygroundView extends View {
         }
       });
     });
-    const deleteSettingsButtons = document.querySelectorAll(
+    const deleteSettingsButtons = this.savedSettingsContainer.querySelectorAll(
       "[data-action=delete]"
     );
     deleteSettingsButtons.forEach((button) => {
@@ -440,32 +419,38 @@ export class PlaygroundView extends View {
       console.log("Save template");
       const template = this.getPlaygroundText();
       if (template) {
-        this.prompt("Name for template:", (name) => {
-          if (name) {
-            const promptTemplate = new PromptTemplate({
-              id: name,
-              name,
-              template,
-            });
-            console.log("Prompt template", promptTemplate);
-            createPromptTemplate(promptTemplate);
-            this.render();
-          }
+        this.promptUserInput({
+          title: "Name for template:",
+          onConfirm: (name) => {
+            if (name) {
+              const promptTemplate = new PromptTemplate({
+                id: name,
+                name,
+                template,
+              });
+              console.log("Prompt template", promptTemplate);
+              createPromptTemplate(promptTemplate);
+              this.render();
+            }
+          },
         });
       }
     });
     this.saveSettingsButton.addEventListener("click", () => {
       console.log("Save settings");
       const lms = this.getLanguageModelSettings();
-      this.prompt("Name for settings:", (name) => {
-        if (name && lms) {
-          console.log("Saving settings", name, lms);
-          lms.id = name;
-          lms.name = name;
-          createLanguageModelSettings(lms);
-          console.log("Language model settings", lms);
-          this.render();
-        }
+      this.promptUserInput({
+        title: "Name for settings:",
+        onConfirm: (name) => {
+          if (name && lms) {
+            console.log("Saving settings", name, lms);
+            lms.id = name;
+            lms.name = name;
+            createLanguageModelSettings(lms);
+            console.log("Language model settings", lms);
+            this.render();
+          }
+        },
       });
     });
     this.autoSuggestSwitch.addEventListener("click", () => {
@@ -537,11 +522,13 @@ export class PlaygroundView extends View {
       tableHeader.innerText = "Select record to insert";
       modalBody.appendChild(tableHeader);
       modalBody.appendChild(recordTableContainer);
-      const modal = new Modal(this.insertRecordModalContainer!, modalBody);
+      const modal = new Modal({
+        container: this.insertRecordModalContainer!,
+        body: modalBody,
+      });
       modal.render();
       modal.show();
     });
-    // Control+Enter to get suggestions
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && e.ctrlKey) {
         e.preventDefault();
