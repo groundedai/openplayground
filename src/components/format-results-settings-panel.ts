@@ -1,24 +1,24 @@
 import { SettingsPanel } from "./settings-panel";
-import { run } from "../types";
+import { Run } from "../types";
 
 const formatResultsSettingsSchema = {
   stripInitialWhiteSpace: {
     label: "Strip initial whitespace",
     type: "checkbox",
     default: false,
-    key: "stripInitialWhiteSpace" as keyof run,
+    key: "stripInitialWhiteSpace" as keyof Run,
   },
   injectStartText: {
     label: "Inject start text",
     type: "text",
     default: "",
-    key: "injectStartText" as keyof run,
+    key: "injectStartText" as keyof Run,
   },
   stripEndText: {
     label: "Strip end text",
     type: "string-array",
     default: [],
-    key: "stripEndText" as keyof run,
+    key: "stripEndText" as keyof Run,
   },
 };
 

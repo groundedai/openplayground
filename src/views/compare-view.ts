@@ -1,7 +1,7 @@
 import { View } from "./view";
 import compareViewHtml from "./compare-view.html?raw";
 import compareViewCss from "./compare-view.css?raw";
-import { run, Record, PromptTemplate, LanguageModelSettings } from "../types";
+import { Run, Record, PromptTemplate, LanguageModelSettings, Result } from "../types";
 import { getDatasets } from "../db/datasets";
 import { getRecords } from "../db/records";
 import { getPromptTemplates } from "../db/prompt-templates";
@@ -10,8 +10,8 @@ import { DataTable } from "../components/datatable";
 import { renderTemplate, newlinesToBreaks } from "../util/string";
 
 export class CompareView extends View {
-  runA: run;
-  runB: run;
+  runA: Run;
+  runB: Run;
   resultsContainer: HTMLDivElement = document.querySelector(
     "#results"
   ) as HTMLDivElement;
@@ -26,8 +26,8 @@ export class CompareView extends View {
     runB,
   }: {
     container: HTMLDivElement;
-    runA: run | undefined;
-    runB: run | undefined;
+    runA: Run | undefined;
+    runB: Run | undefined;
   }) {
     if (!runA) {
       throw new Error("run A is undefined");
@@ -128,12 +128,12 @@ export class CompareView extends View {
     resultsB,
   }: {
     records: Record[];
-    resultsA: { [key: string]: string };
-    resultsB: { [key: string]: string };
+    resultsA: { [key: string]: Result };
+    resultsB: { [key: string]: Result };
   }) {
     const rows = records.map((record) => {
-      const resultA = resultsA[record.id];
-      const resultB = resultsB[record.id];
+      const resultA = resultsA[record.id as string];
+      const resultB = resultsB[record.id as string];
       const resultAHtml = this.makeResultHtml({
         record,
         result: resultA,
@@ -172,7 +172,7 @@ export class CompareView extends View {
     promptTemplate,
   }: {
     record: Record;
-    result: string;
+    result: Result;
     promptTemplate?: PromptTemplate;
   }): string {
     let text: string;

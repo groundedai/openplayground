@@ -4,18 +4,14 @@ import { getRuns, createRun, updateRun, deleteRun } from "../db/runs";
 import { getDatasets } from "../db/datasets";
 import { getLanguageModelSettings } from "../db/language-model-settings";
 import { getPromptTemplates } from "../db/prompt-templates";
-import { getRecords } from "../db/records";
 import { DataTable } from "../components/datatable";
 import runsViewHtml from "./runs-view.html?raw";
-import { renderTemplate, titleCase } from "../util/string";
-import { CohereLanguageModel } from "../providers/cohere";
-import { OpenAILanguageModel } from "../providers/openai";
+import { titleCase } from "../util/string";
 import { router } from "../main";
 import { View } from "./view";
 import { NewRunForm } from "../components/new-run-form";
 import { Modal } from "../components/modal";
 import { startRun, exportRun } from "../runs";
-import { providerToClass } from "../providers";
 import { errorMessageDuration } from "../globals";
 export class RunsView extends View {
   runsTable: DataTable | null = null;
@@ -51,9 +47,9 @@ export class RunsView extends View {
     const runs = getRuns();
     console.log("runs", runs);
     // Sort by most recent first
-    runs.sort((a, b) => {
-      return b.createdAt - a.createdAt;
-    });
+    // runs.sort((a, b) => {
+    //   return b.createdAt - a.createdAt;
+    // });
     const rows = getRuns().map((run) => {
       const dataset = getDatasets().find(
         (dataset) => dataset.id === run.datasetId
@@ -246,7 +242,7 @@ export class RunsView extends View {
     if (!run) {
       return;
     }
-    exportRun(run);
+    exportRun({ run });
   }
 
   makeNewRunForm(): NewRunForm {

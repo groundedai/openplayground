@@ -53,19 +53,19 @@ export class NewRunForm extends Component {
   render() {
     this.datasets.forEach((dataset) => {
       const option = document.createElement("option");
-      option.value = dataset.id;
+      option.value = dataset.id as string;
       option.innerText = dataset.name;
       this.selectDataset.appendChild(option);
     });
     this.templates.forEach((template) => {
       const option = document.createElement("option");
-      option.value = template.id;
+      option.value = template.id as string;
       option.innerText = template.name;
       this.selectTemplate.appendChild(option);
     });
     this.settings.forEach((setting) => {
       const option = document.createElement("option");
-      option.value = setting.id;
+      option.value = setting.id as string;
       option.innerText = setting.name;
       this.selectSettings.appendChild(option);
     });

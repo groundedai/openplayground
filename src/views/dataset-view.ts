@@ -1,6 +1,6 @@
 import datasetViewHtml from "./dataset-view.html?raw";
 import { DataTable } from "../components/datatable";
-import { getRecords, createRecord } from "../db/records";
+import { getRecords } from "../db/records";
 import { Dataset, Record } from "../types";
 import { router } from "../main";
 import { deleteDataset } from "../db/datasets";
@@ -72,31 +72,6 @@ export class DatasetView extends View {
   }
 
   addListeners() {
-    this.newDataForm?.addEventListener("submit", (e: Event) => {
-      e.preventDefault();
-      const dataFile = (
-        document.getElementById("data-file") as HTMLInputElement
-      ).files?.[0];
-      if (dataFile) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const data = e.target?.result;
-          if (data) {
-            const separator = (
-              document.getElementById("data-separator") as HTMLInputElement
-            ).value;
-            const dataString = data.toString();
-            const records = this.parseRecords(dataString, separator);
-            console.log("Data uploaded", records);
-            records.forEach((record) => {
-              createRecord(record);
-            });
-            this.render();
-          }
-        };
-        reader.readAsText(dataFile);
-      }
-    });
     this.deleteDatasetButton?.addEventListener("click", (e: Event) => {
       e.preventDefault();
       console.log("Delete dataset");

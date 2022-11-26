@@ -18,7 +18,7 @@ export class Router {
   constructor(window: Window, routes: Array<Route>) {
     this.window = window;
     this.routes = routes;
-    this.window.addEventListener("popstate", (e: PopStateEvent) => {
+    this.window.addEventListener("popstate", () => {
       const path = this.window.location.pathname;
       console.log("popstate", path);
       this.navigateTo(this.window.location.pathname);

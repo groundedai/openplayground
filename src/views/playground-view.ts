@@ -1,6 +1,6 @@
 import playgroundCss from "./playground-view.css?raw";
 import playgroundViewHtml from "./playground-view.html?raw";
-import { mdToHtml, htmlToMd } from "../util/markdown";
+import { htmlToMd } from "../util/markdown";
 import { newlinesToBreaks } from "../util/string";
 import { PromptTemplate, LanguageModelSettings } from "../types";
 import {
