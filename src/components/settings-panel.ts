@@ -134,6 +134,8 @@ export class SettingsPanel extends Component {
         this.settings[itemKey] = input.value;
       } else if (type === "string-array") {
         this.settings[itemKey] = input.value.split(",").map((x) => x.trim());
+      } else {
+        throw new Error(`Unknown type ${type}`);
       }
     }
     return this.settings;
