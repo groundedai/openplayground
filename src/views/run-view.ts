@@ -134,6 +134,8 @@ export class RunView extends View {
   addListeners() {
     this.formatResultsSettingsPanel.on("settings-change", () => {
       const settings = this.formatResultsSettingsPanel.getSettings();
+      this.run.insertPromptTailBeforeResult =
+        settings.insertPromptTailBeforeResult;
       this.run.stripInitialWhiteSpace = settings.stripInitialWhiteSpace;
       this.run.injectStartText = settings.injectStartText;
       this.run.stripEndText = settings.stripEndText;

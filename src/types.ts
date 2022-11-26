@@ -1,4 +1,5 @@
 import { getRecords } from "./db/records";
+import { getPromptTemplates } from "./db/prompt-templates";
 
 export type ID = string | number | null;
 
@@ -115,6 +116,7 @@ export class Run extends DBItem {
   templateId: string;
   languageModelSettingsId: string;
   results: { [recordId: string | number]: Result };
+  insertPromptTailBeforeResult: boolean = true;
   stripInitialWhiteSpace: boolean = false;
   injectStartText: string = "";
   stripEndText: string[] = [];
@@ -128,6 +130,7 @@ export class Run extends DBItem {
     templateId,
     languageModelSettingsId,
     results,
+    insertPromptTailBeforeResult,
     stripInitialWhiteSpace,
     injectStartText,
     stripEndText,
@@ -140,6 +143,7 @@ export class Run extends DBItem {
     templateId: string;
     languageModelSettingsId: string;
     results?: { [recordId: string | number]: Result };
+    insertPromptTailBeforeResult?: boolean;
     stripInitialWhiteSpace?: boolean;
     injectStartText?: string;
     stripEndText?: string[];
@@ -151,6 +155,7 @@ export class Run extends DBItem {
     this.datasetLength = datasetLength;
     this.templateId = templateId;
     this.languageModelSettingsId = languageModelSettingsId;
+    this.insertPromptTailBeforeResult = insertPromptTailBeforeResult || true;
     this.stripInitialWhiteSpace = stripInitialWhiteSpace || false;
     this.injectStartText = injectStartText || "";
     this.stripEndText = stripEndText || [];
@@ -176,9 +181,16 @@ export class Run extends DBItem {
   }
 
   getFormattedResults() {
-    let results = { ...this.results };
-    for (const recordId in results) {
-      let result = results[recordId];
+    const promptTemplate = getPromptTemplates().find(
+      (template) => template.id === this.templateId
+    );
+    let formattedResults: { [recordId: string | number]: Result } = {};
+    for (const recordId in this.results) {
+      let result = { ...this.results[recordId] };
+      if (this.insertPromptTailBeforeResult) {
+        const promptTail = promptTemplate.template.split("{{ text }}")[1];
+        result.text = `${promptTail}${result.text}`;
+      }
       if (this.stripInitialWhiteSpace) {
         result.text = result.text.replace(/^(\s*)/, "");
       }
@@ -191,9 +203,9 @@ export class Run extends DBItem {
           result.text = result.text.replace(regex, "");
         }
       }
-      results[recordId] = result;
+      formattedResults[recordId] = result;
     }
-    return results;
+    return formattedResults;
   }
 
   getStatus(): RunStatus {

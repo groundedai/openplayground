@@ -89,6 +89,8 @@ export class NewRunForm extends Component {
         datasetLength: records.length,
         templateId,
         languageModelSettingsId: settingsId,
+        insertPromptTailBeforeResult:
+          formatResultsSettings.insertPromptTailBeforeResult,
         stripInitialWhiteSpace: formatResultsSettings.stripInitialWhiteSpace,
         injectStartText: formatResultsSettings.injectStartText,
         stripEndText: formatResultsSettings.stripEndText,

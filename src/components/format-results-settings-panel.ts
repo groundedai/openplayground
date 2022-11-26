@@ -2,6 +2,12 @@ import { SettingsPanel } from "./settings-panel";
 import { Run } from "../types";
 
 const formatResultsSettingsSchema = {
+  insertPromptTailBeforeResult: {
+    label: "Insert prompt tail before result",
+    type: "checkbox",
+    default: true,
+    key: "insertPromptTailBeforeResult" as keyof Run,
+  },
   stripInitialWhiteSpace: {
     label: "Strip initial whitespace",
     type: "checkbox",
@@ -23,6 +29,7 @@ const formatResultsSettingsSchema = {
 };
 
 export interface FormatResultsSettings {
+  insertPromptTailBeforeResult: boolean;
   stripInitialWhiteSpace: boolean;
   injectStartText: string;
   stripEndText: string[];
