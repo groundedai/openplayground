@@ -44,12 +44,6 @@ export class RunsView extends View {
   }
 
   renderRunsTable() {
-    const runs = getRuns();
-    console.log("runs", runs);
-    // Sort by most recent first
-    // runs.sort((a, b) => {
-    //   return b.createdAt - a.createdAt;
-    // });
     const rows = getRuns().map((run) => {
       const dataset = getDatasets().find(
         (dataset) => dataset.id === run.datasetId
@@ -81,9 +75,11 @@ export class RunsView extends View {
         settings: settings?.name || "Not found",
         actions: `<button id="start-run-button" data-id="${run.id}" class="outline">Start</button> <button id="export-run-button" data-id="${run.id}" class="outline">Export</button> <button id="view-run-button" data-id="${run.id}" class="outline">View</button> <button id="delete-run-button" data-id="${run.id}" class="outline danger">Delete</button>`,
         select: `<input type="checkbox" id="select-run" data-id="${run.id}" />`,
-        createdAt: run.createdAt,
+        createdAt: `${run.createdAt.toLocaleDateString()} ${run.createdAt.getHours()}:${run.createdAt.getMinutes()}`,
       };
     });
+    rows.sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1)); // Sort by recent first
+    console.log(rows);
     const columns = [
       { key: "select", name: "Select" },
       { key: "name", name: "Name" },

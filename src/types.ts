@@ -159,7 +159,7 @@ export class Run extends DBItem {
     this.stripInitialWhiteSpace = stripInitialWhiteSpace || false;
     this.injectStartText = injectStartText || "";
     this.stripEndText = stripEndText || [];
-    this.createdAt = createdAt || new Date();
+    this.createdAt = new Date(createdAt || Date.now());
     if (results) {
       this.results = results;
     } else {
