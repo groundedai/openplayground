@@ -101,16 +101,6 @@ export class SettingsPanel extends Component {
             type="text"
           />
         `;
-      } else if (type === "boolean") {
-        defaultVal = defaultVal || false;
-        inputHtml = `
-          <input
-            type="checkbox"
-            name="${key}"
-            id="${key}"
-            ${defaultVal ? "checked" : ""}
-          />
-        `;
       } else {
         throw new Error(`Unknown type ${type}`);
       }
@@ -144,8 +134,6 @@ export class SettingsPanel extends Component {
         this.settings[itemKey] = input.value;
       } else if (type === "string-array") {
         this.settings[itemKey] = input.value.split(",").map((x) => x.trim());
-      } else if (type === "boolean") {
-        this.settings[itemKey] = input.checked;
       } else {
         throw new Error(`Unknown type ${type}`);
       }

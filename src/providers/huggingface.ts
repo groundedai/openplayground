@@ -74,7 +74,7 @@ export const hfGenerationSettingsSchema: settingsSchema = {
   //   label: "Top K",
   // },
   doSample: {
-    type: "boolean",
+    type: "checkbox",
     default: false,
     key: "do_sample",
     label: "Do Sample",
