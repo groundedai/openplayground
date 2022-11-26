@@ -407,6 +407,13 @@ export class PlaygroundView extends View {
           console.log("Auto suggest");
           this.getSuggestions();
         }
+        const templateRegex = /{{\s*text\s*}}/g;
+        const templateMatch = this.getPlaygroundText().match(templateRegex);
+        if (templateMatch) {
+          this.saveTemplateButton?.removeAttribute("disabled");
+        } else {
+          this.saveTemplateButton?.setAttribute("disabled", "");
+        }
       });
     }
   }

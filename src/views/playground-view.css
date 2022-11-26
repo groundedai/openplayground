@@ -90,6 +90,14 @@ textarea#playground-textarea:focus::-webkit-input-placeholder {
   display: none;
 }
 
+#save-template-button:enabled > * .tooltiptext {
+  display: none;
+}
+
+#save-template-button:enabled > .tooltip {
+  border-bottom: 0;
+}
+
 #saved-settings-container > * td {
   padding: 0;
 }

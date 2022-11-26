@@ -24,7 +24,16 @@
           ></div>
         </div>
       </button>
-      <button id="save-template-button">Save Template</button>
+      <button id="save-template-button" disabled>
+        <div class="tooltip">
+          Save Template
+          <span class="tooltiptext">
+            You must add a placeholder for
+            <strong>{{ text }}</strong> to save a template.<br /><br />
+            Try adding <strong>{{ text }}</strong> to the text area above.
+          </span>
+        </div>
+      </button>
       <button id="insert-record-button">Insert Record</button>
       <!-- <button id="save-record-button">Save as Record</button> -->
     </div>

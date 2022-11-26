@@ -9,7 +9,9 @@ export function renderTemplate(
     matches.forEach((match) => {
       const key = match.replace(pattern, "$1");
       const value = props[key];
-      withProps = withProps.replace(match, value);
+      if (value) {
+        withProps = withProps.replace(match, value);
+      }
     });
   }
   return withProps;
