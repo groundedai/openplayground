@@ -27,7 +27,7 @@ const routes = [
     const datasetView = new DatasetView({ container, dataset });
     datasetView.render();
   }),
-  new Route("datasets/(\\d+)/record/(\\d+)/?$", (path: string) => {
+  new Route("/datasets/(\\d+)/record/(\\d+)/?$", (path: string) => {
     const datasetId = path.split("/")[2];
     const recordId = path.split("/")[4];
     console.log("recordId", recordId);
@@ -61,7 +61,7 @@ const routes = [
   }),
 ];
 export const router = new Router(window, routes);
-router.navigateTo(window.location.pathname);
+router.navigateTo(window.location.hash || "#/");
 
 // const rightNav = document.querySelector("#right-nav") as HTMLDivElement;
 // const rightNavContent = document.querySelector(

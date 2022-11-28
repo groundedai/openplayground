@@ -4,7 +4,7 @@ export class Route {
 
   constructor(pathRegex: RegExp | string, callback: (path: string) => void) {
     if (typeof pathRegex === "string") {
-      pathRegex = new RegExp(pathRegex);
+      pathRegex = new RegExp("\#" + pathRegex);
     }
     this.pathRegex = pathRegex;
     this.callback = callback;
@@ -19,9 +19,9 @@ export class Router {
     this.window = window;
     this.routes = routes;
     this.window.addEventListener("popstate", () => {
-      const path = this.window.location.pathname;
+      const path = this.window.location.hash || "#/";
       console.log("popstate", path);
-      this.navigateTo(this.window.location.pathname);
+      this.navigateTo(path);
     });
   }
 
@@ -35,6 +35,7 @@ export class Router {
   }
 
   goTo(path: string) {
+    path = "#" + path;
     this.navigateTo(path);
     this.window.history.pushState({}, "", path);
   }
