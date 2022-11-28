@@ -105,9 +105,10 @@ export class SettingsPanel extends Component {
       } else {
         throw new Error(`Unknown type ${type}`);
       }
+      const link = item.link? ` <a href="${item.link}" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a>` : "";
       html += `
         <div class="setting">
-          <label for="${key}">${label}</label>
+          <label for="${key}">${label}${link}</label>
           <br />
           ${inputHtml}
         </div>

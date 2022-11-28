@@ -5,6 +5,7 @@ export const hfGenerationSettingsSchema: settingsSchema = {
     key: "apiKey",
     type: "password",
     label: "API Key",
+    link: "https://huggingface.co/settings/token",
     default: "",
   },
   /*
