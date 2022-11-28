@@ -1,0 +1,33 @@
+stages:
+  - test
+  - deploy
+  - chatops
+
+pages:
+  stage: deploy
+  image: node:lts
+  script:
+    - npm install
+    - npm run build
+    - cp -r dist/* public
+    - echo "Updated pages with $CI_COMMIT_REF_NAME"
+  artifacts:
+    paths:
+      # The folder that contains the files to be exposed at the Page URL
+      - public
+  environment:
+    name: production
+  rules:
+    # This ensures that only pushes to the default branch will trigger
+    # a pages deploy
+    - if: $CI_COMMIT_REF_NAME == "ci-cd"
+    - if: $CI_PIPELINE_SOURCE == "chat"
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: manual
+
+hello:
+  stage: chatops
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "chat"
+  script:
+    - echo "Hello World"
