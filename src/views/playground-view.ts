@@ -44,6 +44,9 @@ export class PlaygroundView extends View {
   suggestButton: HTMLButtonElement = document.querySelector(
     "#suggest-button"
   ) as HTMLButtonElement;
+  insertPlaceholderButton: HTMLButtonElement = document.querySelector(
+    "#insert-placeholder-button"
+  ) as HTMLButtonElement;
   saveTemplateButton: HTMLButtonElement = document.querySelector(
     "#save-template-button"
   ) as HTMLButtonElement;
@@ -87,10 +90,10 @@ export class PlaygroundView extends View {
       "#playground-editable"
     ) as HTMLSpanElement;
     if (this.useContentEditable) {
-      this.playgroundTextArea!.style.display = "none";
+      this.playgroundTextArea.classList.add("hidden");
       // this.playgroundEditable!.style.display = "block";
     } else {
-      this.playgroundTextArea!.style.display = "block";
+      this.playgroundTextArea.classList.remove("hidden");
       // this.playgroundEditable!.style.display = "none";
     }
     this.addEditorListeners();
@@ -100,10 +103,6 @@ export class PlaygroundView extends View {
       providerToStorageKey[this.languageModelProvider!];
     const settings = localStorage.getItem(settingsStorageKey);
     if (settings) {
-      console.log(
-        `Loading settings for ${this.languageModelProvider}`,
-        settings
-      );
       const lms = new LanguageModelSettings({
         provider: this.languageModelProvider!,
         settings: JSON.parse(settings),
@@ -299,7 +298,6 @@ export class PlaygroundView extends View {
       columns,
       rows,
       emptyMessage: "No saved settings",
-      showTitle: false,
     });
     dataTable.render();
     const loadSettingsButtons =
@@ -420,6 +418,15 @@ export class PlaygroundView extends View {
     }
   }
 
+  getPlaygroundCursorPosition() {
+    return this.playgroundTextArea.selectionStart;
+  }
+
+  setPlaygroundCursorPosition(position: number) {
+    this.playgroundTextArea.selectionStart = position;
+    this.playgroundTextArea.selectionEnd = position;
+  }
+
   initListeners() {
     this.suggestButton.addEventListener("click", () => {
       this.getSuggestions();
@@ -444,6 +451,15 @@ export class PlaygroundView extends View {
           },
         });
       }
+    });
+    this.insertPlaceholderButton.addEventListener("click", () => {
+      const position = this.getPlaygroundCursorPosition();
+      const text = this.getPlaygroundText();
+      const textBefore = text.substring(0, position);
+      const textAfter = text.substring(position);
+      const newText = `${textBefore}{{text}}${textAfter}`;
+      this.setPlaygroundContent(newText);
+      this.setPlaygroundCursorPosition(position + 7);
     });
     this.saveSettingsButton.addEventListener("click", () => {
       console.log("Save settings");
