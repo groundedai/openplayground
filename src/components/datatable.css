@@ -1,0 +1,35 @@
+select {
+  width: auto;
+  height: auto;
+  padding: 0.8rem;
+}
+
+input {
+  width: auto;
+  padding: 0.8rem;
+}
+
+.prev-next > button {
+  padding: 0.8rem;
+}
+
+#header {
+  margin: 0;
+}
+
+#actions-row {
+  font-size: 1.2rem;
+}
+
+#header-col {
+  width: auto;
+}
+
+#actions-row {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.highlight {
+  background-color: #fff243;
+}

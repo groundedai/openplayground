@@ -1,35 +1,161 @@
+import { Component } from "./component";
+import datatableHtml from "./datatable.html?raw";
+import datatableCss from "./datatable.css?raw";
+
 type Column = {
   name: string;
   key: string;
+  searchable?: boolean;
   classes?: string[];
 };
 
-export class DataTable {
-  container: HTMLDivElement;
-  data: Array<any>;
-  columns: Array<Column>;
-  rows: Array<TableRow> = [];
-  emptyMessage: string = "No data to display";
-  rowClicked: (row: TableRow) => void = () => {};
+type Action = "search";
 
-  constructor(
-    container: HTMLDivElement,
-    data: Array<any>,
-    columns: Array<Column>,
-    emptyMessage?: string,
-    rowClicked: (row: TableRow) => void = () => {}
-  ) {
-    this.container = container;
-    this.data = data;
+export class DataTable extends Component {
+  columns: Array<Column>;
+  searchableColumns: Array<Column>;
+  rows: Array<TableRow> = [];
+  filteredRows: Array<TableRow> = [];
+  emptyMessage: string = "No data to display";
+  page: number = 1;
+  rowsPerPage: number = 10;
+  title: string = "";
+  rowClicked: (row: TableRow) => void = () => {};
+  actions: Array<Action> = [];
+  showFooter: boolean = false;
+  pageSizeOptions = [10, 25, 50];
+  showPageSelector: boolean = true;
+  showPageSizeSelector: boolean = false;
+  body: HTMLDivElement = this.container.querySelector(
+    "#datatable-body"
+  ) as HTMLDivElement;
+  header: HTMLHeadingElement = this.container.querySelector(
+    "#datatable-header"
+  ) as HTMLHeadingElement;
+  headerCol: HTMLDivElement = this.container.querySelector(
+    "#header-col"
+  ) as HTMLDivElement;
+  footer: HTMLDivElement = this.container.querySelector(
+    "#datatable-footer"
+  ) as HTMLDivElement;
+  rowCountValue: HTMLSpanElement = this.container.querySelector(
+    "#row-count-value"
+  ) as HTMLSpanElement;
+  searchInput: HTMLInputElement = this.container.querySelector(
+    "#search-input"
+  ) as HTMLInputElement;
+  pageSelectorContainers: NodeListOf<HTMLElement> =
+    this.container.querySelectorAll(".page-selector-container");
+  pageSelectors: NodeListOf<HTMLSelectElement> =
+    this.container.querySelectorAll(".page-selector");
+  pageSizeSelectorContainers: NodeListOf<HTMLElement> =
+    this.container.querySelectorAll(".page-size-selector-container");
+  pageSizeSelectors: NodeListOf<HTMLSelectElement> =
+    this.container.querySelectorAll(".page-size-selector");
+  prevPageButton: HTMLButtonElement = this.container.querySelector(
+    "#prev-page-btn"
+  ) as HTMLButtonElement;
+  nextPageButton: HTMLButtonElement = this.container.querySelector(
+    "#next-page-btn"
+  ) as HTMLButtonElement;
+
+  constructor({
+    container,
+    rows,
+    columns,
+    emptyMessage,
+    page,
+    rowsPerPage,
+    title,
+    rowClicked,
+    actions,
+    showFooter,
+    showPageSelector,
+    showPageSizeSelector,
+  }: {
+    container: HTMLElement;
+    rows: Array<any>;
+    columns: Array<Column>;
+    emptyMessage?: string;
+    page?: number;
+    rowsPerPage?: number;
+    title?: string;
+    rowClicked?: (row: TableRow) => void;
+    actions?: Array<Action>;
+    showFooter?: boolean;
+    showPageSelector?: boolean;
+    showPageSizeSelector?: boolean;
+  }) {
+    super({ container, html: datatableHtml, css: datatableCss });
     this.columns = columns;
+    ``;
+    this.searchableColumns = columns.filter((c) => c.searchable);
+    this.rows = rows.map((r) => new TableRow(r.id, r, this.columns));
+    this.filteredRows = this.rows;
     this.emptyMessage = emptyMessage || this.emptyMessage;
-    this.rowClicked = rowClicked;
+    this.page = page || this.page;
+    this.rowsPerPage = rowsPerPage || this.rowsPerPage;
+    this.rowClicked = rowClicked || this.rowClicked;
+    this.actions = actions || this.actions;
+    this.showFooter = showFooter || this.showFooter;
+    this.title = title || this.title;
+    this.showPageSelector = showPageSelector || this.showPageSelector;
+    this.showPageSizeSelector =
+      showPageSizeSelector || this.showPageSizeSelector;
+    this.initListeners();
+  }
+
+  getPageCount() {
+    return Math.ceil(this.filteredRows.length / this.rowsPerPage);
+  }
+
+  initListeners() {
+    this.pageSelectors.forEach((s) => {
+      s.addEventListener("change", (e: Event) => {
+        this.page = parseInt((e.target as HTMLSelectElement).value);
+        this.render();
+      });
+    });
+    this.pageSizeSelectors.forEach((s) => {
+      s.addEventListener("change", (e: Event) => {
+        this.rowsPerPage = parseInt((e.target as HTMLSelectElement).value);
+        this.page = 1;
+        this.render();
+      });
+    });
+    this.searchInput.addEventListener("input", () => {
+      const search = this.searchInput.value;
+      const searchLower = search.toLowerCase();
+      this.filteredRows = this.rows.filter((r) => {
+        for (const key in r.data) {
+          if (this.searchableColumns.find((c: Column) => c.key === key)) {
+            const val = r.data[key];
+            const valLower = val.toString().toLowerCase();
+            if (valLower.includes(searchLower)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      });
+      this.page = 1;
+      this.render();
+    });
+    this.prevPageButton.addEventListener("click", () => {
+      this.page = Math.max(1, this.page - 1);
+      this.render();
+    });
+    this.nextPageButton.addEventListener("click", () => {
+      this.page = Math.min(this.page + 1, this.getPageCount());
+      this.render();
+    });
   }
 
   render() {
-    this.container.innerHTML = "";
-    if (this.data.length === 0) {
-      this.container.innerHTML = `<div class="empty-message">${this.emptyMessage}</div>`;
+    this.header.innerHTML = this.title;
+    this.body.innerHTML = "";
+    if (this.filteredRows.length === 0) {
+      this.body.innerHTML = `<div class="empty-message">${this.emptyMessage}</div>`;
       return;
     }
     const dataTable = document.createElement("table");
@@ -44,19 +170,83 @@ export class DataTable {
     thead.appendChild(tr);
     dataTable.appendChild(thead);
     const tbody = document.createElement("tbody");
-    this.data.forEach((d: any) => {
-      const row = new TableRow(d.id, d, this.columns);
-      this.rows.push(row);
+    const start = (this.page - 1) * this.rowsPerPage;
+    const end = start + this.rowsPerPage;
+    this.filteredRows.slice(start, end).forEach((row) => {
+      const searchVal = this.searchInput.value;
+      row.highlightStrings = [searchVal];
       row.render();
       tbody.appendChild(row.tr);
     });
     dataTable.appendChild(tbody);
-    this.container.appendChild(dataTable);
+    this.body.appendChild(dataTable);
+    this.rowCountValue.innerHTML = this.filteredRows.length.toString();
+    if (this.showFooter) {
+      this.footer.classList.remove("hidden");
+    } else {
+      this.footer.classList.add("hidden");
+    }
+    if (this.title.length > 0) {
+      this.headerCol.classList.remove("hidden");
+    } else {
+      this.headerCol.classList.add("hidden");
+    }
+    this.renderActions();
     this.addListeners();
   }
 
+  renderActions() {
+    if (this.showPageSelector && this.getPageCount() > 1) {
+      this.pageSelectorContainers.forEach((c) => {
+        c.classList.remove("hidden");
+      });
+      this.pageSelectors.forEach((s) => {
+        s.innerHTML = "";
+        for (let i = 1; i <= this.getPageCount(); i++) {
+          const option = document.createElement("option");
+          option.value = i.toString();
+          option.innerHTML = i.toString();
+          if (i === this.page) {
+            option.selected = true;
+          }
+          s.appendChild(option);
+        }
+      });
+    } else {
+      this.pageSelectorContainers.forEach((c) => {
+        c.classList.add("hidden");
+      });
+    }
+    if (this.showPageSizeSelector && this.getPageCount() > 1) {
+      this.pageSizeSelectorContainers.forEach((c) => {
+        c.classList.remove("hidden");
+      });
+      this.pageSizeSelectors.forEach((s) => {
+        s.innerHTML = "";
+        this.pageSizeOptions.forEach((r) => {
+          const option = document.createElement("option");
+          option.value = r.toString();
+          option.innerHTML = r.toString();
+          if (r === this.rowsPerPage) {
+            option.selected = true;
+          }
+          s.appendChild(option);
+        });
+      });
+    } else {
+      this.pageSizeSelectorContainers.forEach((c) => {
+        c.classList.add("hidden");
+      });
+    }
+    if (!this.actions.includes("search")) {
+      this.searchInput.classList.add("hidden");
+    } else {
+      this.searchInput.classList.remove("hidden");
+    }
+  }
+
   addListeners() {
-    const rows = this.container.querySelectorAll("tbody tr");
+    const rows = this.body.querySelectorAll("tbody tr");
     rows.forEach((r) => {
       r.addEventListener("click", (e: Event) => {
         const row = (e.target as HTMLElement).closest("tr");
@@ -82,7 +272,7 @@ export class DataTable {
     key: string;
     value: string;
   }) {
-    const row = this.rows.find((r) => r.id === rowId);
+    const row = this.filteredRows.find((r) => r.id === rowId);
     if (row) {
       row.updateCell({ key, value });
     }
@@ -94,18 +284,42 @@ export class TableRow {
   data: any;
   columns: Array<Column>;
   tr: HTMLTableRowElement = document.createElement("tr");
+  highlightStrings: Array<string> = [];
 
-  constructor(id: string, data: any, columns: Array<Column>) {
+  constructor(
+    id: string,
+    data: any,
+    columns: Array<Column>,
+    highlightStrings?: Array<string>
+  ) {
     this.id = id;
     this.data = data;
     this.columns = columns;
+    this.highlightStrings = highlightStrings || this.highlightStrings;
   }
 
   render() {
+    this.tr.innerHTML = "";
     this.tr.dataset.id = this.id.toString();
     this.columns.forEach((c: Column) => {
       const td = document.createElement("td");
-      td.innerHTML = this.data[c.key];
+      const val = this.data[c.key];
+      if (c.searchable && this.highlightStrings.length > 0) {
+        const valLower = val.toString().toLowerCase();
+        let valHtml = val.toString();
+        this.highlightStrings.forEach((s) => {
+          const sLower = s.toLowerCase();
+          if (valLower.includes(sLower)) {
+            valHtml = valHtml.replace(
+              new RegExp(s, "gi"),
+              `<span class="highlight">${s}</span>`
+            );
+          }
+        });
+        td.innerHTML = valHtml;
+      } else {
+        td.innerHTML = val;
+      }
       const classes = c.classes || [];
       classes.forEach((c) => td.classList.add(c));
       td.dataset.column = c.key;

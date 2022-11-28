@@ -26,7 +26,6 @@ export class Router {
   }
 
   navigateTo(path: string) {
-    console.log(path);
     const route = this.routes.find((r: Route) => {
       return r.pathRegex.test(path);
     });

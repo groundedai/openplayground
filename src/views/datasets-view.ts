@@ -50,19 +50,21 @@ export class DatasetsView extends View {
       {
         name: "Name",
         key: "name",
+        classes: ["text-center"],
       },
       {
         name: "Actions",
         key: "actions",
+        classes: ["text-center"],
       },
     ];
     const emptyMessage = "You don't have any datasets yet. Create one";
-    const dataTable = new DataTable(
-      this.datasetTableContainer,
-      datasets,
-      datasetsColumns,
-      emptyMessage
-    );
+    const dataTable = new DataTable({
+      container: this.datasetTableContainer,
+      rows: datasets,
+      columns: datasetsColumns,
+      emptyMessage,
+    });
     dataTable.render();
     const viewButtons = document.querySelectorAll(
       "#dataset-table-container button[data-action='view']"

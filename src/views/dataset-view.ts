@@ -6,7 +6,6 @@ import { router } from "../main";
 import { deleteDataset } from "../db/datasets";
 import { View } from "./view";
 
-
 export class DatasetView extends View {
   dataset: Dataset;
   records: Array<Record> = [];
@@ -45,28 +44,24 @@ export class DatasetView extends View {
     this.recordsTableContainer.innerHTML = "";
     const columns = [
       { name: "ID", key: "id" },
-      { name: "Text", key: "text" },
+      { name: "Text", key: "text", searchable: true },
     ];
     const rows = this.records.map((r) => {
       // Replace newlines or breaks in the text with a space
       const text = r.text.replace(/(\r\n|\n|\r)/gm, " ");
-      // return { id: r.id, text: mdToHtml(text) };
       return { id: r.id, text };
     });
-    const rowClicked = (row: any) => {
-      console.log("Row clicked", row);
-      const record = this.records.find((r) => r.id === row.id);
-      if (record) {
-        router.goTo(`/datasets/${this.dataset.id}/record/${record.id}`);
-      }
-    };
-    const dataTable = new DataTable(
-      this.recordsTableContainer,
-      rows,
+    const dataTable = new DataTable({
+      container: this.recordsTableContainer,
       columns,
-      "No records yet. Upload some:",
-      rowClicked
-    );
+      rows,
+      emptyMessage: "No records",
+      title: this.dataset.name,
+      actions: ["search"],
+      showFooter: true,
+      showPageSelector: true,
+      showPageSizeSelector: true,
+    });
     dataTable.render();
     this.addListeners();
   }
@@ -84,5 +79,4 @@ export class DatasetView extends View {
       }
     });
   }
-
 }

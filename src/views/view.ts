@@ -1,32 +1,10 @@
-import { Snackbar } from "../components/snackbar";
 import { renderTemplate } from "../util/string";
+import { Snackbar } from "../components/snackbar";
 import { Modal } from "../components/modal";
 import promptModalHtml from "../components/prompt-modal.html?raw";
+import { Component } from "../components/component";
 
-export class View {
-  container: HTMLDivElement;
-
-  constructor({
-    container,
-    html = "",
-    props = {},
-    css = "",
-  }: {
-    container: HTMLDivElement;
-    html?: string;
-    props?: any;
-    css?: string;
-  }) {
-    this.container = container;
-    const htmlWithProps = renderTemplate(html, props);
-    this.container.innerHTML = htmlWithProps;
-    if (css) {
-      const style = document.createElement("style");
-      style.textContent = css;
-      this.container.appendChild(style);
-    }
-  }
-
+export class View extends Component {
   showSnackbar({
     messageHtml,
     position = "top",

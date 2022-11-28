@@ -250,14 +250,15 @@ export class PlaygroundView extends View {
         classes: ["fitwidth"],
       },
     ];
-    const dataTable = new DataTable(
-      this.templateContainer!,
-      rows,
+    const dataTable = new DataTable({
+      container: this.templateContainer,
       columns,
-      "No templates"
-    );
+      rows,
+      emptyMessage: "No templates",
+      title: "Templates",
+    });
     dataTable.render();
-    this.templateContainer!.querySelectorAll("button").forEach((button) => {
+    this.templateContainer.querySelectorAll("button").forEach((button) => {
       button.addEventListener("click", () => {
         const id = button.dataset.id;
         const action = button.dataset.action;
@@ -293,12 +294,13 @@ export class PlaygroundView extends View {
         key: "actions",
       },
     ];
-    const dataTable = new DataTable(
-      this.savedSettingsContainer!,
-      rows,
+    const dataTable = new DataTable({
+      container: this.savedSettingsContainer,
       columns,
-      "No saved settings"
-    );
+      rows,
+      emptyMessage: "No saved settings",
+      showTitle: false,
+    });
     dataTable.render();
     const loadSettingsButtons =
       this.savedSettingsContainer.querySelectorAll("[data-action=load]");
@@ -503,13 +505,13 @@ export class PlaygroundView extends View {
             }
             modal.hide();
           };
-          const dataTable = new DataTable(
-            recordTableContainer,
-            rows,
+          const dataTable = new DataTable({
+            container: recordTableContainer,
             columns,
-            "No records",
-            rowClicked
-          );
+            rows,
+            rowClicked,
+            emptyMessage: "No records",
+          });
           dataTable.render();
         }
       };

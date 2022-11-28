@@ -1,0 +1,58 @@
+<div class="datatable">
+  <div class="row center" id="header-row">
+    <div class="col-1 hidden" id="header-col"><h5 id="datatable-header"></h5></div>
+    <div class="col-2 right">
+      <div class="row" id="actions-row">
+        <div class="row-count">Rows: <span id="row-count-value">0</span></div>
+        <div class="search mr-3 ml-3">
+          <input type="text" placeholder="Search" id="search-input" />
+        </div>
+        <div class="page-selector-container mr-1 hidden">
+          <label for="page-selector">Page: </label>
+          <select name="page-selector" class="page-selector"></select>
+        </div>
+        <div class="page-size-selector-container hidden">
+          <label for="page-size-selector">Page size: </label>
+          <select name="page-size-selector" class="page-size-selector"></select>
+        </div>
+      </div>
+    </div>
+    <div class="prev-next ml-1">
+      <button id="prev-page-btn" class="outline">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button id="next-page-btn" class="outline">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+  <div id="datatable-body"></div>
+  <div id="datatable-footer" class="hidden">
+    <div class="row center" id="footer-row">
+      <div class="col-1" id="footer-col"></div>
+      <div class="col-2 right">
+        <div class="row" id="actions-row">
+          <div class="page-selector-container ml-2 mr-1">
+            <label for="page-selector">Page: </label>
+            <select name="page-selector" class="page-selector"></select>
+          </div>
+          <div class="page-size-selector-container">
+            <label for="page-size-selector">Page size: </label>
+            <select
+              name="page-size-selector"
+              class="page-size-selector"
+            ></select>
+          </div>
+          <div class="prev-next ml-1">
+            <button id="prev-page-btn" class="outline">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button id="next-page-btn" class="outline">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
