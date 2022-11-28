@@ -1,28 +1,9 @@
 import { renderTemplate } from "../util/string";
-import { Snackbar } from "../components/snackbar";
 import { Modal } from "../components/modal";
 import promptModalHtml from "../components/prompt-modal.html?raw";
 import { Component } from "../components/component";
 
 export class View extends Component {
-  showSnackbar({
-    messageHtml,
-    position = "top",
-    type = "info",
-    duration = 3000,
-  }: {
-    messageHtml: string;
-    position?: string;
-    type?: string;
-    duration?: number;
-  }) {
-    const body = document.createElement("div");
-    body.innerHTML = messageHtml;
-    const snackbar = new Snackbar({ body, position, type, duration });
-    snackbar.render();
-    snackbar.show();
-  }
-
   promptUserInput({
     title,
     message,

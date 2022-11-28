@@ -1,1 +1,1 @@
-export const errorMessageDuration = 6000;
+export const errorMessageDuration = 7000;

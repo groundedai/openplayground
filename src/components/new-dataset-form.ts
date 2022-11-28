@@ -4,6 +4,9 @@ import { Dataset, Record } from "../types";
 import { createDataset } from "../db/datasets";
 import { createRecord } from "../db/records";
 
+const datasetFileMaxSizeKb = 500;
+const datasetFileMaxRecords = 100;
+
 export class NewDatasetForm extends Component {
   form: HTMLFormElement = this.container.querySelector(
     "#form"
@@ -28,26 +31,40 @@ export class NewDatasetForm extends Component {
     this.form.addEventListener("submit", (e) => {
       e.preventDefault();
       const formData = new FormData(this.form);
+      const dataFile = formData.get("data-file") as File;
+      let kbSize = dataFile.size / 1024;
+      let kbSizeRounded = Math.round(kbSize * 100) / 100;
+      if (kbSize > datasetFileMaxSizeKb) {
+        this.showSnackbar({
+          messageHtml: `File must be less than <strong>${datasetFileMaxSizeKb}KB</strong>. Yours is <strong>${kbSizeRounded}KB</strong>.`,
+          type: "error",
+        });
+        return;
+      }
       const name = formData.get("name") as string;
       const dataset = new Dataset({ name });
-      createDataset(dataset);
-      const dataFile = formData.get("data-file") as File;
       const data = dataFile.text();
       data.then((data) => {
-        if (!data) {
-          this.onSubmit(dataset);
-          return;
-        } else {
+        if (data) {
           const separator = (
             document.getElementById("data-separator") as HTMLInputElement
           ).value;
           const dataString = data.toString();
           const records = this.parseRecords(dataString, separator);
-          records.forEach((record) => {
-            record.datasetId = dataset.id;
-            createRecord(record);
-          });
-          this.onSubmit(dataset);
+          if (records.length > datasetFileMaxRecords) {
+            this.showSnackbar({
+              messageHtml: `File must have less than <strong>${datasetFileMaxRecords}</strong> records. Yours has <strong>${records.length}</strong> records.`,
+              type: "error",
+            });
+            return;
+          } else {
+            createDataset(dataset);
+            records.forEach((record) => {
+              record.datasetId = dataset.id;
+              createRecord(record);
+            });
+            this.onSubmit(dataset);
+          }
         }
       });
     });

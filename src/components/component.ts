@@ -1,4 +1,6 @@
 import { renderTemplate } from "../util/string";
+import { Snackbar } from "./snackbar";
+import { errorMessageDuration } from "../globals";
 
 export class Component {
   container: HTMLElement;
@@ -30,5 +32,28 @@ export class Component {
     this.container.addEventListener(event, (e: any) => {
       callback(e);
     });
+  }
+
+  showSnackbar({
+    messageHtml,
+    position = "top",
+    type = "info",
+    duration,
+  }: {
+    messageHtml: string;
+    position?: string;
+    type?: string;
+    duration?: number;
+  }) {
+    if (!duration && type === "error") {
+      duration = errorMessageDuration;
+    } else if (!duration) {
+      duration = 3000;
+    }
+    const body = document.createElement("div");
+    body.innerHTML = messageHtml;
+    const snackbar = new Snackbar({ body, position, type, duration });
+    snackbar.render();
+    snackbar.show();
   }
 }
