@@ -39,12 +39,18 @@ export class DataTable extends Component {
   footer: HTMLDivElement = this.container.querySelector(
     "#datatable-footer"
   ) as HTMLDivElement;
+  rowCountContainer: HTMLDivElement = this.container.querySelector(
+    ".row-count"
+  ) as HTMLDivElement;
   rowCountValue: HTMLSpanElement = this.container.querySelector(
     "#row-count-value"
   ) as HTMLSpanElement;
   searchInput: HTMLInputElement = this.container.querySelector(
     ".search-input"
   ) as HTMLInputElement;
+  searchContainer: HTMLDivElement = this.container.querySelector(
+    ".search"
+  ) as HTMLDivElement;
   pageSelectorContainers: NodeListOf<HTMLElement> =
     this.container.querySelectorAll(".page-selector-container");
   pageSelectors: NodeListOf<HTMLSelectElement> =
@@ -161,10 +167,14 @@ export class DataTable extends Component {
 
   render() {
     this.header.innerHTML = this.title;
+    console.log(this.header);
     this.body.innerHTML = "";
     if (this.filteredRows.length === 0) {
       this.body.innerHTML = `<div class="empty-message">${this.emptyMessage}</div>`;
+      this.rowCountContainer.classList.add("hidden");
       return;
+    } else {
+      this.rowCountContainer.classList.remove("hidden");
     }
     const dataTable = document.createElement("table");
     const thead = document.createElement("thead");
@@ -260,10 +270,10 @@ export class DataTable extends Component {
 
   renderActions() {
     this.renderPageNavigation();
-    if (!this.actions.includes("search")) {
-      this.searchInput.classList.add("hidden");
+    if (this.actions.includes("search")) {
+      this.searchContainer.classList.remove("hidden");
     } else {
-      this.searchInput.classList.remove("hidden");
+      this.searchContainer.classList.add("hidden");
     }
   }
 
