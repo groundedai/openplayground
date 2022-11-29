@@ -35,7 +35,7 @@
 
 #settings-panel-actions > * button {
   padding: 0.7em 1em;
-  margin: 0 0.5em;
+  margin-right: 0.5em;
 }
 
 #settings-panel > * input {

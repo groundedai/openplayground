@@ -565,7 +565,6 @@ export class PlaygroundView extends View {
       modalBody.appendChild(tableHeader);
       modalBody.appendChild(recordTableContainer);
       const modal = new Modal({
-        container: this.insertRecordModalContainer!,
         body: modalBody,
       });
       modal.render();

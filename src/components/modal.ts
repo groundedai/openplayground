@@ -1,25 +1,29 @@
-import "./modal.css";
 import modalHtml from "./modal.html?raw";
+import modalCss from "./modal.css?raw";
+import { Component } from "../components/component";
 
-export class Modal {
-  container: HTMLElement;
-  modalDiv: HTMLElement | null = null;
-  bodyContainer: HTMLElement | null = null;
-  closeButton: HTMLButtonElement | null = null;
-  titleElement: HTMLHeadingElement | null = null;
+export class Modal extends Component {
+  modalDiv: HTMLElement = this.container.querySelector("#modal") as HTMLElement;
+  bodyContainer: HTMLElement = this.container.querySelector(
+    "#modal-body"
+  ) as HTMLElement;
+  closeButton: HTMLButtonElement = this.container.querySelector(
+    "#modal-close-button"
+  ) as HTMLButtonElement;
+  titleElement: HTMLHeadingElement = this.container.querySelector(
+    "#modal-title-text"
+  ) as HTMLHeadingElement;
   body: HTMLElement;
   title: string;
 
   constructor({
-    container,
     body,
     title,
   }: {
-    container?: HTMLElement;
     body?: HTMLElement | string;
     title?: string;
   }) {
-    this.container = container || document.createElement("div");
+    super({ html: modalHtml, css: modalCss });
     if (body) {
       if (typeof body === "string") {
         const div = document.createElement("div");
@@ -36,32 +40,20 @@ export class Modal {
 
   render() {
     document.body.appendChild(this.container); // Move container to top level
-    this.container.innerHTML = modalHtml;
-    this.modalDiv = this.container.querySelector("#modal") as HTMLElement;
+    console.log(this.container);
     this.hide();
-    this.bodyContainer = this.container.querySelector(
-      "#modal-body"
-    ) as HTMLElement;
-    this.closeButton = this.container.querySelector(
-      "#modal-close-button"
-    ) as HTMLButtonElement;
-    this.titleElement = this.container.querySelector(
-      "#modal-title-text"
-    ) as HTMLHeadingElement;
-    if (this.title) {
-      this.titleElement!.innerText = this.title;
-    }
+    this.titleElement.innerText = this.title;
     this.bodyContainer.innerHTML = "";
     this.bodyContainer.appendChild(this.body);
     this.addListeners();
   }
 
   show() {
-    this.modalDiv!.style.display = "block";
+    this.modalDiv.style.display = "block";
   }
 
   hide() {
-    this.modalDiv!.style.display = "none";
+    this.modalDiv.style.display = "none";
   }
 
   addListeners() {

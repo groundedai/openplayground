@@ -13,10 +13,9 @@ export class View extends Component {
     message?: string;
     onConfirm: (value: string) => void;
   }) {
+    message = message || " ";
     const body = document.createElement("div");
-    message = message || "";
-    const html = renderTemplate(promptModalHtml, { message });
-    body.innerHTML = html;
+    body.innerHTML = renderTemplate(promptModalHtml, { message });
     const confirmButton = body.querySelector(
       "#confirm-button"
     ) as HTMLButtonElement;
@@ -30,8 +29,7 @@ export class View extends Component {
         confirmButton.click();
       }
     });
-    const container = document.createElement("div");
-    const modal = new Modal({ container, title, body });
+    const modal = new Modal({ title, body });
     modal.render();
     modal.show();
     input.focus();

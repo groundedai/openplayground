@@ -11,7 +11,7 @@ export class Component {
     props = {},
     css = "",
   }: {
-    container: HTMLElement;
+    container?: HTMLElement;
     html?: string;
     props?: any;
     css?: string;
