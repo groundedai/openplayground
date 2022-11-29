@@ -1,6 +1,6 @@
 import { renderTemplate } from "../util/string";
 import { Snackbar } from "./snackbar";
-import { errorMessageDuration } from "../globals";
+import { errorMessageDuration, infoMessageDuration } from "../globals";
 
 export class Component {
   container: HTMLElement;
@@ -48,7 +48,7 @@ export class Component {
     if (!duration && type === "error") {
       duration = errorMessageDuration;
     } else if (!duration) {
-      duration = 3000;
+      duration = infoMessageDuration;
     }
     const body = document.createElement("div");
     body.innerHTML = messageHtml;

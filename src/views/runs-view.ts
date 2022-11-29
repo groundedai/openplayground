@@ -11,7 +11,7 @@ import { router } from "../main";
 import { View } from "./view";
 import { NewRunForm } from "../components/new-run-form";
 import { Modal } from "../components/modal";
-import { startRun, exportRun } from "../runs";
+import { startRun, exportRun, makeStartingRunMessage } from "../runs";
 import { errorMessageDuration } from "../globals";
 export class RunsView extends View {
   runsTable: DataTable | null = null;
@@ -189,9 +189,9 @@ export class RunsView extends View {
     if (!run) {
       return;
     }
-    this.showSnackbar({
-      messageHtml: `Starting <strong>${run.name}</strong>`,
-    });
+    const onStart = () => {
+      this.showSnackbar({ messageHtml: makeStartingRunMessage(run) });
+    };
     const onUpdate = () => {
       this.renderRunsTable();
     };
@@ -209,7 +209,7 @@ export class RunsView extends View {
       });
       this.renderRunsTable();
     };
-    startRun({ run, onUpdate, onError, onComplete });
+    startRun({ run, onStart, onUpdate, onError, onComplete });
   }
 
   viewRun(id: string) {

@@ -8,7 +8,7 @@ import { DataTable } from "../components/datatable";
 import { View } from "./view";
 import { updateRun } from "../db/runs";
 import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
-import { startRun, exportRun } from "../runs";
+import { startRun, exportRun, makeStartingRunMessage } from "../runs";
 import { errorMessageDuration } from "../globals";
 
 export class RunView extends View {
@@ -31,6 +31,9 @@ export class RunView extends View {
   formatResultsSettingsPanelContainer: HTMLDivElement = document.querySelector(
     "#format-results-settings-panel"
   ) as HTMLDivElement;
+  statusBox: HTMLSpanElement = document.querySelector(
+    "#status"
+  ) as HTMLSpanElement;
   formatResultsSettingsPanel: FormatResultsSettingsPanel;
 
   constructor({
@@ -43,12 +46,7 @@ export class RunView extends View {
     if (!run) {
       throw new Error("run is undefined");
     }
-    const runStatus = run.getStatus();
-    const props = {
-      runName: run.name,
-      status: runStatus.status,
-      statusTitle: titleCase(runStatus.status),
-    };
+    const props = { runName: run.name };
     super({ container, html: runViewHtml, props, css: runViewCss });
     this.run = run;
     this.formatResultsSettingsPanel = new FormatResultsSettingsPanel(
@@ -63,8 +61,15 @@ export class RunView extends View {
       injectStartText: this.run.injectStartText,
       stripEndText: this.run.stripEndText,
     });
+    this.updateStatus();
     this.renderRecordsTable();
     this.addListeners();
+  }
+
+  updateStatus() {
+    const runStatus = this.run.getStatus();
+    this.statusBox.innerText = titleCase(runStatus.status);
+    this.statusBox.dataset.value = runStatus.status;
   }
 
   renderRecordsTable() {
@@ -98,20 +103,19 @@ export class RunView extends View {
         result: resultHtml,
       };
     });
-    const datatable = new DataTable(
-      this.recordsTableContainer!,
-      rows,
+    const datatable = new DataTable({
+      container: this.recordsTableContainer,
       columns,
-      "No records found"
-    );
+      rows,
+      emptyMessage: "No records",
+    });
     datatable.render();
   }
 
   startRun() {
-    this.showSnackbar({
-      messageHtml: `Starting <strong>${this.run.name}</strong>`,
-    });
+    this.showSnackbar({ messageHtml: makeStartingRunMessage(this.run) });
     const onUpdate = () => {
+      this.updateStatus();
       this.renderRecordsTable();
     };
     const onError = (err: Error) => {

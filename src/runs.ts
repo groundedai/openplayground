@@ -7,13 +7,19 @@ import { updateRun } from "./db/runs";
 import { providerToClass } from "./providers";
 import { renderTemplate } from "./util/string";
 
+export function makeStartingRunMessage(run: Run): string {
+  return `Starting <strong>${run.name}</strong>. Do not leave this page until the run is complete or it will be cancelled.`;
+}
+
 export function startRun({
   run,
+  onStart,
   onUpdate,
   onError,
   onComplete,
 }: {
   run: Run;
+  onStart?: () => void;
   onUpdate?: (run: Run) => void;
   onError?: (err: any) => void;
   onComplete?: (run: Run) => void;
@@ -34,6 +40,7 @@ export function startRun({
       return;
     }
   }
+  onStart && onStart();
   run.resetResults();
   update(run);
   const dataset = getDatasets().find((dataset) => dataset.id === run.datasetId);
@@ -89,7 +96,7 @@ export function exportRun({ run }: { run: Run }) {
     result.text = `${record.text}${result.text}`;
     result.text = result.text.replace(/\\n/g, "\n");
     result.text = result.text.trimEnd();
-    return result;
+    return result.text;
   });
   const blob = new Blob([text.join("\n\n---\n\n")], {
     type: "text/plain;charset=utf-8",
