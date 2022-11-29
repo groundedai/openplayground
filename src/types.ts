@@ -238,6 +238,7 @@ export interface settingsSchema {
   [key: string]: {
     key: string;
     label: string;
+    link?: string;
     type: string;
     min?: number;
     max?: number;

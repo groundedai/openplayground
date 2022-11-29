@@ -5,6 +5,7 @@ export const openaiGenerationSettingsSchema: settingsSchema = {
     key: "apiKey",
     type: "password",
     label: "API Key",
+    link: "https://beta.openai.com/account/api-keys",
     default: "",
   },
   model: {

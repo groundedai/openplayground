@@ -5,6 +5,7 @@ export const cohereGenerationSettingsSchema: settingsSchema = {
     key: "apiKey",
     type: "password",
     label: "API Key",
+    link: "https://dashboard.cohere.ai/api-keys",
     default: "",
   },
   model: {

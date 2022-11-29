@@ -63,7 +63,8 @@ export class SettingsPanel extends Component {
             name="${key}"
             id="${key}"
             value="${defaultVal}"
-          /><button class="show-password outline">Show</button>
+          />
+          <i class="fa-regular fa-eye" id="${key}TogglePassword" style="margin-left: -30px; cursor: pointer; background: white"></i>
         `;
       } else if (type === "checkbox") {
         defaultVal = defaultVal || false;
@@ -104,9 +105,10 @@ export class SettingsPanel extends Component {
       } else {
         throw new Error(`Unknown type ${type}`);
       }
+      const link = item.link? ` <a href="${item.link}" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a>` : "";
       html += `
         <div class="setting">
-          <label for="${key}">${label}</label>
+          <label for="${key}">${label}${link}</label>
           <br />
           ${inputHtml}
         </div>
@@ -198,11 +200,11 @@ export class SettingsPanel extends Component {
         showPasswordButton.addEventListener("click", () => {
           if (input.type === "password") {
             input.type = "text";
-            showPasswordButton.innerText = "Hide";
           } else {
             input.type = "password";
-            showPasswordButton.innerText = "Show";
           }
+          showPasswordButton.classList.toggle('fa-eye');
+          showPasswordButton.classList.toggle('fa-eye-slash');
         });
       }
     }
