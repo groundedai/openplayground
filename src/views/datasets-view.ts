@@ -1,6 +1,7 @@
 import datasetsViewCss from "./datasets-view.css?raw";
 import { Dataset } from "../types";
 import { getDatasets, deleteDataset } from "../db/datasets";
+import { getRuns, deleteRun } from "../db/runs";
 import datasetViewHtml from "./datasets-view.html?raw";
 import { DataTable } from "../components/datatable";
 import { router } from "../main";
@@ -85,11 +86,22 @@ export class DatasetsView extends View {
         const id = (e.target as HTMLButtonElement).dataset.id;
         const dataset = getDatasets().find((d) => d.id === id);
         if (id) {
-          const confirm = window.confirm(
-            `Are you sure you want to delete dataset ${dataset?.name}?`
-          );
+          const runs = getRuns().filter((r) => r.datasetId === id);
+          console.log(runs);
+          let confirmMessage = `Are you sure you want to delete dataset ${dataset?.name}?`;
+          if (runs.length > 0) {
+            confirmMessage += ` This will also delete ${runs.length} runs associated with this dataset.`;
+          }
+          const confirm = window.confirm(confirmMessage);
           if (confirm) {
+            runs.forEach((r) => {
+              deleteRun(r);
+            });
             deleteDataset(dataset);
+            this.showSnackbar({
+              messageHtml: `Dataset <strong>${dataset?.name}</strong> deleted`,
+              type: "success",
+            });
             this.render();
           }
         }
