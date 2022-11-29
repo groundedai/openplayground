@@ -83,19 +83,19 @@ export class RunsView extends View {
     const columns = [
       { key: "select", name: "Select" },
       { key: "name", name: "Name" },
-      { key: "status", name: "Status" },
+      { key: "status", name: "Status", classes: ["text-center"] },
       { key: "dataset", name: "Dataset" },
       { key: "template", name: "Template" },
       { key: "settings", name: "Settings" },
       { key: "actions", name: "Actions" },
       { key: "createdAt", name: "Created At" },
     ];
-    this.runsTable = new DataTable(
-      this.runsTableContainer!,
-      rows,
+    this.runsTable = new DataTable({
+      container: this.runsTableContainer,
       columns,
-      "No runs"
-    );
+      rows,
+      emptyMessage: "No runs",
+    });
     this.runsTable.render();
     this.addRunsTableListeners();
   }

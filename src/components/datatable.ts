@@ -26,6 +26,7 @@ export class DataTable extends Component {
   pageSizeOptions = [10, 25, 50];
   showPageSelector: boolean = true;
   showPageSizeSelector: boolean = false;
+  showPrevNextButtons: boolean = true;
   body: HTMLDivElement = this.container.querySelector(
     "#datatable-body"
   ) as HTMLDivElement;
@@ -52,12 +53,12 @@ export class DataTable extends Component {
     this.container.querySelectorAll(".page-size-selector-container");
   pageSizeSelectors: NodeListOf<HTMLSelectElement> =
     this.container.querySelectorAll(".page-size-selector");
-  prevPageButton: HTMLButtonElement = this.container.querySelector(
-    "#prev-page-btn"
-  ) as HTMLButtonElement;
-  nextPageButton: HTMLButtonElement = this.container.querySelector(
-    "#next-page-btn"
-  ) as HTMLButtonElement;
+  prevNextButtonContainers: NodeListOf<HTMLElement> =
+    this.container.querySelectorAll(".prev-next-container");
+  prevPageButtons: NodeListOf<HTMLButtonElement> =
+    this.container.querySelectorAll(".prev-page-btn");
+  nextPageButtons: NodeListOf<HTMLButtonElement> =
+    this.container.querySelectorAll(".next-page-btn");
 
   constructor({
     container,
@@ -72,6 +73,7 @@ export class DataTable extends Component {
     showFooter,
     showPageSelector,
     showPageSizeSelector,
+    showPrevNextButtons,
   }: {
     container: HTMLElement;
     rows: Array<any>;
@@ -85,6 +87,7 @@ export class DataTable extends Component {
     showFooter?: boolean;
     showPageSelector?: boolean;
     showPageSizeSelector?: boolean;
+    showPrevNextButtons?: boolean;
   }) {
     super({ container, html: datatableHtml, css: datatableCss });
     this.columns = columns;
@@ -102,6 +105,7 @@ export class DataTable extends Component {
     this.showPageSelector = showPageSelector || this.showPageSelector;
     this.showPageSizeSelector =
       showPageSizeSelector || this.showPageSizeSelector;
+    this.showPrevNextButtons = showPrevNextButtons || this.showPrevNextButtons;
     this.initListeners();
   }
 
@@ -141,13 +145,17 @@ export class DataTable extends Component {
       this.page = 1;
       this.render();
     });
-    this.prevPageButton.addEventListener("click", () => {
-      this.page = Math.max(1, this.page - 1);
-      this.render();
+    this.prevPageButtons.forEach((b) => {
+      b.addEventListener("click", () => {
+        this.page = Math.max(this.page - 1, 1);
+        this.render();
+      });
     });
-    this.nextPageButton.addEventListener("click", () => {
-      this.page = Math.min(this.page + 1, this.getPageCount());
-      this.render();
+    this.nextPageButtons.forEach((b) => {
+      b.addEventListener("click", () => {
+        this.page = Math.min(this.page + 1, this.getPageCount());
+        this.render();
+      });
     });
   }
 
@@ -195,8 +203,9 @@ export class DataTable extends Component {
     this.addListeners();
   }
 
-  renderActions() {
-    if (this.showPageSelector && this.getPageCount() > 1) {
+  renderPageNavigation() {
+    const pageCount = this.getPageCount();
+    if (this.showPageSelector && pageCount > 1) {
       this.pageSelectorContainers.forEach((c) => {
         c.classList.remove("hidden");
       });
@@ -217,7 +226,7 @@ export class DataTable extends Component {
         c.classList.add("hidden");
       });
     }
-    if (this.showPageSizeSelector && this.getPageCount() > 1) {
+    if (this.showPageSizeSelector && pageCount > 1) {
       this.pageSizeSelectorContainers.forEach((c) => {
         c.classList.remove("hidden");
       });
@@ -238,6 +247,19 @@ export class DataTable extends Component {
         c.classList.add("hidden");
       });
     }
+    if (this.showPrevNextButtons && pageCount > 1) {
+      this.prevNextButtonContainers.forEach((c) => {
+        c.classList.remove("hidden");
+      });
+    } else {
+      this.prevNextButtonContainers.forEach((c) => {
+        c.classList.add("hidden");
+      });
+    }
+  }
+
+  renderActions() {
+    this.renderPageNavigation();
     if (!this.actions.includes("search")) {
       this.searchInput.classList.add("hidden");
     } else {
