@@ -1,13 +1,17 @@
 import { Component } from "./component";
-import "./settings-panel.css";
+import settingsPanelCss from "./settings-panel.css?raw";
+import settingsPanelHtml from "./settings-panel.html?raw";
 import { settingsSchema } from "../types";
 
 export class SettingsPanel extends Component {
   schema: settingsSchema;
+  innerContainer: HTMLElement = this.container.querySelector(
+    ".inner-container"
+  ) as HTMLElement;
   settings: any;
 
-  constructor(container: HTMLDivElement, schema: settingsSchema) {
-    super({ container });
+  constructor(container: HTMLElement, schema: settingsSchema) {
+    super({ container, html: settingsPanelHtml, css: settingsPanelCss });
     this.schema = schema;
     this.settings = {};
   }
@@ -105,7 +109,9 @@ export class SettingsPanel extends Component {
       } else {
         throw new Error(`Unknown type ${type}`);
       }
-      const link = item.link? ` <a href="${item.link}" target="_blank"><i class="fa-solid fa-up-right-from-square"></i></a>` : "";
+      const link = item.link
+        ? ` <a href="${item.link}" target="_blank" class="label-link"><i class="fa-solid fa-up-right-from-square"></i></a>`
+        : "";
       html += `
         <div class="setting">
           <label for="${key}">${label}${link}</label>
@@ -114,7 +120,7 @@ export class SettingsPanel extends Component {
         </div>
       `;
     }
-    this.container.innerHTML = html;
+    this.innerContainer.innerHTML = html;
     this.addListeners();
   }
 
@@ -203,8 +209,8 @@ export class SettingsPanel extends Component {
           } else {
             input.type = "password";
           }
-          showPasswordButton.classList.toggle('fa-eye');
-          showPasswordButton.classList.toggle('fa-eye-slash');
+          showPasswordButton.classList.toggle("fa-eye");
+          showPasswordButton.classList.toggle("fa-eye-slash");
         });
       }
     }

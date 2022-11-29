@@ -16,14 +16,21 @@ export class Modal {
     title,
   }: {
     container?: HTMLElement;
-    body: HTMLElement;
+    body?: HTMLElement | string;
     title?: string;
   }) {
     this.container = container || document.createElement("div");
-    if (!(body instanceof HTMLElement)) {
-      throw new Error(`Modal body must be of type HTMLElement, got ${body}`);
+    if (body) {
+      if (typeof body === "string") {
+        const div = document.createElement("div");
+        div.innerHTML = body;
+        this.body = div;
+      } else {
+        this.body = body;
+      }
+    } else {
+      this.body = document.createElement("div");
     }
-    this.body = body;
     this.title = title || "";
   }
 

@@ -43,7 +43,7 @@ export class DataTable extends Component {
     "#row-count-value"
   ) as HTMLSpanElement;
   searchInput: HTMLInputElement = this.container.querySelector(
-    "#search-input"
+    ".search-input"
   ) as HTMLInputElement;
   pageSelectorContainers: NodeListOf<HTMLElement> =
     this.container.querySelectorAll(".page-selector-container");

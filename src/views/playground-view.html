@@ -48,15 +48,34 @@
       <!-- <button id="save-record-button">Save as Record</button> -->
     </div>
     <div id="settings-panel">
-      <h5>Settings</h5>
+      <div class="row center" id="settings-panel-header-row">
+        <div class="col">
+          <h5>Settings</h5>
+        </div>
+        <div class="col right" id="settings-panel-actions">
+          <div class="row">
+            <button
+              id="save-settings-button"
+              class="outline"
+              title="Save settings"
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+            <button
+              id="load-settings-button"
+              class="outline"
+              title="Open saved settings"
+            >
+              <i class="fa-solid fa-folder-open"></i>
+            </button>
+          </div>
+        </div>
+      </div>
       <div>
         <label for="language-model-provider-select">Provider</label>
         <select id="language-model-provider-select"></select>
       </div>
       <div id="settings-container"></div>
-      <button id="save-settings-button">Save Settings</button>
-      <h5>Saved settings</h5>
-      <div id="saved-settings-container"></div>
     </div>
   </div>
   <div id="templates">

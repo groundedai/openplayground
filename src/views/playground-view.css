@@ -25,6 +25,23 @@
   overflow-y: scroll;
 }
 
+#settings-panel-header-row {
+  margin-bottom: 0.5em;
+}
+
+#settings-panel > * h5 {
+  margin: 0;
+}
+
+#settings-panel-actions > * button {
+  padding: 0.7em 1em;
+  margin: 0 0.5em;
+}
+
+#settings-panel > * input {
+  max-width: 90%;
+}
+
 #actions-panel {
   grid-area: actions;
 }
@@ -45,15 +62,6 @@
   background-color: #eee;
   padding: 0.2em 0.5em;
   border-radius: 3px;
-}
-
-#settings-panel > h5 {
-  margin-top: 0;
-  margin-bottom: 0.5em;
-}
-
-#settings-panel > * input {
-  max-width: 90%;
 }
 
 textarea#playground-textarea {
@@ -111,6 +119,7 @@ textarea#playground-textarea:focus::-webkit-input-placeholder {
 #saved-settings-container > * td[data-column="actions"] {
   width: 1px;
   white-space: nowrap;
+  padding: 0 1em;
 }
 
 #saved-settings-container > * td[data-column="actions"] > button {

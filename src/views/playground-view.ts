@@ -53,15 +53,17 @@ export class PlaygroundView extends View {
   saveSettingsButton: HTMLButtonElement = document.querySelector(
     "#save-settings-button"
   ) as HTMLButtonElement;
+  loadSettingsButton: HTMLButtonElement = document.querySelector(
+    "#load-settings-button"
+  ) as HTMLButtonElement;
   templateContainer: HTMLDivElement = document.querySelector(
     "#templates-container"
   ) as HTMLDivElement;
   settingsContainer: HTMLDivElement = document.querySelector(
     "#settings-container"
   ) as HTMLDivElement;
-  savedSettingsContainer: HTMLDivElement = document.querySelector(
-    "#saved-settings-container"
-  ) as HTMLDivElement;
+  savedSettingsContainer: HTMLDivElement = document.createElement("div");
+  savedSettingsModal: Modal;
   insertRecordButton: HTMLButtonElement = document.querySelector(
     "#insert-record-button"
   ) as HTMLButtonElement;
@@ -82,6 +84,11 @@ export class PlaygroundView extends View {
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: playgroundViewHtml, css: playgroundCss });
+    this.savedSettingsContainer.id = "saved-settings-container";
+    this.savedSettingsModal = new Modal({
+      title: "Saved Settings",
+      body: this.savedSettingsContainer,
+    });
     this.initListeners();
   }
 
@@ -144,11 +151,11 @@ export class PlaygroundView extends View {
     this.languageModelProviderSelect!.value = this.languageModelProvider;
     const settingsSchema = providerToSettingsSchema[this.languageModelProvider];
     this.settingsPanel = new SettingsPanel(
-      this.settingsContainer!,
+      this.settingsContainer,
       settingsSchema
     );
-    this.settingsPanel?.render();
-    this.settingsPanel?.setSettings(settings.settings);
+    this.settingsPanel.render();
+    this.settingsPanel.setSettings(settings.settings);
   }
 
   setPlaygroundContent(content: string) {
@@ -287,10 +294,12 @@ export class PlaygroundView extends View {
       {
         name: "Name",
         key: "name",
+        classes: ["text-center"],
       },
       {
         name: "Actions",
         key: "actions",
+        classes: ["text-center"],
       },
     ];
     const dataTable = new DataTable({
@@ -308,10 +317,14 @@ export class PlaygroundView extends View {
         const settings = getLanguageModelSettings().find(
           (lms) => lms.name === id
         );
-        console.log(settings);
         if (settings) {
           this.renderSettings(settings);
         }
+        this.savedSettingsModal.hide();
+        this.settingsPanel?.container.dispatchEvent(
+          new Event("settings-change")
+        );
+        this.languageModelProviderSelect?.dispatchEvent(new Event("change"));
       });
     });
     const deleteSettingsButtons = this.savedSettingsContainer.querySelectorAll(
@@ -478,6 +491,10 @@ export class PlaygroundView extends View {
         },
       });
     });
+    this.loadSettingsButton.addEventListener("click", () => {
+      this.savedSettingsModal.render();
+      this.savedSettingsModal.show();
+    });
     this.autoSuggestSwitch.addEventListener("click", () => {
       const value = this.autoSuggestSwitch.checked || false;
       this.autoSuggest = value;
@@ -573,7 +590,7 @@ export class PlaygroundView extends View {
       }
     });
     this.languageModelProviderSelect.addEventListener("change", (e) => {
-      const provider = (e.target as HTMLSelectElement).value;
+      const provider = this.languageModelProviderSelect.value;
       this.languageModelProvider = provider;
       localStorage.setItem("playgroundLanguageModelProvider", provider);
       this.render();
