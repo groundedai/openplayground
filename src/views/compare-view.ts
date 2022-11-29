@@ -1,7 +1,13 @@
 import { View } from "./view";
 import compareViewHtml from "./compare-view.html?raw";
 import compareViewCss from "./compare-view.css?raw";
-import { Run, Record, PromptTemplate, LanguageModelSettings, Result } from "../types";
+import {
+  Run,
+  Record,
+  PromptTemplate,
+  LanguageModelSettings,
+  Result,
+} from "../types";
 import { getDatasets } from "../db/datasets";
 import { getRecords } from "../db/records";
 import { getPromptTemplates } from "../db/prompt-templates";
@@ -118,7 +124,11 @@ export class CompareView extends View {
         key: "valueB",
       },
     ];
-    const table = new DataTable(this.settingsContainer, rows, columns);
+    const table = new DataTable({
+      container: this.settingsContainer,
+      rows,
+      columns,
+    });
     table.render();
   }
 
@@ -162,7 +172,11 @@ export class CompareView extends View {
         name: this.runB.name,
       },
     ];
-    const table = new DataTable(this.resultsContainer, rows, columns);
+    const table = new DataTable({
+      container: this.resultsContainer,
+      rows,
+      columns,
+    });
     table.render();
   }
 

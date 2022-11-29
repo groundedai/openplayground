@@ -589,7 +589,7 @@ export class PlaygroundView extends View {
         localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
       }
     });
-    this.languageModelProviderSelect.addEventListener("change", (e) => {
+    this.languageModelProviderSelect.addEventListener("change", () => {
       const provider = this.languageModelProviderSelect.value;
       this.languageModelProvider = provider;
       localStorage.setItem("playgroundLanguageModelProvider", provider);
