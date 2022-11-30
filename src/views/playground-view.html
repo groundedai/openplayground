@@ -1,4 +1,4 @@
-<div id="playground-view">
+<div id="playground-view" class="view">
   <h4>Playground</h4>
   <div id="editor-grid">
     <div id="editor-panel">
@@ -48,12 +48,16 @@
       <!-- <button id="save-record-button">Save as Record</button> -->
     </div>
     <div id="settings-panel">
-      <div class="row center" id="settings-panel-header-row">
-        <div class="col">
+      <div
+        class="row center"
+        id="settings-panel-header-row"
+        style="justify-content: space-between"
+      >   
+        <div>
           <h5>Settings</h5>
         </div>
-        <div class="col" id="settings-panel-actions">
-          <div class="row" style="justify-content: flex-start;">
+        <div id="settings-panel-actions">
+          <div class="row" style="justify-content: flex-start">
             <button
               id="save-settings-button"
               class="outline"

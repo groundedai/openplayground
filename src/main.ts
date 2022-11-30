@@ -6,6 +6,7 @@ import { DatasetView } from "./views/dataset-view";
 import { RunsView } from "./views/runs-view";
 import { RunView } from "./views/run-view";
 import { CompareView } from "./views/compare-view";
+import { IntroView } from "./views/intro-view";
 import { getRecords } from "./db/records";
 import { getDatasets } from "./db/datasets";
 import { getRuns } from "./db/runs";
@@ -54,6 +55,10 @@ const routes = [
     const runB = getRuns().find((j) => j.id === runIdB);
     const compareView = new CompareView({ container, runA, runB });
     compareView.render();
+  }),
+  new Route("/intro/?$", () => {
+    const introView = new IntroView({ container });
+    introView.render();
   }),
   new Route("/?$", () => {
     const playgroundView = new PlaygroundView({ container });
