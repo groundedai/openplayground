@@ -1,15 +1,31 @@
 import { test } from "@playwright/test";
 
-const port = process.env.PORT;
-const rootUrl = `http://localhost:${port}`;
+// @ts-ignore
+import { createTemplate, saveSettings } from "./features.ts";
 
-test("Suggest with no API key shows error", async ({ page }) => {
-  await page.goto(`${rootUrl}/playground`);
+test("Suggest with and w/o API key", async ({ page }) => {
+  await page.goto(`/#/playground`);
+  await page.getByRole('combobox', { name: 'Provider' }).selectOption('cohere');
   await page.locator("#playground-textarea").click();
   await page.locator("#playground-textarea").fill("Hello");
-  await page.getByRole("button", { name: "Suggest" }).click();
-  await page
-    .getByRole("status")
-    .getByText('Cohere Error: "no api key supplied"')
-    .click();
+  await test.step("Suggest without API key", async () => {
+    await page.getByRole("button", { name: "Suggest" }).click();
+    await page
+      .getByRole("status")
+      .getByText('Cohere Error: "no api key supplied"')
+      .click();
+  });
+  await test.step("Suggest with API key", async () => {
+    await page.getByLabel('API Key').fill(process.env.COHERE_API_KEY as string);
+    await page.getByLabel('Temperature').fill('0');
+    await page.getByRole("button", { name: "Suggest" }).click();
+  });
+});
+
+test("Can create a template", async ({ page }) => {
+  await createTemplate({ page });
+});
+
+test("Can save settings", async ({ page }) => {
+  await saveSettings({ page });
 });

@@ -144,6 +144,7 @@ export class PlaygroundView extends View {
     });
     this.examplesTable.render();
     this.updateListeners();
+    this.savedSettingsModal.render();
   }
 
   setupSettingsPanel() {
@@ -519,7 +520,6 @@ export class PlaygroundView extends View {
       });
     });
     this.loadSettingsButton.addEventListener("click", () => {
-      this.savedSettingsModal.render();
       this.savedSettingsModal.show();
     });
     this.autoSuggestSwitch.addEventListener("click", () => {
