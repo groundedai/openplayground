@@ -39,7 +39,7 @@ export class DatasetsView extends View {
 
   render() {
     const datasets = getDatasets().map((d: Dataset) => ({
-      id: d.id,
+      id: d.id!,
       name: d.name,
       actions: `<button class="outline" data-id="${d.id}" data-action="view">View</button> <button class="outline danger" data-id="${d.id}" data-action="delete">Delete</button>`,
     }));

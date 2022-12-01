@@ -153,7 +153,7 @@ export class CompareView extends View {
         result: resultB,
       });
       return {
-        id: record.id,
+        id: record.id!,
         resultA: resultAHtml,
         resultB: resultBHtml,
       };

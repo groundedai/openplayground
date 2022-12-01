@@ -49,7 +49,7 @@ export class DatasetView extends View {
     const rows = this.records.map((r) => {
       // Replace newlines or breaks in the text with a space
       const text = r.text.replace(/(\r\n|\n|\r)/gm, " ");
-      return { id: r.id, text };
+      return { id: r.id!, text };
     });
     const dataTable = new DataTable({
       container: this.recordsTableContainer,

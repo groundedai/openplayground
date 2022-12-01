@@ -67,7 +67,7 @@ export class RunsView extends View {
         statusMessage = runStatus.status;
       }
       return {
-        id: run.id,
+        id: run.id!,
         name: run.name,
         status: titleCase(statusMessage),
         dataset: dataset?.name || "Not found",
