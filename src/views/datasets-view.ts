@@ -38,6 +38,7 @@ export class DatasetsView extends View {
   }
 
   render() {
+    this.newDatasetModal.render();
     const datasets = getDatasets().map((d: Dataset) => ({
       id: d.id!,
       name: d.name,
@@ -111,7 +112,6 @@ export class DatasetsView extends View {
 
   initListeners() {
     this.createDatasetButton.addEventListener("click", () => {
-      this.newDatasetModal.render();
       this.newDatasetModal.show();
     });
   }

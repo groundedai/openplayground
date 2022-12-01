@@ -1,7 +1,35 @@
 stages:
   - test
+  - build
   - deploy
   - chatops
+
+# workflow:
+#   rules:
+#     - if: $CI_MERGE_REQUEST_IID
+#     - if: $CI_COMMIT_TAG
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+
+ui-test:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.28.1-focal
+  variables:
+    COHERE_API_KEY: $COHERE_API_KEY
+  script:
+   - npm install
+   - npx playwright test --grep-invert '@slow'
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - test-results/
+      - results.xml
+    reports:
+      junit: results.xml
+  rules:
+      - when: manual
+
 
 pages:
   stage: deploy
