@@ -18,7 +18,7 @@ ui-test:
     COHERE_API_KEY: $COHERE_API_KEY
   script:
    - npm install
-   - npx playwright test
+   - npx playwright test --grep-invert '@slow'
   artifacts:
     when: always
     paths:
