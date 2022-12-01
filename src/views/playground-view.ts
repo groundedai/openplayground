@@ -16,6 +16,7 @@ import {
 import { getDatasets } from "../db/datasets";
 import { getRecords } from "../db/records";
 import { DataTable } from "../components/datatable";
+import { ExamplesTable, Example } from "../components/examples-table";
 import { SettingsPanel } from "../components/settings-panel";
 import { Modal } from "../components/modal";
 import { View } from "./view";
@@ -81,6 +82,10 @@ export class PlaygroundView extends View {
   ) as HTMLSpanElement;
   languageModelProvider: string | null = null;
   settingsPanel: SettingsPanel | null = null;
+  examplesTableContainer: HTMLDivElement = document.querySelector(
+    "#examples-table-container"
+  ) as HTMLDivElement;
+  examplesTable: ExamplesTable | null = null;
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: playgroundViewHtml, css: playgroundCss });
@@ -122,6 +127,22 @@ export class PlaygroundView extends View {
     }
     this.renderTemplates();
     this.renderSavedSettings();
+    this.examplesTable = new ExamplesTable({
+      container: this.examplesTableContainer,
+      onLoad: (example: Example) => {
+        const provider = example.provider;
+        // Set the provider, which will also load settings such as apiKey from local storage
+        this.languageModelProviderSelect.value = provider;
+        this.languageModelProviderSelect.dispatchEvent(new Event("change"));
+        // Then set new settings
+        Object.keys(example.settings).forEach((key) => {
+          console.log(key);
+          this.settingsPanel?.setSetting(key, example.settings[key]);
+        });
+        this.setPlaygroundContent(example.prompt);
+      },
+    });
+    this.examplesTable.render();
     this.updateListeners();
   }
 
@@ -219,6 +240,12 @@ export class PlaygroundView extends View {
 
   saveToLocalStorage() {
     localStorage.setItem("playgroundTextareaContent", this.getPlaygroundText());
+    const settings = this.settingsPanel?.getSettings();
+    const settingsStorageKey =
+      providerToStorageKey[this.languageModelProvider!];
+    if (settings && settingsStorageKey) {
+      localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+    }
   }
 
   getFromLocalStorage() {
@@ -581,12 +608,7 @@ export class PlaygroundView extends View {
   updateListeners() {
     this.settingsPanel?.on("settings-change", (e: any) => {
       console.log("Settings change", e.detail);
-      const settings = this.settingsPanel?.getSettings();
-      const settingsStorageKey =
-        providerToStorageKey[this.languageModelProvider!];
-      if (settings && settingsStorageKey) {
-        localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
-      }
+      this.saveToLocalStorage();
     });
     this.languageModelProviderSelect.addEventListener("change", () => {
       const provider = this.languageModelProviderSelect.value;

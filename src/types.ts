@@ -4,9 +4,9 @@ import { getPromptTemplates } from "./db/prompt-templates";
 export type ID = string | number | null;
 
 export class DBItem {
-  id: ID;
+  id: ID
 
-  constructor({ id = null }: { id?: ID }) {
+  constructor({ id }: { id?: ID }) {
     this.id = id ? id.toString() : null;
   }
 }

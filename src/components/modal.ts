@@ -40,7 +40,6 @@ export class Modal extends Component {
 
   render() {
     document.body.appendChild(this.container); // Move container to top level
-    console.log(this.container);
     this.hide();
     this.titleElement.innerText = this.title;
     this.bodyContainer.innerHTML = "";

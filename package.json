@@ -19,6 +19,7 @@
     "vite": "^3.2.3"
   },
   "dependencies": {
-    "showdown": "^2.1.0"
+    "showdown": "^2.1.0",
+    "yaml": "^2.1.3"
   }
 }

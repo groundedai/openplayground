@@ -175,6 +175,19 @@ export class SettingsPanel extends Component {
     }
   }
 
+  setSetting(key: string, value: any) {
+    const input = this.container.querySelector(`#${key}`) as HTMLInputElement;
+    if (!input) {
+      throw new Error(
+        `No input with id ${key}. Available inputs: ${Object.keys(
+          this.schema
+        ).join(", ")}`
+      );
+    } else {
+      input.value = value;
+    }
+  }
+
   addListeners() {
     for (let key in this.schema) {
       const item = this.schema[key];

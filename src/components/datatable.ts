@@ -2,14 +2,19 @@ import { Component } from "./component";
 import datatableHtml from "./datatable.html?raw";
 import datatableCss from "./datatable.css?raw";
 
-type Column = {
+export type Column = {
   name: string;
   key: string;
   searchable?: boolean;
   classes?: string[];
 };
 
-type Action = "search";
+export type Row = {
+  id: string | number;
+  [key: string]: any;
+};
+
+export type Action = "search";
 
 export class DataTable extends Component {
   columns: Array<Column>;
@@ -82,7 +87,7 @@ export class DataTable extends Component {
     showPrevNextButtons,
   }: {
     container: HTMLElement;
-    rows: Array<any>;
+    rows: Array<Row>;
     columns: Array<Column>;
     emptyMessage?: string;
     page?: number;
@@ -97,10 +102,8 @@ export class DataTable extends Component {
   }) {
     super({ container, html: datatableHtml, css: datatableCss });
     this.columns = columns;
-    ``;
     this.searchableColumns = columns.filter((c) => c.searchable);
-    this.rows = rows.map((r) => new TableRow(r.id, r, this.columns));
-    this.filteredRows = this.rows;
+    this.updateRows(rows);
     this.emptyMessage = emptyMessage || this.emptyMessage;
     this.page = page || this.page;
     this.rowsPerPage = rowsPerPage || this.rowsPerPage;
@@ -113,6 +116,11 @@ export class DataTable extends Component {
       showPageSizeSelector || this.showPageSizeSelector;
     this.showPrevNextButtons = showPrevNextButtons || this.showPrevNextButtons;
     this.initListeners();
+  }
+
+  updateRows(rows: Array<Row>) {
+    this.rows = rows.map((r) => new TableRow(r.id, r, this.columns));
+    this.filteredRows = this.rows;
   }
 
   getPageCount() {
@@ -135,13 +143,15 @@ export class DataTable extends Component {
     });
     this.searchInput.addEventListener("input", () => {
       const search = this.searchInput.value;
-      const searchLower = search.toLowerCase();
       this.filteredRows = this.rows.filter((r) => {
         for (const key in r.data) {
           if (this.searchableColumns.find((c: Column) => c.key === key)) {
             const val = r.data[key];
-            const valLower = val.toString().toLowerCase();
-            if (valLower.includes(searchLower)) {
+            const regex = new RegExp(
+              nonTagRegex.replace("{{val}}", search),
+              "gi"
+            );
+            if (regex.test(val)) {
               return true;
             }
           }
@@ -167,7 +177,6 @@ export class DataTable extends Component {
 
   render() {
     this.header.innerHTML = this.title;
-    console.log(this.header);
     this.body.innerHTML = "";
     if (this.filteredRows.length === 0) {
       this.body.innerHTML = `<div class="empty-message">${this.emptyMessage}</div>`;
@@ -311,15 +320,17 @@ export class DataTable extends Component {
   }
 }
 
+const nonTagRegex = "(?![^<]*>){{val}}";
+
 export class TableRow {
-  id: string;
+  id: string | number;
   data: any;
   columns: Array<Column>;
   tr: HTMLTableRowElement = document.createElement("tr");
   highlightStrings: Array<string> = [];
 
   constructor(
-    id: string,
+    id: string | number,
     data: any,
     columns: Array<Column>,
     highlightStrings?: Array<string>
@@ -333,30 +344,35 @@ export class TableRow {
   render() {
     this.tr.innerHTML = "";
     this.tr.dataset.id = this.id.toString();
+    this.highlightStrings = this.highlightStrings.filter((s) => s.length > 0);
     this.columns.forEach((c: Column) => {
       const td = document.createElement("td");
       const val = this.data[c.key];
-      if (c.searchable && this.highlightStrings.length > 0) {
-        const valLower = val.toString().toLowerCase();
-        let valHtml = val.toString();
-        this.highlightStrings.forEach((s) => {
-          const sLower = s.toLowerCase();
-          if (valLower.includes(sLower)) {
-            valHtml = valHtml.replace(
-              new RegExp(s, "gi"),
-              `<span class="highlight">${s}</span>`
-            );
-          }
-        });
-        td.innerHTML = valHtml;
-      } else {
-        td.innerHTML = val;
+      td.innerHTML = val;
+      if (c.searchable) {
+        if (this.highlightStrings.length > 0) {
+          this.highlight(td);
+        }
       }
       const classes = c.classes || [];
       classes.forEach((c) => td.classList.add(c));
       td.dataset.column = c.key;
       td.dataset.value = this.data[c.key];
       this.tr.appendChild(td);
+    });
+  }
+
+  highlight(td: HTMLTableCellElement) {
+    this.highlightStrings.forEach((s) => {
+      const regex = new RegExp(nonTagRegex.replace("{{val}}", s), "gi");
+      const matches = td.innerHTML.match(regex);
+      if (matches) {
+        matches.forEach((m) => {
+          const replacement = `<span class="highlight">${m}</span>`;
+          const regex = new RegExp(nonTagRegex.replace("{{val}}", m), "gi");
+          td.innerHTML = td.innerHTML.replace(regex, replacement);
+        });
+      }
     });
   }
 

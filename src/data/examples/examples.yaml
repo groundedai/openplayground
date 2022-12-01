@@ -1,0 +1,40 @@
+# This file is used to generate the examples table
+
+- name: "Keywords Cohere"
+  tags: ["Information extraction", "Keywords"]
+  prompt: "### Vitamin D, Cognition and Alzheimer’s Disease: The Therapeutic Benefit is in the D-Tails\n\nSince its discovery during the epidemic of rickets in the early 1920s, the physiological effects of vitamin D on calcium/phosphorus homeostasis have been thoroughly studied. Along with the understanding of its actions on skeletal diseases and advances in cellular and molecular biology, this misnamed vitamin has gained attention as a potential player in a growing number of physiological processes and a variety of diseases. During the last 25 years, vitamin D has emerged as a serious candidate in nervous system development and function and a therapeutic tool in a number of neurological pathologies. More recently, experimental and pre-clinical data suggest a link between vitamin D status and cognitive function. Human studies strongly support a correlation between low levels of circulating 25-hydroxyvitamin D (25(OH)D) and cognitive impairment or dementia in aging populations. In parallel, animal studies show that supplementation with vitamin D is protective against biological processes associated with Alzheimer’s disease (AD) and enhances learning and memory performance in various animal models of aging and AD. These experimental observations support multiple mechanisms by which vitamin D can act against neurodegenerative processes. However, clinical interventional studies are disappointing and fail to associate increased 25(OH)D levels with improved cognitive outcomes. This review collects the current available data from both animal and human studies and discusses the considerations that future studies examining the effects of vitamin D status on neurocognitive function might consider.\n\nKeywords:\n-"
+  provider: "cohere"
+  settings:
+    model: "xlarge-20221108"
+    maxTokens: 30
+    temperature: 0.1
+    topP: 1
+    frequencyPenalty: 0
+    presencePenalty: 0
+    stop: ["\\n\\n"]
+
+- name: "Keywords Ada"
+  tags: ["Information extraction", "Keywords"]
+  prompt: "### Vitamin D, Cognition and Alzheimer’s Disease: The Therapeutic Benefit is in the D-Tails\n\nSince its discovery during the epidemic of rickets in the early 1920s, the physiological effects of vitamin D on calcium/phosphorus homeostasis have been thoroughly studied. Along with the understanding of its actions on skeletal diseases and advances in cellular and molecular biology, this misnamed vitamin has gained attention as a potential player in a growing number of physiological processes and a variety of diseases. During the last 25 years, vitamin D has emerged as a serious candidate in nervous system development and function and a therapeutic tool in a number of neurological pathologies. More recently, experimental and pre-clinical data suggest a link between vitamin D status and cognitive function. Human studies strongly support a correlation between low levels of circulating 25-hydroxyvitamin D (25(OH)D) and cognitive impairment or dementia in aging populations. In parallel, animal studies show that supplementation with vitamin D is protective against biological processes associated with Alzheimer’s disease (AD) and enhances learning and memory performance in various animal models of aging and AD. These experimental observations support multiple mechanisms by which vitamin D can act against neurodegenerative processes. However, clinical interventional studies are disappointing and fail to associate increased 25(OH)D levels with improved cognitive outcomes. This review collects the current available data from both animal and human studies and discusses the considerations that future studies examining the effects of vitamin D status on neurocognitive function might consider.\n\nKeywords:\n-"
+  provider: "openai"
+  settings:
+    model: "text-ada-001"
+    maxTokens: 30
+    temperature: 0.1
+    topP: 1
+    frequencyPenalty: 0
+    presencePenalty: 0
+    stop: ["\\n\\n"]
+
+- name: "Data breach table"
+  tags: ["Information extraction", "Table"]
+  prompt: "Extract a table of data breaches from the following excerpt:\n\n\"\"\"\nDate: March 2020.\n\nImpact: 10.88 billion records.\n\nAdult video streaming website CAM4 has had its Elasticsearch server breached exposing over 10 billion records.\n\nThe breached records included the following sensitive information:\n\nFull names\nEmail addresses\nSexual orientation\nChat transcripts\nEmail correspondence transcripts\nPassword hashes\nIP addresses\nPayment logs\n\nMany of the exposed email addresses are linked to cloud storage services. If hackers were to launch successful phishing attacks on these users, they could gain deeper access to personal photos and business information.\n\nDue to the licentious connection of the breached database, compromised users could fall victim to blackmail and defamation attempts for many years to come.\n\"\"\"\n\n| Company | Date | Impact |\n| CAM4 | March 2020 | 10.88 billion records |\n\n---\n\nExtract a table of data breaches from the following excerpt:\n\n\"\"\"\nYahoo disclosed that a breach in August 2013 by a group of hackers had compromised 1 billion accounts. In this instance, security questions and answers were also compromised, increasing the risk of identity theft. The breach was first reported by Yahoo while in negotiations to sell itself to Verizon, on December 14, 2016. Yahoo forced all affected users to change passwords and to reenter any unencrypted security questions and answers to re-encrypt them.\n\nHowever, by October of 2017, Yahoo changed the estimate to 3 billion user accounts. An investigation revealed that users' passwords in clear text, payment card data and bank information were not stolen. Nonetheless, this remains one of the largest data breaches of this type in history.\n\"\"\"\n\n| Company | Date | Impact |\n|"
+  provider: "cohere"
+  settings:
+    model: "command-xlarge-20221108"
+    maxTokens: 50
+    temperature: 0.1
+    topP: 1
+    frequencyPenalty: 0
+    presencePenalty: 0
+    stop: ["---"]

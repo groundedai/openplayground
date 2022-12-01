@@ -373,13 +373,7 @@ td > * button {
 
 td {
   padding: 0.5em;
-}
-
-td {
-  font-family: var(--font-family-2);
-}
-
-td {
+  /* font-family: var(--font-family-2); */
   border-top: 1px solid #cccccc;
 }
 
@@ -405,6 +399,15 @@ span.completion {
 span.failed {
   border-radius: 2px;
   font-weight: bold;
+}
+
+span.tag {
+  border-radius: 10px;
+  background-color: var(--color-teal-2);
+  color: #fff;
+  padding: 0.5em 0.5em;
+  font-size: 0.8em;
+  vertical-align: middle;
 }
 
 /* Tooltip container */
