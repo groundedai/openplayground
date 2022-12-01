@@ -1,6 +1,6 @@
 ## What is OpenPlayground?
 
-OpenPlayground is a web application that allows you to experiment with large language models, compare different language models from different providers, and run them on your data.
+OpenPlayground is a web application that allows you to experiment with large language models, compare different language models from different providers, and run them on your data. The goal is to make it easier for people to start benefiting from language models in their work.
 
 ## Why use OpenPlayground?
 
@@ -16,7 +16,7 @@ OpenPlayground has a few different parts:
 
 - **[Playground](#/playground)** - The first part is a playground where you can try out different language models and settings. This includes a library of examples that you can use to get started.<br/><br/>
 - **[Datasets](#/datasets)** - The second part is the ability to upload your own data. This can be used in the playground as you experiment with different models and settings, and later to run models on an entire dataset.<br/><br/>
-- **[Runs](#/runs)** - The third part is the ability to run a model across a whole dataset. You can use the playground to find the best model and settings for your task, save them as a preset, then run them on your data. You can then download the results and use them in your own processes.<br/><br/>
+- **[Runs](#/runs)** - The third part is the ability to run a model across a whole dataset. You can use the playground to find the best model and settings for your task, save them as a preset, then run them on your data. You can then download the results and use them in your own processes.
 
 ## How to use
 

@@ -322,25 +322,6 @@ ul {
   list-style-type: disc;
 }
 
-img#nav-logo {
-  max-width: 32px;
-  margin-right: 0.5em;
-  /* max-width: 80px; */
-}
-
-.nav-logo {
-  margin-right: 1.5em;
-}
-
-a.nav-item.icon {
-  color: #202020;
-  font-size: 1.5em;
-}
-
-a.nav-item.icon:hover {
-  color: var(--color-secondary);
-}
-
 button {
   cursor: pointer;
 }

@@ -1,4 +1,5 @@
 import { Route, Router } from "./util/router";
+import { Navbar } from "./components/navbar";
 import { RecordView } from "./views/record-view";
 import { PlaygroundView } from "./views/playground-view";
 import { DatasetsView } from "./views/datasets-view";
@@ -67,6 +68,9 @@ const routes = [
 ];
 export const router = new Router(window, routes);
 router.navigateTo(window.location.hash || "#/");
+
+const navContainer = document.getElementById("nav") as HTMLDivElement;
+new Navbar({ container: navContainer });
 
 // const rightNav = document.querySelector("#right-nav") as HTMLDivElement;
 // const rightNavContent = document.querySelector(
