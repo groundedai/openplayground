@@ -2,8 +2,7 @@ import { Component } from "./component";
 import newDatasetFormHtml from "./new-dataset-form.html?raw";
 import newDatasetFormCss from "./new-dataset-form.css?raw";
 import { Dataset, Record } from "../types";
-import { createDataset } from "../db/datasets";
-import { createRecord } from "../db/records";
+import { db } from "../main";
 import { parse } from 'csv-parse/sync';
 
 const datasetFileMaxSizeKb = 500;
@@ -79,10 +78,10 @@ export class NewDatasetForm extends Component {
             });
             return;
           } else {
-            createDataset(dataset);
+            db.createDataset(dataset);
             records.forEach((record) => {
               record.datasetId = dataset.id;
-              createRecord(record);
+              db.createRecord(record);
             });
             this.onSubmit(dataset);
           }

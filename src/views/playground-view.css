@@ -1,8 +1,8 @@
-#examples-panel {
+#presets-panel {
   border: 1px solid #ccc;
   border-radius: 3px;
   display: inline-flex;
-  padding: 1em;
+  padding: 0.5em;
 }
 
 #editor-grid {
@@ -61,6 +61,10 @@
 
 #actions-panel {
   grid-area: actions;
+}
+
+#actions-panel > button {
+  padding: 0.8em 1.4em;
 }
 
 #editor-info-panel {
@@ -122,6 +126,13 @@ textarea#playground-textarea:focus::-webkit-input-placeholder {
 #save-template-button:enabled > .tooltip {
   border-bottom: 0;
 }
+
+/* #save-preset-button {
+  font-size: 1.1em;
+  padding: 0.5em 1em;
+  vertical-align: middle;
+  margin-left: 0.5em;
+} */
 
 #saved-settings-container > * td {
   padding: 0;

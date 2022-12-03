@@ -210,7 +210,7 @@ export class SettingsPanel extends Component {
         });
       }
       input.addEventListener("input", () => {
-        const event = new CustomEvent("settings-change", {
+        const event = new CustomEvent("change", {
           detail: {
             key,
             value: this.getSettings()[item.key],

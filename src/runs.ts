@@ -1,9 +1,5 @@
-import { getDatasets } from "./db/datasets";
-import { getLanguageModelSettings } from "./db/language-model-settings";
-import { getPromptTemplates } from "./db/prompt-templates";
-import { getRecords } from "./db/records";
-import { Run, ResultStatus } from "./types";
-import { updateRun } from "./db/runs";
+import { db } from "./main";
+import { Run, ResultStatus, Preset, Dataset, Record } from "./types";
 import { providerToClass } from "./providers";
 import { renderTemplate } from "./util/string";
 
@@ -25,7 +21,7 @@ export function startRun({
   onComplete?: (run: Run) => void;
 }) {
   const update = (run: Run) => {
-    updateRun(run);
+    db.updateRun(run);
     if (onUpdate) {
       onUpdate(run);
     }
@@ -43,37 +39,42 @@ export function startRun({
   onStart && onStart();
   run.resetResults();
   update(run);
-  const dataset = getDatasets().find((dataset) => dataset.id === run.datasetId);
-  const records = getRecords().filter(
-    (record) => record.datasetId === run.datasetId
-  );
-  const template = getPromptTemplates().find(
-    (template) => template.id === run.templateId
-  );
-  const settings = getLanguageModelSettings().find(
-    (settings) => settings.id === run.languageModelSettingsId
-  );
-  if (!dataset || !template || !settings) {
+  const dataset = db
+    .getDatasets()
+    .find((dataset: Dataset) => dataset.id === run.datasetId);
+  const records = db
+    .getRecords()
+    .filter((record: Record) => record.datasetId === run.datasetId);
+  const preset = db
+    .getPresets()
+    .find((preset: Preset) => preset.id === run.presetId);
+  if (!dataset || !preset) {
     return;
   }
-  const langModelClass = providerToClass[settings.provider];
-  const langModel = new langModelClass(settings.settings);
-  const promises = records.map((record) => {
-    const prompt = renderTemplate(template.template, { text: record.text });
+  const prompt = preset.getPrompt();
+  if (!prompt.hasPlaceholder()) {
+    const err = new Error("Prompt does not have a placeholder");
+    onError && onError(err);
+  }
+  const settings = preset.getLanguageModelSettings();
+  const modelClass = providerToClass[settings.provider];
+  const langModel = new modelClass(settings.apiSettings);
+  const promises = records.map((record: Record) => {
+    const promptText = renderTemplate(prompt.text, { text: record.text });
     return langModel
-      .getSuggestions(prompt)
+      .getSuggestions(promptText)
       .then((res: { data: any; text: string }) => {
         const text = res.text;
         const result = { text, status: ResultStatus.completed };
-        run.results[record.id] = result;
+        run.results[record.id!] = result;
         update(run);
       })
       .catch((err: any) => {
-        run.results[record.id] = {
+        run.results[record.id!] = {
           text: err.message,
           status: ResultStatus.failed,
         };
-        updateRun(run);
+        db.updateRun(run);
         onError && onError(err);
       });
   });
@@ -83,16 +84,18 @@ export function startRun({
 }
 
 export function exportRun({ run }: { run: Run }) {
-  const dataset = getDatasets().find((dataset) => dataset.id === run.datasetId);
-  const records = getRecords().filter(
-    (record) => record.datasetId === run.datasetId
-  );
+  const dataset = db
+    .getDatasets()
+    .find((dataset: Dataset) => dataset.id === run.datasetId);
+  const records = db
+    .getRecords()
+    .filter((record: Record) => record.datasetId === run.datasetId);
   if (!dataset || !records) {
     return;
   }
-  const resultsFormatted = run.getFormattedResults();
-  const text = records.map((record) => {
-    let result = resultsFormatted[record.id];
+  const resultsFormatted = run.formatResults();
+  const text = records.map((record: Record) => {
+    let result = resultsFormatted[record.id!];
     result.text = `${record.text}${result.text}`;
     result.text = result.text.replace(/\\n/g, "\n");
     result.text = result.text.trimEnd();

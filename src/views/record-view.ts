@@ -1,7 +1,7 @@
 import { Record } from "../types";
 import recordViewHtml from "./record-view.html?raw";
 import { autosizeTextarea } from "../util/dom";
-import { getRecords, updateRecord } from "../db/records";
+import { db } from "../main";
 import { router } from "../main";
 import { mdToHtml } from "../util/markdown";
 import { View } from "./view";
@@ -75,18 +75,18 @@ export class RecordView extends View {
       const prompt = this.recordTextArea?.value;
       if (prompt) {
         this.record.text = prompt;
-        updateRecord(this.record);
+        db.updateRecord(this.record);
         console.log("saved record", this.record);
       }
     });
     this.nextButton?.addEventListener("click", (e: Event) => {
       e.preventDefault();
-      let records = getRecords().filter(
-        (r) => r.datasetId === this.record.datasetId
+      let records = db.getRecords().filter(
+        (r: Record) => r.datasetId === this.record.datasetId
       );
       let foundCurrentRecord = false;
       let nextRecord: Record;
-      records.forEach((record) => {
+      records.forEach((record: Record) => {
         if (record.id === this.record.id) {
           foundCurrentRecord = true;
         } else if (foundCurrentRecord) {
@@ -105,7 +105,7 @@ export class RecordView extends View {
       e.preventDefault();
       let prevRecord: Record;
       let foundCurrentRecord = false;
-      getRecords().forEach((record: Record) => {
+      db.getRecords().forEach((record: Record) => {
         if (!foundCurrentRecord) {
           if (record.id === this.record.id) {
             foundCurrentRecord = true;

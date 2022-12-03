@@ -365,14 +365,24 @@ export class TableRow {
   highlight(td: HTMLTableCellElement) {
     this.highlightStrings.forEach((s) => {
       const regex = new RegExp(nonTagRegex.replace("{{val}}", s), "gi");
-      const matches = td.innerHTML.match(regex);
-      if (matches) {
-        matches.forEach((m) => {
-          const replacement = `<span class="highlight">${m}</span>`;
-          const regex = new RegExp(nonTagRegex.replace("{{val}}", m), "gi");
-          td.innerHTML = td.innerHTML.replace(regex, replacement);
-        });
+      // Get match positions
+      const matches = [];
+      let match;
+      while ((match = regex.exec(td.innerHTML))) {
+        matches.push(match.index);
       }
+      // Replace matches with highlighted text
+      let offset = 0;
+      matches.forEach((m) => {
+        const start = m + offset;
+        const end = start + s.length;
+        const highlighted = `<span class="highlight">${s}</span>`;
+        td.innerHTML =
+          td.innerHTML.substring(0, start) +
+          highlighted +
+          td.innerHTML.substring(end);
+        offset += highlighted.length - s.length;
+      });
     });
   }
 

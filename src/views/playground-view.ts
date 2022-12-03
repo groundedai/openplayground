@@ -2,21 +2,16 @@ import playgroundCss from "./playground-view.css?raw";
 import playgroundViewHtml from "./playground-view.html?raw";
 import { htmlToMd } from "../util/markdown";
 import { newlinesToBreaks } from "../util/string";
-import { PromptTemplate, LanguageModelSettings } from "../types";
 import {
-  createPromptTemplate,
-  getPromptTemplates,
-  deletePromptTemplate,
-} from "../db/prompt-templates";
-import {
-  createLanguageModelSettings,
-  getLanguageModelSettings,
-  deleteLanguageModelSettings,
-} from "../db/language-model-settings";
-import { getDatasets } from "../db/datasets";
-import { getRecords } from "../db/records";
+  Prompt,
+  LanguageModelSettings,
+  Preset,
+  Dataset,
+  Record,
+} from "../types";
+import { db } from "../main";
 import { DataTable } from "../components/datatable";
-import { ExamplesTable, Example } from "../components/examples-table";
+import { PresetsTable } from "../components/presets-table";
 import { SettingsPanel } from "../components/settings-panel";
 import { Modal } from "../components/modal";
 import { View } from "./view";
@@ -27,7 +22,10 @@ import {
   providerToClass,
   defaultProvider,
 } from "../providers";
-import { errorMessageDuration } from "../globals";
+import presetFormHtml from "../components/preset-form.html?raw";
+import previewTemplateHtml from "../components/preview-template.html?raw";
+import { errorMessageDuration, textPlaceholderRegex } from "../globals";
+import { renderTemplate } from "../util/string";
 
 export class PlaygroundView extends View {
   useContentEditable: boolean = false;
@@ -50,6 +48,13 @@ export class PlaygroundView extends View {
   ) as HTMLButtonElement;
   saveTemplateButton: HTMLButtonElement = document.querySelector(
     "#save-template-button"
+  ) as HTMLButtonElement;
+  savePresetButton: HTMLButtonElement = document.querySelector(
+    "#save-preset-button"
+  ) as HTMLButtonElement;
+  presetModal: Modal;
+  previewTemplateButton: HTMLButtonElement = document.querySelector(
+    "#preview-template-button"
   ) as HTMLButtonElement;
   saveSettingsButton: HTMLButtonElement = document.querySelector(
     "#save-settings-button"
@@ -82,10 +87,10 @@ export class PlaygroundView extends View {
   ) as HTMLSpanElement;
   languageModelProvider: string | null = null;
   settingsPanel: SettingsPanel | null = null;
-  examplesTableContainer: HTMLDivElement = document.querySelector(
-    "#examples-table-container"
+  presetsTableContainer: HTMLDivElement = document.querySelector(
+    "#presets-table-container"
   ) as HTMLDivElement;
-  examplesTable: ExamplesTable | null = null;
+  presetsTable: PresetsTable | null = null;
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: playgroundViewHtml, css: playgroundCss });
@@ -93,6 +98,9 @@ export class PlaygroundView extends View {
     this.savedSettingsModal = new Modal({
       title: "Saved Settings",
       body: this.savedSettingsContainer,
+    });
+    this.presetModal = new Modal({
+      title: "Save Preset",
     });
     this.initListeners();
   }
@@ -117,7 +125,7 @@ export class PlaygroundView extends View {
     if (settings) {
       const lms = new LanguageModelSettings({
         provider: this.languageModelProvider!,
-        settings: JSON.parse(settings),
+        apiSettings: JSON.parse(settings),
       });
       this.renderSettings(lms);
     }
@@ -125,26 +133,42 @@ export class PlaygroundView extends View {
     if (textareaContent) {
       this.setPlaygroundContent(textareaContent);
     }
-    this.renderTemplates();
-    this.renderSavedSettings();
-    this.examplesTable = new ExamplesTable({
-      container: this.examplesTableContainer,
-      onLoad: (example: Example) => {
-        const provider = example.provider;
-        // Set the provider, which will also load settings such as apiKey from local storage
+    // this.renderTemplates();
+    // this.renderSavedSettings();
+    this.renderPresetsTable();
+    this.updateListeners();
+  }
+
+  renderPresetsTable() {
+    const presets = db.getPresets();
+    this.presetsTable = new PresetsTable({
+      presets,
+      container: this.presetsTableContainer,
+      onLoad: (preset: Preset) => {
+        const prompt = preset.getPrompt();
+        this.setPlaygroundContent(prompt.text);
+        const settings = preset.getLanguageModelSettings();
+        const provider = settings.provider;
+        // Set the provider, which will also load apiKey from local storage
         this.languageModelProviderSelect.value = provider;
         this.languageModelProviderSelect.dispatchEvent(new Event("change"));
-        // Then set new settings
-        Object.keys(example.settings).forEach((key) => {
-          console.log(key);
-          this.settingsPanel?.setSetting(key, example.settings[key]);
+        const apiSettings = { ...settings.apiSettings };
+        delete apiSettings.apiKey;
+        const settingsSchema = providerToSettingsSchema[provider];
+        Object.keys(apiSettings).forEach((key) => {
+          Object.keys(settingsSchema).forEach((settingName) => {
+            const schemaKey = settingsSchema[settingName].key;
+            if (schemaKey === key) {
+              const value = apiSettings[key];
+              this.settingsPanel!.setSetting(settingName, value);
+            }
+          });
         });
-        this.setPlaygroundContent(example.prompt);
+        // Dispatch change event to update the settings
+        this.settingsPanel!.container.dispatchEvent(new Event("change"));
       },
     });
-    this.examplesTable.render();
-    this.updateListeners();
-    this.savedSettingsModal.render();
+    this.presetsTable.render();
   }
 
   setupSettingsPanel() {
@@ -177,7 +201,7 @@ export class PlaygroundView extends View {
       settingsSchema
     );
     this.settingsPanel.render();
-    this.settingsPanel.setSettings(settings.settings);
+    this.settingsPanel.setSettings(settings.apiSettings);
   }
 
   setPlaygroundContent(content: string) {
@@ -253,130 +277,6 @@ export class PlaygroundView extends View {
     return localStorage.getItem("playgroundTextareaContent") || "";
   }
 
-  renderTemplates() {
-    const rows = getPromptTemplates().map((pt) => {
-      let template = pt.template.replace(/(\r\n|\n|\r)/gm, " ");
-      // if (template.length > 100) {
-      //   template = template.substring(0, 200) + "...";
-      // }
-      // template = mdToHtml(template);
-      const row = {
-        id: pt.name,
-        name: pt.name,
-        template,
-        actions: `<button data-id="${pt.name}" data-action="load" class="outline">Load</button> <button data-id="${pt.name}" data-action="delete" class="outline danger">Delete</button>`,
-      };
-      return row;
-    });
-    const columns = [
-      {
-        name: "Name",
-        key: "name",
-        classes: ["text-center"],
-      },
-      {
-        name: "Text",
-        key: "template",
-      },
-      {
-        name: "Actions",
-        key: "actions",
-        classes: ["fitwidth"],
-      },
-    ];
-    const dataTable = new DataTable({
-      container: this.templateContainer,
-      columns,
-      rows,
-      emptyMessage: "No templates",
-      title: "Templates",
-    });
-    dataTable.render();
-    this.templateContainer.querySelectorAll("button").forEach((button) => {
-      button.addEventListener("click", () => {
-        const id = button.dataset.id;
-        const action = button.dataset.action;
-        const pt = getPromptTemplates().find((pt) => pt.name === id);
-        if (action === "delete") {
-          const confirm = window.confirm(
-            `Are you sure you want to delete the template "${pt?.name}"?`
-          );
-          if (confirm) {
-            deletePromptTemplate(pt);
-            this.renderTemplates();
-          }
-        } else if (action === "load") {
-          this.setPlaygroundContent(pt.template);
-        }
-      });
-    });
-  }
-
-  renderSavedSettings() {
-    const rows = getLanguageModelSettings().map((lms) => ({
-      id: lms.name,
-      name: lms.name,
-      actions: `<button data-action="load" data-id="${lms.name}" class="outline">Load</button> <button data-action="delete" data-id="${lms.name}" class="outline danger">Delete</button>`,
-    }));
-    const columns = [
-      {
-        name: "Name",
-        key: "name",
-        classes: ["text-center"],
-      },
-      {
-        name: "Actions",
-        key: "actions",
-        classes: ["text-center"],
-      },
-    ];
-    const dataTable = new DataTable({
-      container: this.savedSettingsContainer,
-      columns,
-      rows,
-      emptyMessage: "No saved settings",
-    });
-    dataTable.render();
-    const loadSettingsButtons =
-      this.savedSettingsContainer.querySelectorAll("[data-action=load]");
-    loadSettingsButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const id = (e.target as HTMLButtonElement).dataset.id;
-        const settings = getLanguageModelSettings().find(
-          (lms) => lms.name === id
-        );
-        if (settings) {
-          this.renderSettings(settings);
-        }
-        this.savedSettingsModal.hide();
-        this.settingsPanel?.container.dispatchEvent(
-          new Event("settings-change")
-        );
-        this.languageModelProviderSelect?.dispatchEvent(new Event("change"));
-      });
-    });
-    const deleteSettingsButtons = this.savedSettingsContainer.querySelectorAll(
-      "[data-action=delete]"
-    );
-    deleteSettingsButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
-        const confirm = window.confirm(
-          "Are you sure you want to delete this settings?"
-        );
-        if (confirm) {
-          const id = (e.target as HTMLButtonElement).dataset.id;
-          const settings = getLanguageModelSettings().find(
-            (lms) => lms.name === id
-          );
-          if (settings) {
-            deleteLanguageModelSettings(settings);
-            this.renderSavedSettings();
-          }
-        }
-      });
-    });
-  }
-
   getSuggestions() {
     this.setLoading(true);
     const settings = this.getLanguageModelSettings();
@@ -388,10 +288,10 @@ export class PlaygroundView extends View {
       this.showSnackbar({ messageHtml: "Please enter some text" });
       return;
     } else if (settings) {
-      const langModelClass = providerToClass[settings.provider];
-      const langModel = new langModelClass(settings.settings);
-      if (langModel) {
-        langModel
+      const modelClass = providerToClass[settings.provider];
+      const model = new modelClass(settings.apiSettings);
+      if (model) {
+        model
           .getSuggestions(text)
           .then((res: { data: any; text: string }) => {
             console.log("Response", res);
@@ -424,9 +324,8 @@ export class PlaygroundView extends View {
     if (settings) {
       const languageModelSettings = new LanguageModelSettings({
         provider: this.languageModelProvider!,
-        settings,
+        apiSettings: settings,
       });
-      console.log("Language model settings", languageModelSettings);
       return languageModelSettings;
     } else {
       throw new Error("No settings");
@@ -448,12 +347,14 @@ export class PlaygroundView extends View {
           console.log("Auto suggest");
           this.getSuggestions();
         }
-        const templateRegex = /{{\s*text\s*}}/g;
-        const templateMatch = this.getPlaygroundText().match(templateRegex);
-        if (templateMatch) {
+        const placeholderMatch =
+          this.getPlaygroundText().match(textPlaceholderRegex);
+        if (placeholderMatch) {
           this.saveTemplateButton?.removeAttribute("disabled");
+          this.previewTemplateButton?.removeAttribute("disabled");
         } else {
           this.saveTemplateButton?.setAttribute("disabled", "");
+          this.previewTemplateButton?.setAttribute("disabled", "");
         }
       });
     }
@@ -472,28 +373,39 @@ export class PlaygroundView extends View {
     this.suggestButton.addEventListener("click", () => {
       this.getSuggestions();
     });
-    this.saveTemplateButton.addEventListener("click", () => {
-      console.log("Save template");
-      const template = this.getPlaygroundText();
-      if (template) {
-        this.promptUserInput({
-          title: "Name for template:",
-          onConfirm: (name) => {
-            if (name) {
-              const promptTemplate = new PromptTemplate({
-                id: name,
-                name,
-                template,
-              });
-              console.log("Prompt template", promptTemplate);
-              createPromptTemplate(promptTemplate);
-              this.render();
-            }
-          },
+    this.savePresetButton?.addEventListener("click", () => {
+      const body = document.createElement("div");
+      body.innerHTML = presetFormHtml;
+      const presetForm = body.querySelector("form") as HTMLFormElement;
+      presetForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(presetForm);
+        const name = formData.get("name") as string;
+        const tags = formData.get("tags") as string;
+        let tagList = tags.split(",").map((t) => t.trim());
+        tagList = tagList.filter((t) => t.length > 0);
+        const prompt = new Prompt({
+          name: `${name} - prompt`,
+          text: this.getPlaygroundText(),
         });
-      }
+        db.createPrompt(prompt);
+        const settings = this.getLanguageModelSettings();
+        db.createLanguageModelSettings(settings);
+        const preset = new Preset({
+          name,
+          promptId: prompt.id,
+          languageModelSettingsId: settings.id,
+          tags: tagList,
+        });
+        db.createPreset(preset);
+        this.render();
+        this.presetModal.hide();
+      });
+      this.presetModal.body = body;
+      this.presetModal.render();
+      this.presetModal.show();
     });
-    this.insertPlaceholderButton.addEventListener("click", () => {
+    this.insertPlaceholderButton?.addEventListener("click", () => {
       const position = this.getPlaygroundCursorPosition();
       const text = this.getPlaygroundText();
       const textBefore = text.substring(0, position);
@@ -502,36 +414,126 @@ export class PlaygroundView extends View {
       this.setPlaygroundContent(newText);
       this.setPlaygroundCursorPosition(position + 7);
     });
-    this.saveSettingsButton.addEventListener("click", () => {
-      console.log("Save settings");
-      const lms = this.getLanguageModelSettings();
-      this.promptUserInput({
-        title: "Name for settings:",
-        onConfirm: (name) => {
-          if (name && lms) {
-            console.log("Saving settings", name, lms);
-            lms.id = name;
-            lms.name = name;
-            createLanguageModelSettings(lms);
-            console.log("Language model settings", lms);
-            this.render();
-          }
-        },
-      });
+    this.previewTemplateButton?.addEventListener("click", () => {
+      const placeholderMatch =
+        this.getPlaygroundText().match(textPlaceholderRegex);
+      if (placeholderMatch) {
+        if (placeholderMatch.length > 1) {
+          this.showSnackbar({
+            messageHtml: "Multiple placeholders found. Please only use one.",
+            type: "error",
+          });
+        } else {
+          // Open preview modal
+          const body = document.createElement("div");
+          body.innerHTML = previewTemplateHtml;
+          const previewModal = new Modal({
+            title: "Preview with Record",
+            body,
+          });
+          previewModal.render();
+          previewModal.show();
+          const datasetSelect = body.querySelector(
+            "#dataset-select"
+          ) as HTMLSelectElement;
+          const previewArea = body.querySelector(
+            "#preview-area"
+          ) as HTMLTextAreaElement;
+          // Make preview area larger
+          previewArea.style.height = "300px";
+          previewArea.style.width = "90%";
+          // Set initial content to template
+          previewArea.value = this.getPlaygroundText();
+          // Load dataset select options
+          const datasets = db.getDatasets();
+          datasets.forEach((dataset: Dataset) => {
+            const option = document.createElement("option");
+            option.value = dataset.id! as string;
+            option.textContent = dataset.name;
+            datasetSelect.appendChild(option);
+          });
+          const recordSelect = body.querySelector(
+            "#record-select"
+          ) as HTMLSelectElement;
+          recordSelect.addEventListener("change", () => {
+            // Create preview and show in preview area
+            const datasetId = datasetSelect.value;
+            const recordId = recordSelect.value;
+            const dataset = db
+              .getDatasets()
+              .find((d: Dataset) => d.id === datasetId);
+            if (dataset) {
+              const record = dataset
+                .getRecords()
+                .find((r: Record) => r.id === recordId);
+              if (record) {
+                const template = this.getPlaygroundText();
+                const prompt = renderTemplate(template, { text: record.text });
+                previewArea.value = prompt;
+              }
+            }
+          });
+          datasetSelect.addEventListener("change", () => {
+            // Load record select options
+            const datasetId = datasetSelect.value;
+            const dataset = db
+              .getDatasets()
+              .find((d: Dataset) => d.id === datasetId);
+            if (dataset) {
+              recordSelect.innerHTML = "";
+              const records = dataset.getRecords();
+              records.forEach((record: Record) => {
+                const option = document.createElement("option");
+                option.value = record.id! as string;
+                option.textContent = record.id! as string;
+                recordSelect.appendChild(option);
+              });
+            }
+            // Dispatch change event to load preview
+            recordSelect.dispatchEvent(new Event("change"));
+          });
+          // const nextButton = body.querySelector(
+          //   "#next-button"
+          // ) as HTMLButtonElement;
+          // const previousButton = body.querySelector(
+          //   "#previous-button"
+          // ) as HTMLButtonElement;
+        }
+      }
     });
-    this.loadSettingsButton.addEventListener("click", () => {
-      this.savedSettingsModal.show();
-    });
+    // this.saveSettingsButton?.addEventListener("click", () => {
+    //   console.log("Save settings");
+    //   const lms = this.getLanguageModelSettings();
+    //   this.promptUserInput({
+    //     title: "Name for settings:",
+    //     onConfirm: (name) => {
+    //       if (name && lms) {
+    //         console.log("Saving settings", name, lms);
+    //         lms.id = name;
+    //         lms.name = name;
+    //         db.createLanguageModelSettings(lms);
+    //         console.log("Language model settings", lms);
+    //         this.render();
+    //       }
+    //     },
+    //   });
+    // });
+    // this.loadSettingsButton?.addEventListener("click", () => {
+    //   this.savedSettingsModal.render();
+    //   this.savedSettingsModal.show();
+    // });
     this.autoSuggestSwitch.addEventListener("click", () => {
       const value = this.autoSuggestSwitch.checked || false;
       this.autoSuggest = value;
     });
     this.insertRecordButton.addEventListener("click", () => {
-      const datasets = getDatasets();
-      const datasetOptions = datasets.map((d) => ({
-        value: d.id,
-        label: d.name,
-      }));
+      const datasets = db.getDatasets();
+      const datasetOptions: HTMLOptionElement[] = datasets.map(
+        (d: Dataset) => ({
+          value: d.id,
+          label: d.name,
+        })
+      );
       const datasetSelect = document.createElement("select");
       datasetSelect.id = "dataset-select";
       datasetSelect.innerHTML = datasetOptions
@@ -539,12 +541,12 @@ export class PlaygroundView extends View {
         .join("");
       const recordTableContainer = document.createElement("div");
       const renderRecordsTable = (datasetId: string) => {
-        const dataset = datasets.find((d) => d.id === datasetId);
+        const dataset = datasets.find((d: Dataset) => d.id === datasetId);
         if (dataset) {
-          const records = getRecords().filter(
-            (r) => r.datasetId === dataset.id
-          );
-          const rows = records.map((r) => ({
+          const records = db
+            .getRecords()
+            .filter((r: Record) => r.datasetId === dataset.id);
+          const rows = records.map((r: Record) => ({
             id: r.id,
             text: r.text,
           }));
@@ -559,7 +561,7 @@ export class PlaygroundView extends View {
             },
           ];
           const rowClicked = (row: any) => {
-            const record = records.find((r) => r.id === row.data.id);
+            const record = records.find((r: Record) => r.id === row.data.id);
             if (record) {
               this.appendPlaygroundContent(record.text);
             }
@@ -606,7 +608,7 @@ export class PlaygroundView extends View {
   }
 
   updateListeners() {
-    this.settingsPanel?.on("settings-change", (e: any) => {
+    this.settingsPanel?.on("change", (e: any) => {
       console.log("Settings change", e.detail);
       this.saveToLocalStorage();
     });

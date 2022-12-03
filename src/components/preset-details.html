@@ -1,0 +1,34 @@
+<div>
+  <style>
+    .prompt {
+      width: 90%;
+    }
+  </style>
+  <div class="name">
+    <strong>Name:</strong>
+    <span>{{name}}</span>
+  </div>
+  <div class="tags">
+    <strong>Tags:</strong>
+    <span class="tags-html">{{tagsHtml}}</span>
+    <!-- Edit button-->
+    <button class="edit-tags-button outline icon">
+      <i class="fa fa-pencil"></i>
+    </button>
+    <input class="tags-input hidden" type="text" value="{{tags}}" />
+    <button class="save-tags-button outline icon hidden">
+      <i class="fa fa-check"></i>
+    </button>
+  </div>
+  <div class="prompt">
+    <strong>Prompt:</strong>
+    <textarea class="prompt-text" disabled>{{prompt}}</textarea>
+  </div>
+  <div class="settings">
+    <strong>Settings:</strong>
+    <pre>{{settings}}</pre>
+  </div>
+  <!-- <div class="actions">
+    <button on-click="deletePreset">Delete</button>
+  </div> -->
+</div>

@@ -1,7 +1,6 @@
 import datasetsViewCss from "./datasets-view.css?raw";
-import { Dataset } from "../types";
-import { getDatasets, deleteDataset } from "../db/datasets";
-import { getRuns, deleteRun } from "../db/runs";
+import { Dataset, Run } from "../types";
+import { db } from "../main";
 import datasetViewHtml from "./datasets-view.html?raw";
 import { DataTable } from "../components/datatable";
 import { router } from "../main";
@@ -39,7 +38,7 @@ export class DatasetsView extends View {
 
   render() {
     this.newDatasetModal.render();
-    const datasets = getDatasets().map((d: Dataset) => ({
+    const datasets = db.getDatasets().map((d: Dataset) => ({
       id: d.id!,
       name: d.name,
       actions: `<button class="outline" data-id="${d.id}" data-action="view">View</button> <button class="outline danger" data-id="${d.id}" data-action="delete">Delete</button>`,
@@ -85,9 +84,9 @@ export class DatasetsView extends View {
     deleteButtons.forEach((b) => {
       b.addEventListener("click", (e) => {
         const id = (e.target as HTMLButtonElement).dataset.id;
-        const dataset = getDatasets().find((d) => d.id === id);
+        const dataset = db.getDatasets().find((d: Dataset) => d.id === id);
         if (id) {
-          const runs = getRuns().filter((r) => r.datasetId === id);
+          const runs = db.getRuns().filter((r: Run) => r.datasetId === id);
           console.log(runs);
           let confirmMessage = `Are you sure you want to delete dataset ${dataset?.name}?`;
           if (runs.length > 0) {
@@ -95,10 +94,10 @@ export class DatasetsView extends View {
           }
           const confirm = window.confirm(confirmMessage);
           if (confirm) {
-            runs.forEach((r) => {
-              deleteRun(r);
+            runs.forEach((r: Run) => {
+              db.deleteRun(r);
             });
-            deleteDataset(dataset);
+            db.deleteDataset(dataset);
             this.showSnackbar({
               messageHtml: `Dataset <strong>${dataset?.name}</strong> deleted`,
               type: "success",

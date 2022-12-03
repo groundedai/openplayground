@@ -1,10 +1,22 @@
 <div id="playground-view" class="view">
   <h4>Playground</h4>
-  <div id="examples-panel" class="mb-1">
-    <details>
-      <summary class="h6"><strong>Examples</strong></summary>
-      <div id="examples">
-        <div id="examples-table-container"></div>
+  <div id="presets-panel" class="mb-1">
+    <details open>
+      <summary class="h6"><strong>Presets</strong></summary>
+      <div id="presets">
+        <div class="row right">
+          <button
+            class="outline icon import-preset-button"
+            title="Import preset"
+          >
+            <i class="fa fa-upload"></i>
+          </button>
+          <label class="hide-examples-label">
+            <input type="checkbox" class="hide-example-presets-checkbox" />
+            Hide example presets
+          </label>
+        </div>
+        <div id="presets-table-container"></div>
       </div>
     </details>
   </div>
@@ -32,27 +44,37 @@
           ></div>
         </div>
       </button>
-      <button id="save-template-button" disabled>
+      <button id="save-preset-button" class="otline" title="Save Preset">
+        Save Preset
+        <i class="fa-regular fa-floppy-disk"></i>
+      </button>
+      <button id="insert-record-button">
         <div class="tooltip">
-          Save Template
-          <span class="tooltiptext">
-            You must insert a placeholder for
-            <strong>{{ text }}</strong> to save a template.<br /><br />
-            You can use the <strong>Insert Placeholder</strong> button to do
-            this.
-          </span>
+          Insert Record
+          <i class="fa-regular fa-file-lines"></i>
+          <span class="tooltiptext"> Insert text from a dataset record. </span>
         </div>
       </button>
       <button id="insert-placeholder-button">
         <div class="tooltip">
           Insert Placeholder
+          <i class="fa-solid fa-code"></i>
           <span class="tooltiptext">
-            Insert a placeholder for <strong>{{ text }}</strong> at the current
-            cursor position.
+            Insert a placeholder which shows where to put the text when applying
+            to different records.
           </span>
         </div>
       </button>
-      <button id="insert-record-button">Insert Record</button>
+      <button id="preview-template-button" disabled>
+        <div class="tooltip">
+          Preview Template
+          <i class="fa-solid fa-puzzle-piece"></i>
+          <span class="tooltiptext">
+            See resulting prompt when replacing placeholder with text from
+            different records.
+          </span>
+        </div>
+      </button>
       <!-- <button id="save-record-button">Save as Record</button> -->
     </div>
     <div id="settings-panel">
@@ -64,24 +86,7 @@
         <div>
           <h5>Settings</h5>
         </div>
-        <div id="settings-panel-actions">
-          <div class="row" style="justify-content: flex-start">
-            <button
-              id="save-settings-button"
-              class="outline"
-              title="Save settings"
-            >
-              <i class="fa-solid fa-floppy-disk"></i>
-            </button>
-            <button
-              id="load-settings-button"
-              class="outline"
-              title="Open saved settings"
-            >
-              <i class="fa-solid fa-folder-open"></i>
-            </button>
-          </div>
-        </div>
+>
       </div>
       <div>
         <label for="language-model-provider-select">Provider</label>
@@ -89,9 +94,6 @@
       </div>
       <div id="settings-container"></div>
     </div>
-  </div>
-  <div id="templates">
-    <div id="templates-container" class="mt-1"></div>
   </div>
   <div id="insert-record-modal"></div>
 </div>

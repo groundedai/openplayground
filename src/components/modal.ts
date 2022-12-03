@@ -36,10 +36,10 @@ export class Modal extends Component {
       this.body = document.createElement("div");
     }
     this.title = title || "";
+    document.body.appendChild(this.container); // Move container to top level
   }
 
   render() {
-    document.body.appendChild(this.container); // Move container to top level
     this.hide();
     this.titleElement.innerText = this.title;
     this.bodyContainer.innerHTML = "";

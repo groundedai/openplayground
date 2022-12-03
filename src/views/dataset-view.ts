@@ -1,9 +1,8 @@
 import datasetViewHtml from "./dataset-view.html?raw";
 import { DataTable } from "../components/datatable";
-import { getRecords } from "../db/records";
+import { db } from "../main";
 import { Dataset, Record } from "../types";
 import { router } from "../main";
-import { deleteDataset } from "../db/datasets";
 import { View } from "./view";
 
 export class DatasetView extends View {
@@ -38,7 +37,7 @@ export class DatasetView extends View {
   }
 
   render() {
-    this.records = getRecords().filter((r: Record) => {
+    this.records = db.getRecords().filter((r: Record) => {
       return r.datasetId === this.dataset.id;
     });
     this.recordsTableContainer.innerHTML = "";
@@ -74,7 +73,7 @@ export class DatasetView extends View {
         "Are you sure you want to delete this dataset?"
       );
       if (confirmed) {
-        deleteDataset(this.dataset);
+        db.deleteDataset(this.dataset);
         router.goTo("/projects");
       }
     });
