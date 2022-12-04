@@ -29,7 +29,17 @@
   border: 1px solid #ccc;
   border-radius: 3px;
   overflow: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
+}
+
+#settings-panel .tooltip .tooltiptext {
+  left: 0%;
+  bottom: 100%;
+  margin-left: -10px;
+}
+
+#settings-panel .tooltiptext::after {
+  left: 10%;
 }
 
 #settings-panel-header-row {

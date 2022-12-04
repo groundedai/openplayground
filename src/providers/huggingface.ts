@@ -32,6 +32,7 @@ export const hfGenerationSettingsSchema: settingsSchema = {
     default: "bloomz-7b1",
     key: "model",
     label: "Model",
+    link: "https://huggingface.co/bigscience/bloomz",
   },
   maxTokens: {
     type: "number",
@@ -79,6 +80,10 @@ export const hfGenerationSettingsSchema: settingsSchema = {
     default: false,
     key: "do_sample",
     label: "Do Sample",
+    tooltip: "Whether or not to use sampling; use greedy decoding otherwise. \
+    Use sampling if you want to generate a random sequence that looks more like natural language. \
+    Use greedy decoding if you want to generate a deterministic sequence that looks more like a computer program. \
+    Sampling here means picking the next token among the top tokens with probabilities that follow the softmax distribution.",
   },
   // returnSequences: {
   //   type: "number",

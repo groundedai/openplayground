@@ -2,6 +2,7 @@ import { Component } from "./component";
 import settingsPanelCss from "./settings-panel.css?raw";
 import settingsPanelHtml from "./settings-panel.html?raw";
 import { settingsSchema } from "../types";
+import { tooltips } from "../providers/common";
 
 export class SettingsPanel extends Component {
   schema: settingsSchema;
@@ -20,7 +21,8 @@ export class SettingsPanel extends Component {
     let html = "";
     for (let key in this.schema) {
       const item = this.schema[key];
-      const label = item.label;
+      var label = item.label;
+      const tooltip = item.tooltip || tooltips[key];
       const type = item.type;
       const min = item.min;
       const max = item.max;
@@ -112,6 +114,9 @@ export class SettingsPanel extends Component {
       const link = item.link
         ? ` <a href="${item.link}" target="_blank" class="label-link"><i class="fa-solid fa-up-right-from-square"></i></a>`
         : "";
+      label = tooltip
+       ? ` <div class="tooltip" >${label}<span class="tooltiptext">${tooltip}</span></div>`
+       : label;
       html += `
         <div class="setting">
           <label for="${key}">${label}${link}</label>
