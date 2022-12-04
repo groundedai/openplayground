@@ -239,6 +239,7 @@ export interface settingsSchema {
     key: string;
     label: string;
     link?: string;
+    tooltip?: string;
     type: string;
     min?: number;
     max?: number;
