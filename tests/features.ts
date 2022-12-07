@@ -37,7 +37,6 @@ export async function createDataset({ page }: { page: Page }) {
     await test.step("Create a dataset", async () => {
         await page.goto(`/#/datasets`);
         await page.getByRole('button', { name: 'Create Dataset' }).click();
-        await page.getByText('× New Dataset Dataset name Data file Separator Create').click();
         await page.getByLabel('Dataset name').click();
         await page.getByLabel('Dataset name').fill('TestDataset');
         //await page.getByLabel('Data file').click();
