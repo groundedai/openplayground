@@ -43,10 +43,10 @@ export class NewDatasetForm extends Component {
       if (!this.dataFileInput.files) return;
       const file = this.dataFileInput.files[0];
       if (file && (file.name.endsWith(".csv") || file.name.endsWith(".tsv"))) {
-        this.separatorLabel.nodeValue = "Column";
+        this.separatorLabel.innerText = "Column";
         this.separatorInput.value = "text";
       } else {
-        this.separatorLabel.nodeValue = "Separator";
+        this.separatorLabel.innerText = "Separator";
         this.separatorInput.value = "---";
       }
     });
