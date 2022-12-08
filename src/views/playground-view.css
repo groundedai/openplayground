@@ -87,8 +87,8 @@
 
 textarea#playground-textarea {
   height: 100%;
-  /* font-family: inherit; */
-  font-family: var(--font-family-2);
+  font-family: "Roboto Mono", monospace;
+  /* font-family: var(--font-family-2); */
   font-size: 1em;
   font-weight: 400;
   margin-top: 0;

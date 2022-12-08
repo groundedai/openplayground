@@ -1,0 +1,59 @@
+<div class="drawer" class="open">
+  <!-- Expandable overlay coming in from the right-->
+  <style>
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 100%;
+      background-color: rgb(253, 253, 253);
+      border-right: 1px solid rgb(200, 200, 200);
+      border-left: 1px solid rgb(200, 200, 200);
+      overflow-x: hidden;
+      transition: 0.1s;
+      z-index: 1;
+      /* Add a shadow to the right side */
+      box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+    }
+    @media (max-width: 768px) {
+      .drawer.open {
+        width: 100%;
+      }
+    }
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .drawer.open {
+        width: 80vw;
+      }
+    }
+    @media (min-width: 1024px) and (max-width: 1440px) {
+      .drawer.open {
+        width: 70vw;
+      }
+    }
+    @media (min-width: 1440px) and (max-width: 1920px) {
+      .drawer.open {
+        width: 60vw;
+      }
+    }
+    @media (min-width: 1920px) {
+      .drawer.open {
+        width: 50vw;
+      }
+    }
+    .drawer .close-button {
+      position: absolute;
+      top: 0;
+      right: 10px;
+      font-size: 12px;
+      margin-left: 50px;
+    }
+    .drawer .body {
+      padding: 10px;
+    }
+  </style>
+  <!-- <button class="close-button outline">
+    <i class="fa fa-angles-left"></i>
+  </button> -->
+  <div class="body mt-3"></div>
+</div>

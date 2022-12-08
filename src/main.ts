@@ -9,8 +9,14 @@ import { RunView } from "./views/run-view";
 import { IntroView } from "./views/intro-view";
 import { DB } from "./db";
 import { Dataset, Run } from "./types";
+import { loadExamplePresets } from "./presets";
+import { loadExampleDatasets } from "./datasets";
+import { loadExampleRuns } from "./runs";
 
 export const db = new DB();
+loadExamplePresets();
+loadExampleDatasets();
+loadExampleRuns();
 
 const container = document.querySelector("#view") as HTMLDivElement;
 const routes = [
@@ -25,20 +31,9 @@ const routes = [
   new Route("/datasets/(\\d+)/?$", (path: string) => {
     const datasetId = path.split("/")[2];
     const dataset = db.getDatasets().find((d: Dataset) => d.id === datasetId);
-    console.log("dataset", dataset);
     const datasetView = new DatasetView({ container, dataset });
     datasetView.render();
   }),
-  // new Route("/datasets/(\\d+)/record/(\\d+)/?$", (path: string) => {
-  //   const datasetId = path.split("/")[2];
-  //   const recordId = path.split("/")[4];
-  //   console.log("recordId", recordId);
-  //   const record = db
-  //     .getRecords()
-  //     .find((r: Record) => r.datasetId === datasetId && r.id === recordId);
-  //   const recordView = new RecordView({ container, record });
-  //   recordView.render();
-  // }),
   new Route("/runs/?$", () => {
     const runsView = new RunsView({ container });
     runsView.render();
@@ -71,23 +66,3 @@ router.navigateTo(window.location.hash || "#/");
 
 const navContainer = document.getElementById("nav") as HTMLDivElement;
 new Navbar({ container: navContainer });
-
-// const rightNav = document.querySelector("#right-nav") as HTMLDivElement;
-// const rightNavContent = document.querySelector(
-//   "#right-nav-content"
-// ) as HTMLDivElement;
-// const rightNavExpandButton = document.querySelector(
-//   "#right-nav-expand-button"
-// ) as HTMLButtonElement;
-// const expandLeftNavIcon = document.querySelector(
-//   "#expand-left-nav-icon"
-// ) as HTMLElement;
-// const expandRightNavIcon = document.querySelector(
-//   "#expand-right-nav-icon"
-// ) as HTMLElement;
-// rightNavExpandButton.addEventListener("click", () => {
-//   console.log("click");
-//   rightNav.classList.toggle("collapsed");
-//   expandLeftNavIcon.classList.toggle("hidden");
-//   expandRightNavIcon.classList.toggle("hidden");
-// });

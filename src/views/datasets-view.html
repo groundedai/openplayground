@@ -1,10 +1,14 @@
-<div id="data-view">
+<div id="data-view" style="max-width: 700px">
   <h4>Datasets</h4>
-  <div class="row">
+  <div class="row center" style="justify-content: space-between">
     <button id="create-dataset-button">Create Dataset</button>
+    <label class="hide-examples-label">
+      <input type="checkbox" id="hide-example-datasets-checkbox" />
+      Hide example datasets
+    </label>
   </div>
   <div class="row">
-    <div class="col" style="max-width: 700px">
+    <div class="col">
       <div id="dataset-table-container"></div>
     </div>
   </div>

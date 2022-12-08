@@ -79,7 +79,7 @@ export class NewDatasetForm extends Component {
             return;
           } else {
             db.createDataset(dataset);
-            records.forEach((record) => {
+            records.forEach((record: Record) => {
               record.datasetId = dataset.id;
               db.createRecord(record);
             });

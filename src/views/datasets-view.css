@@ -2,7 +2,11 @@
   text-align: center;
 }
 
-#dataset-table-container >* td[data-column="name"] {
+#dataset-table-container > * td[data-column="name"] {
   font-weight: bold;
   font-size: 1.2em;
+}
+
+#dataset-table-container > * button.outline {
+  padding: 0.5em 1.4em;
 }

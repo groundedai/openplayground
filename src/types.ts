@@ -1,5 +1,6 @@
 import { db } from "./main";
 import { textPlaceholderRegex } from "./globals";
+import * as yaml from "yaml";
 
 export type ID = string | number | null;
 
@@ -32,10 +33,20 @@ export class Record extends DBItem {
 
 export class Dataset extends DBItem {
   name: string;
+  isExample: boolean;
 
-  constructor({ id, name }: { id?: ID; name: string }) {
+  constructor({
+    id,
+    name,
+    isExample,
+  }: {
+    id?: ID;
+    name: string;
+    isExample?: boolean;
+  }) {
     super({ id });
     this.name = name;
+    this.isExample = isExample ? isExample : false;
   }
 
   getRecords() {
@@ -56,7 +67,8 @@ export class Prompt extends DBItem {
   }
 
   hasPlaceholder() {
-    return textPlaceholderRegex.test(this.text);
+    const placeholderMatch = this.text.match(textPlaceholderRegex);
+    return placeholderMatch !== null;
   }
 }
 
@@ -93,6 +105,7 @@ export class Preset extends DBItem {
   promptId: ID;
   languageModelSettingsId: ID;
   tags: string[];
+  isExample: boolean;
 
   constructor({
     id,
@@ -100,18 +113,21 @@ export class Preset extends DBItem {
     promptId,
     languageModelSettingsId,
     tags,
+    isExample = false,
   }: {
     id?: ID;
     name: string;
     tags: string[];
     promptId: ID;
     languageModelSettingsId: ID;
+    isExample?: boolean;
   }) {
     super({ id });
     this.name = name;
     this.promptId = promptId;
     this.tags = tags;
     this.languageModelSettingsId = languageModelSettingsId;
+    this.isExample = isExample;
   }
 
   getPrompt() {
@@ -122,13 +138,14 @@ export class Preset extends DBItem {
     return db.getLanguageModelSettings(this.languageModelSettingsId);
   }
 
-  serialize() {
+  toYAML() {
+    // To human readable YAML
     const prompt = this.getPrompt();
     const languageModelSettings = { ...this.getLanguageModelSettings() };
     delete languageModelSettings.id;
     delete languageModelSettings.name;
     delete languageModelSettings.apiSettings.apiKey;
-    return {
+    const json = {
       name: this.name,
       prompt: {
         name: prompt.name,
@@ -142,6 +159,7 @@ export class Preset extends DBItem {
       languageModelSettingsId: this.languageModelSettingsId,
       tags: this.tags,
     };
+    return yaml.stringify(json);
   }
 }
 

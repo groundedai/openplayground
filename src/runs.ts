@@ -1,7 +1,9 @@
 import { db } from "./main";
 import { Run, ResultStatus, Preset, Dataset, Record } from "./types";
-import { providerToClass } from "./providers";
+import { providerToClass, providerToStorageKey } from "./providers";
 import { renderTemplate } from "./util/string";
+import exampleRuns from "./data/examples/runs.yaml?raw";
+import * as yaml from "yaml";
 
 export function makeStartingRunMessage(run: Run): string {
   return `Starting <strong>${run.name}</strong>. Do not leave this page until the run is complete or it will be cancelled.`;
@@ -57,6 +59,19 @@ export function startRun({
     onError && onError(err);
   }
   const settings = preset.getLanguageModelSettings();
+  // If no apiKey in settings, get from localStorage
+  if (!settings.apiSettings.apiKey) {
+    const storageKey = providerToStorageKey[settings.provider];
+    const storedState = localStorage.getItem(storageKey);
+    const apiKey = storedState && JSON.parse(storedState).apiKey;
+    if (!apiKey) {
+      const err = new Error("No API key found");
+      onError && onError(err);
+      return;
+    }
+    settings.apiSettings.apiKey = apiKey;
+  }
+  console.log("settings", settings);
   const modelClass = providerToClass[settings.provider];
   const langModel = new modelClass(settings.apiSettings);
   const promises = records.map((record: Record) => {
@@ -111,4 +126,36 @@ export function exportRun({ run }: { run: Run }) {
   document.body.appendChild(element);
   element.click();
   document.body.removeChild(element);
+}
+
+export function loadExampleRuns() {
+  const runs = yaml.parse(exampleRuns);
+  // Create the Run object and save to database
+  const datasets = db.getDatasets();
+  const presets = db.getPresets();
+  const existingRuns = db.getRuns();
+  runs.forEach((run: any) => {
+    // Check whether a run with this name already exists
+    const existingRun = existingRuns.find((existingRun: Run) => {
+      return existingRun.name === run.name;
+    });
+    if (existingRun) {
+      return;
+    }
+    const datasetName = run.dataset;
+    const presetName = run.preset;
+    const dataset = datasets.find((dataset: Dataset) => {
+      return dataset.name === datasetName;
+    });
+    const preset = presets.find((preset: Preset) => {
+      return preset.name === presetName;
+    });
+    if (!dataset || !preset) {
+      throw new Error("Dataset or preset not found when loading example run");
+    }
+    run.datasetId = dataset.id;
+    run.presetId = preset.id;
+    run.results = {};
+    db.createRun(run);
+  });
 }

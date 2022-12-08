@@ -1,25 +1,9 @@
 <div id="playground-view" class="view">
   <h4>Playground</h4>
-  <div id="presets-panel" class="mb-1">
-    <details open>
-      <summary class="h6"><strong>Presets</strong></summary>
-      <div id="presets">
-        <div class="row right">
-          <button
-            class="outline icon import-preset-button"
-            title="Import preset"
-          >
-            <i class="fa fa-upload"></i>
-          </button>
-          <label class="hide-examples-label">
-            <input type="checkbox" class="hide-example-presets-checkbox" />
-            Hide example presets
-          </label>
-        </div>
-        <div id="presets-table-container"></div>
-      </div>
-    </details>
-  </div>
+  <button id="show-presets-button" class="outline">
+    Show Presets
+  </button>
+
   <div id="editor-grid">
     <div id="editor-panel">
       <textarea id="playground-textarea"></textarea>
@@ -86,7 +70,6 @@
         <div>
           <h5>Settings</h5>
         </div>
->
       </div>
       <div>
         <label for="language-model-provider-select">Provider</label>

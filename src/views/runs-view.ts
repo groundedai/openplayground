@@ -232,7 +232,10 @@ export class RunsView extends View {
 
   makeNewRunForm(): NewRunForm {
     const datasets = db.getDatasets();
-    const presets = db.getPresets();
+    let presets = db.getPresets();
+    presets = presets.filter((preset: Preset) =>
+      preset.getPrompt().hasPlaceholder()
+    );
     const newRunForm = new NewRunForm({
       datasets,
       presets,

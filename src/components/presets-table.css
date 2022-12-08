@@ -5,3 +5,12 @@ button.outline {
 td {
   padding: 0 1em;
 }
+
+.tooltip .tooltiptext {
+  /* Position to the left */
+  left: -200%;
+}
+
+.tooltiptext::after {
+  border-style: none;
+}

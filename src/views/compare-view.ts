@@ -4,14 +4,12 @@ import compareViewCss from "./compare-view.css?raw";
 import {
   Run,
   Record,
-  PromptTemplate,
+  Prompt,
   LanguageModelSettings,
   Result,
+  Dataset,
 } from "../types";
-import { getDatasets } from "../db/datasets";
-import { getRecords } from "../db/records";
-import { getPromptTemplates } from "../db/prompt-templates";
-import { getLanguageModelSettings } from "../db/language-model-settings";
+import { db } from "../db";
 import { DataTable } from "../components/datatable";
 import { renderTemplate, newlinesToBreaks } from "../util/string";
 
@@ -56,10 +54,10 @@ export class CompareView extends View {
   }
 
   render() {
-    const dataset = getDatasets().find((d) => d.id === this.runA.datasetId);
+    const dataset = db.getDatasets().find((d: Dataset) => d.id === this.runA.datasetId);
     const records = getRecords().filter((r) => r.datasetId === dataset.id);
-    const resultsA = this.runA.getFormattedResults();
-    const resultsB = this.runB.getFormattedResults();
+    const resultsA = this.runA.formatResults();
+    const resultsB = this.runB.formatResults();
     this.renderSettingsTable();
     this.renderResultsTable({ records, resultsA, resultsB });
   }

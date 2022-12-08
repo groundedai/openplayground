@@ -24,8 +24,10 @@ import {
 } from "../providers";
 import presetFormHtml from "../components/preset-form.html?raw";
 import previewTemplateHtml from "../components/preview-template.html?raw";
+import presetsPanelHtml from "../components/presets-panel.html?raw";
 import { errorMessageDuration, textPlaceholderRegex } from "../globals";
 import { renderTemplate } from "../util/string";
+import { createPresetFromYAML } from "../presets";
 
 export class PlaygroundView extends View {
   useContentEditable: boolean = false;
@@ -87,10 +89,14 @@ export class PlaygroundView extends View {
   ) as HTMLSpanElement;
   languageModelProvider: string | null = null;
   settingsPanel: SettingsPanel | null = null;
-  presetsTableContainer: HTMLDivElement = document.querySelector(
-    "#presets-table-container"
-  ) as HTMLDivElement;
+  presetsTableContainer: HTMLDivElement | null = null;
   presetsTable: PresetsTable | null = null;
+  importPresetButton: HTMLButtonElement | null = null;
+  hideExamplePresetsCheckbox: HTMLInputElement | null = null;
+  hideExamplePresets: boolean = false;
+  showPresetsButton: HTMLButtonElement = document.querySelector(
+    "#show-presets-button"
+  ) as HTMLButtonElement;
 
   constructor({ container }: { container: HTMLDivElement }) {
     super({ container, html: playgroundViewHtml, css: playgroundCss });
@@ -102,7 +108,24 @@ export class PlaygroundView extends View {
     this.presetModal = new Modal({
       title: "Save Preset",
     });
+    this.initLeftDrawer();
     this.initListeners();
+  }
+
+  initLeftDrawer() {
+    this.leftDrawer.openTriggers = [this.showPresetsButton];
+    const body = document.createElement("div");
+    body.innerHTML = presetsPanelHtml;
+    this.leftDrawer.body.appendChild(body);
+    this.importPresetButton = document.querySelector(
+      ".import-preset-button"
+    ) as HTMLButtonElement;
+    this.hideExamplePresetsCheckbox = document.querySelector(
+      ".hide-example-presets-checkbox"
+    ) as HTMLInputElement;
+    this.presetsTableContainer = document.querySelector(
+      "#presets-table-container"
+    ) as HTMLDivElement;
   }
 
   render() {
@@ -116,7 +139,21 @@ export class PlaygroundView extends View {
       this.playgroundTextArea.classList.remove("hidden");
       // this.playgroundEditable!.style.display = "none";
     }
-    this.addEditorListeners();
+    const provider =
+      this.languageModelProvider ||
+      localStorage.getItem("playgroundLanguageModelProvider") ||
+      defaultProvider;
+    this.changeLanguageModelProvider(provider);
+    const textareaContent = this.getFromLocalStorage();
+    if (textareaContent) {
+      this.setPlaygroundContent(textareaContent);
+    }
+    this.renderPresetsTable();
+    this.updateListeners();
+  }
+
+  changeLanguageModelProvider(provider: string) {
+    this.languageModelProvider = provider;
     this.setupSettingsPanel();
     // Load settings from local storage
     const settingsStorageKey =
@@ -129,21 +166,14 @@ export class PlaygroundView extends View {
       });
       this.renderSettings(lms);
     }
-    const textareaContent = this.getFromLocalStorage();
-    if (textareaContent) {
-      this.setPlaygroundContent(textareaContent);
-    }
-    // this.renderTemplates();
-    // this.renderSavedSettings();
-    this.renderPresetsTable();
-    this.updateListeners();
+    localStorage.setItem("playgroundLanguageModelProvider", provider);
   }
 
   renderPresetsTable() {
     const presets = db.getPresets();
     this.presetsTable = new PresetsTable({
       presets,
-      container: this.presetsTableContainer,
+      container: this.presetsTableContainer!,
       onLoad: (preset: Preset) => {
         const prompt = preset.getPrompt();
         this.setPlaygroundContent(prompt.text);
@@ -166,7 +196,9 @@ export class PlaygroundView extends View {
         });
         // Dispatch change event to update the settings
         this.settingsPanel!.container.dispatchEvent(new Event("change"));
+        this.leftDrawer.close();
       },
+      hideExamplePresets: this.hideExamplePresets,
     });
     this.presetsTable.render();
   }
@@ -281,8 +313,6 @@ export class PlaygroundView extends View {
     this.setLoading(true);
     const settings = this.getLanguageModelSettings();
     const text = this.getPlaygroundText();
-    console.log("Settings", settings);
-    console.log("Text", text);
     if (text.length === 0) {
       this.setLoading(false);
       this.showSnackbar({ messageHtml: "Please enter some text" });
@@ -370,6 +400,7 @@ export class PlaygroundView extends View {
   }
 
   initListeners() {
+    this.addEditorListeners();
     this.suggestButton.addEventListener("click", () => {
       this.getSuggestions();
     });
@@ -397,7 +428,9 @@ export class PlaygroundView extends View {
           languageModelSettingsId: settings.id,
           tags: tagList,
         });
+        console.log("Before create preset", preset);
         db.createPreset(preset);
+        console.log("Created preset", preset);
         this.render();
         this.presetModal.hide();
       });
@@ -439,6 +472,9 @@ export class PlaygroundView extends View {
           const previewArea = body.querySelector(
             "#preview-area"
           ) as HTMLTextAreaElement;
+          const loadPromptButton = body.querySelector(
+            "#load-prompt-button"
+          ) as HTMLButtonElement;
           // Make preview area larger
           previewArea.style.height = "300px";
           previewArea.style.width = "90%";
@@ -470,7 +506,12 @@ export class PlaygroundView extends View {
                 const template = this.getPlaygroundText();
                 const prompt = renderTemplate(template, { text: record.text });
                 previewArea.value = prompt;
+                loadPromptButton.removeAttribute("disabled");
+              } else {
+                loadPromptButton.setAttribute("disabled", "");
               }
+            } else {
+              loadPromptButton.setAttribute("disabled", "");
             }
           });
           datasetSelect.addEventListener("change", () => {
@@ -492,6 +533,12 @@ export class PlaygroundView extends View {
             // Dispatch change event to load preview
             recordSelect.dispatchEvent(new Event("change"));
           });
+          loadPromptButton.addEventListener("click", () => {
+            // Load prompt into playground
+            const prompt = previewArea.value;
+            this.setPlaygroundContent(prompt);
+            previewModal.hide();
+          });
           // const nextButton = body.querySelector(
           //   "#next-button"
           // ) as HTMLButtonElement;
@@ -501,27 +548,36 @@ export class PlaygroundView extends View {
         }
       }
     });
-    // this.saveSettingsButton?.addEventListener("click", () => {
-    //   console.log("Save settings");
-    //   const lms = this.getLanguageModelSettings();
-    //   this.promptUserInput({
-    //     title: "Name for settings:",
-    //     onConfirm: (name) => {
-    //       if (name && lms) {
-    //         console.log("Saving settings", name, lms);
-    //         lms.id = name;
-    //         lms.name = name;
-    //         db.createLanguageModelSettings(lms);
-    //         console.log("Language model settings", lms);
-    //         this.render();
-    //       }
-    //     },
-    //   });
-    // });
-    // this.loadSettingsButton?.addEventListener("click", () => {
-    //   this.savedSettingsModal.render();
-    //   this.savedSettingsModal.show();
-    // });
+    this.importPresetButton?.addEventListener("click", () => {
+      // Open import modal
+      const body = document.createElement("div");
+      // Add helper message
+      const helperMessage = document.createElement("p");
+      helperMessage.innerHTML = "<strong>Paste preset string here:</strong>";
+      body.appendChild(helperMessage);
+      // Add text area to body
+      const textArea = document.createElement("textarea");
+      textArea.style.width = "90%";
+      textArea.style.height = "100px";
+      body.appendChild(textArea);
+      // Add button to import
+      const importButton = document.createElement("button");
+      importButton.textContent = "Import";
+
+      const importModal = new Modal({
+        title: "Import Preset",
+        body,
+      });
+      importModal.render();
+      importButton.addEventListener("click", () => {
+        const presetString = textArea.value;
+        createPresetFromYAML(presetString);
+        this.render();
+        importModal.hide();
+      });
+      body.appendChild(importButton);
+      importModal.show();
+    });
     this.autoSuggestSwitch.addEventListener("click", () => {
       const value = this.autoSuggestSwitch.checked || false;
       this.autoSuggest = value;
@@ -599,6 +655,21 @@ export class PlaygroundView extends View {
       modal.render();
       modal.show();
     });
+    this.hideExamplePresetsCheckbox?.addEventListener("change", () => {
+      this.hideExamplePresets = this.hideExamplePresetsCheckbox!.checked;
+      this.render();
+    });
+    this.showPresetsButton.addEventListener("click", () => {
+      this.leftDrawer.toggle();
+    });
+    this.leftDrawer.on("close", () => {
+      this.showPresetsButton.innerHTML =
+        'Show Presets'
+    });
+    this.leftDrawer.on("open", () => {
+      this.showPresetsButton.innerHTML =
+        "Hide Presets";
+    });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && e.ctrlKey) {
         e.preventDefault();
@@ -614,9 +685,7 @@ export class PlaygroundView extends View {
     });
     this.languageModelProviderSelect.addEventListener("change", () => {
       const provider = this.languageModelProviderSelect.value;
-      this.languageModelProvider = provider;
-      localStorage.setItem("playgroundLanguageModelProvider", provider);
-      this.render();
+      this.changeLanguageModelProvider(provider);
     });
   }
 }

@@ -362,6 +362,17 @@ button.icon:hover {
   background-color: transparent;
 }
 
+button.icon:disabled {
+  color: var(--material-color-grey-500);
+  background-color: transparent;
+}
+
+button.icon:disabled:hover {
+  color: var(--material-color-grey-500);
+  background-color: transparent;
+  cursor: default;
+}
+
 button:disabled {
   background-color: #cccccc;
   color: #666666;

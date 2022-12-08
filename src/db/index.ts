@@ -113,6 +113,11 @@ export class DB {
     });
   }
 
+  getDatasetByName(name: string): Dataset | undefined {
+    const datasets = this.getDatasets();
+    return datasets.find((d: Dataset) => d.name === name);
+  }
+
   deletePreset(preset: Preset) {
     this.deletePreset(preset);
     const languageModelSettings = this.getItems("languageModelSettings");
@@ -127,5 +132,10 @@ export class DB {
         this.deletePrompt(p);
       }
     });
+  }
+
+  getPresetByName(name: string): Preset | undefined {
+    const presets = this.getPresets();
+    return presets.find((p: Preset) => p.name === name);
   }
 }
