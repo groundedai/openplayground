@@ -37,7 +37,6 @@ export async function createDataset({ page }: { page: Page }) {
     await test.step("Create a dataset", async () => {
         await page.goto(`/#/datasets`);
         await page.getByRole('button', { name: 'Create Dataset' }).click();
-        await page.getByText('× New Dataset Dataset name Data file Separator Create').click();
         await page.getByLabel('Dataset name').click();
         await page.getByLabel('Dataset name').fill('TestDataset');
         //await page.getByLabel('Data file').click();
@@ -45,6 +44,25 @@ export async function createDataset({ page }: { page: Page }) {
         await page.locator('#form').getByRole('button', { name: 'Create' }).click();
         await page.getByRole('cell', { name: 'TestDataset' }).click();
         await page.getByRole('button', { name: 'View' }).click();
+        //expect(await page.locator('#row-count-value').textContent()).toBe('3');
+    });
+}
+
+export async function createCSVDataset({ page }: { page: Page }) {
+    await test.step("Create a csv based dataset", async () => {
+        await page.goto(`/#/datasets`);
+        await page.getByRole('button', { name: 'Create Dataset' }).click();
+        await page.getByLabel('Dataset name').click();
+        await page.getByLabel('Dataset name').fill('TestDataset');
+        //await page.getByLabel('Data file').click();
+        await page.getByLabel('Data file').setInputFiles('data/organs_wikilist.csv');
+        await page.getByText('Column').nth(1).click();
+        await page.getByRole('textbox', { name: 'Column' }).fill('Organ');
+        await page.locator('#form').getByRole('button', { name: 'Create' }).click();
+        await page.getByRole('cell', { name: 'TestDataset' }).click();
+        await page.getByRole('button', { name: 'View' }).click();
+        await page.getByText('Rows: 77').click();
+        await page.getByRole('cell', { name: 'Adrenal glands' }).click();
         //expect(await page.locator('#row-count-value').textContent()).toBe('3');
     });
 }

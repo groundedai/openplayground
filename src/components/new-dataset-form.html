@@ -1,8 +1,18 @@
 <div id="new-dataset" style="width: 40%" class="mb-3">
   <form id="form">
-    <label for="name">Dataset name</label>
-    <input type="text" id="name" name="name" />
-    <label for="data-file">Data file</label>
+    <label for="dataset-name">Dataset name</label>
+    <input type="text" id="dataset-name" name="dataset-name" />
+    <label for="data-file">
+      <div class="tooltip" >
+        Data file
+        <span class="tooltiptext">
+          CSV and TSV files are supported containing a header and a column field specified below.
+          Otherewise, the data file should be a text file with each document separated by three dashes
+           or other character sequence provided in the separator field.
+          </br><strong>Choose your file before specifying options.</strong>
+        </span>
+      </div>
+    </label>
     <input type="file" id="data-file" name="data-file" />
     <label for="data-separator">Separator</label>
     <input type="text" id="data-separator" name="data-separator" value="---" />

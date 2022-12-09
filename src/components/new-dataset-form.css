@@ -1,0 +1,12 @@
+#new-dataset .tooltip .tooltiptext {
+    bottom: -250%;
+    margin-left: 100%;
+    left: 10px;
+    opacity: 0.85;
+}
+  
+#new-dataset .tooltiptext::after {
+    top: 63%;
+    left: -5px;
+    rotate: 90deg;
+}
