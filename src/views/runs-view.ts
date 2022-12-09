@@ -1,9 +1,6 @@
 import runsViewCss from "./runs-view.css?raw";
-import { Run, ResultStatus } from "../types";
-import { getRuns, createRun, updateRun, deleteRun } from "../db/runs";
-import { getDatasets } from "../db/datasets";
-import { getLanguageModelSettings } from "../db/language-model-settings";
-import { getPromptTemplates } from "../db/prompt-templates";
+import { Run, ResultStatus, Dataset, Preset, ID } from "../types";
+import { db } from "../main";
 import { DataTable } from "../components/datatable";
 import runsViewHtml from "./runs-view.html?raw";
 import { titleCase } from "../util/string";
@@ -17,9 +14,6 @@ export class RunsView extends View {
   runsTable: DataTable | null = null;
   runsTableContainer: HTMLDivElement = document.querySelector(
     "#runs-table-container"
-  ) as HTMLDivElement;
-  savedSettingsContainer: HTMLDivElement = document.querySelector(
-    "#saved-settings-container"
   ) as HTMLDivElement;
   compareButton: HTMLButtonElement = document.querySelector(
     "#compare-button"
@@ -44,16 +38,13 @@ export class RunsView extends View {
   }
 
   renderRunsTable() {
-    const rows = getRuns().map((run) => {
-      const dataset = getDatasets().find(
-        (dataset) => dataset.id === run.datasetId
-      );
-      const template = getPromptTemplates().find(
-        (template) => template.id === run.templateId
-      );
-      const settings = getLanguageModelSettings().find(
-        (settings) => settings.id === run.languageModelSettingsId
-      );
+    const rows = db.getRuns().map((run: Run) => {
+      const dataset = db
+        .getDatasets()
+        .find((dataset: Dataset) => dataset.id === run.datasetId);
+      const preset = db
+        .getPresets()
+        .find((preset: Preset) => preset.id === run.presetId);
       const runStatus = run.getStatus();
       let statusMessage = "";
       if (runStatus.status === ResultStatus.failed) {
@@ -71,22 +62,20 @@ export class RunsView extends View {
         name: run.name,
         status: titleCase(statusMessage),
         dataset: dataset?.name || "Not found",
-        template: template?.name || "Not found",
-        settings: settings?.name || "Not found",
-        actions: `<button id="start-run-button" data-id="${run.id}" class="outline">Start</button> <button id="export-run-button" data-id="${run.id}" class="outline">Export</button> <button id="view-run-button" data-id="${run.id}" class="outline">View</button> <button id="delete-run-button" data-id="${run.id}" class="outline danger">Delete</button>`,
+        preset: preset?.name || "Not found",
+        actions: `<button id="start-run-button" data-id="${run.id}" class="outline icon" title="Start" data-action="start"><i class="fas fa-play"></i></button> <button id="view-run-button" data-id="${run.id}" class="outline icon" title="View" data-action="view"><i class="fas fa-eye"></i></button> <button id="delete-run-button" data-id="${run.id}" class="outline icon" title="Delete" data-action="delete"><i class="fas fa-trash"></i></button> <button id="export-run-button" data-id="${run.id}" class="outline icon" title="Export" data-action="export"><i class="fas fa-download"></i></button>`,
         select: `<input type="checkbox" id="select-run" data-id="${run.id}" />`,
         createdAt: `${run.createdAt.toLocaleDateString()} ${run.createdAt.getHours()}:${run.createdAt.getMinutes()}`,
       };
     });
-    rows.sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1)); // Sort by recent first
+    rows.sort((a: Run, b: Run) => (a.createdAt > b.createdAt ? -1 : 1)); // Sort by recent first
     console.log(rows);
     const columns = [
       { key: "select", name: "Select" },
       { key: "name", name: "Name" },
       { key: "status", name: "Status", classes: ["text-center"] },
       { key: "dataset", name: "Dataset" },
-      { key: "template", name: "Template" },
-      { key: "settings", name: "Settings" },
+      { key: "preset", name: "Preset" },
       { key: "actions", name: "Actions" },
       { key: "createdAt", name: "Created At" },
     ];
@@ -166,7 +155,7 @@ export class RunsView extends View {
     selectRunCheckboxes.forEach((checkbox) => {
       if (checkbox.checked) {
         const runId = checkbox.dataset.id!;
-        const run = getRuns().find((run) => run.id === runId);
+        const run = db.getRuns().find((run: Run) => run.id === runId);
         if (run) {
           selectedRuns.push(run);
         }
@@ -184,8 +173,8 @@ export class RunsView extends View {
     }
   }
 
-  startRun(id: string) {
-    const run = getRuns().find((run) => run.id === id);
+  startRun(id: ID) {
+    const run = db.getRuns().find((run: Run) => run.id === id);
     if (!run) {
       return;
     }
@@ -213,7 +202,7 @@ export class RunsView extends View {
   }
 
   viewRun(id: string) {
-    const run = getRuns().find((run) => run.id === id);
+    const run = db.getRuns().find((run: Run) => run.id === id);
     if (!run) {
       return;
     }
@@ -225,16 +214,16 @@ export class RunsView extends View {
     if (!confirm) {
       return;
     }
-    const run = getRuns().find((run) => run.id === id);
+    const run = db.getRuns().find((run: Run) => run.id === id);
     if (!run) {
       return;
     }
-    deleteRun(run);
+    db.deleteRun(run);
     this.renderRunsTable();
   }
 
   exportRun(id: string) {
-    const run = getRuns().find((run) => run.id === id);
+    const run = db.getRuns().find((run: Run) => run.id === id);
     if (!run) {
       return;
     }
@@ -242,23 +231,25 @@ export class RunsView extends View {
   }
 
   makeNewRunForm(): NewRunForm {
-    const datasets = getDatasets();
-    const templates = getPromptTemplates();
-    const settings = getLanguageModelSettings();
+    const datasets = db.getDatasets();
+    let presets = db.getPresets();
+    presets = presets.filter((preset: Preset) =>
+      preset.getPrompt().hasPlaceholder()
+    );
     const newRunForm = new NewRunForm({
       datasets,
-      templates,
-      settings,
+      presets,
       onSubmit: (run: Run) => {
-        createRun(run);
+        db.createRun(run);
         run.name = `Run ${run.id}`;
-        updateRun(run);
+        db.updateRun(run);
         this.renderRunsTable();
         this.showSnackbar({
           messageHtml: "Run created",
           type: "success",
         });
         this.newRunModal.hide();
+        this.startRun(run.id);
       },
     });
     newRunForm.render();

@@ -1,41 +1,35 @@
 import { Component } from "./component";
 import newRunFormHtml from "./new-run-form.html?raw";
-import { Dataset, LanguageModelSettings, PromptTemplate, Run } from "../types";
-import { getRecords } from "../db/records";
+import { Dataset, Preset, Run } from "../types";
 import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
 
 export class NewRunForm extends Component {
   selectDataset: HTMLSelectElement = this.container.querySelector(
     "#dataset"
   ) as HTMLSelectElement;
-  selectTemplate: HTMLSelectElement = this.container.querySelector(
-    "#template"
-  ) as HTMLSelectElement;
-  selectSettings: HTMLSelectElement = this.container.querySelector(
-    "#settings"
+  selectPreset: HTMLSelectElement = this.container.querySelector(
+    "#preset"
   ) as HTMLSelectElement;
   form: HTMLFormElement = this.container.querySelector(
     "#form"
   ) as HTMLFormElement;
-  formatResultsSettingsPanelContainer: HTMLDivElement = document.querySelector(
-    "#format-results-settings-panel"
-  ) as HTMLDivElement;
+  formatResultsSettingsPanelContainer: HTMLDivElement =
+    this.container.querySelector(
+      "#format-results-settings-panel"
+    ) as HTMLDivElement;
   formatResultsSettingsPanel: FormatResultsSettingsPanel;
   datasets: Dataset[];
-  templates: PromptTemplate[];
-  settings: LanguageModelSettings[];
+  presets: Preset[];
   onSubmit: (run: Run) => void;
 
   constructor({
     datasets,
-    templates,
-    settings,
+    presets,
     onSubmit,
   }: {
     container?: HTMLElement;
     datasets: Dataset[];
-    templates: PromptTemplate[];
-    settings: LanguageModelSettings[];
+    presets: Preset[];
     onSubmit: (run: Run) => void;
   }) {
     const newRunForm = document.createElement("div");
@@ -45,8 +39,7 @@ export class NewRunForm extends Component {
       this.formatResultsSettingsPanelContainer
     );
     this.datasets = datasets;
-    this.templates = templates;
-    this.settings = settings;
+    this.presets = presets;
     this.onSubmit = onSubmit;
   }
 
@@ -57,17 +50,11 @@ export class NewRunForm extends Component {
       option.innerText = dataset.name;
       this.selectDataset.appendChild(option);
     });
-    this.templates.forEach((template) => {
+    this.presets.forEach((preset) => {
       const option = document.createElement("option");
-      option.value = template.id as string;
-      option.innerText = template.name;
-      this.selectTemplate.appendChild(option);
-    });
-    this.settings.forEach((setting) => {
-      const option = document.createElement("option");
-      option.value = setting.id as string;
-      option.innerText = setting.name;
-      this.selectSettings.appendChild(option);
+      option.value = preset.id as string;
+      option.innerText = preset.name;
+      this.selectPreset.appendChild(option);
     });
     this.formatResultsSettingsPanel.render();
     this.addListeners();
@@ -77,23 +64,13 @@ export class NewRunForm extends Component {
     this.form.addEventListener("submit", (e) => {
       e.preventDefault();
       const datasetId = this.selectDataset?.value;
-      const records = getRecords().filter(
-        (record) => record.datasetId === datasetId
-      );
-      const templateId = this.selectTemplate?.value;
-      const settingsId = this.selectSettings?.value;
-      const formatResultsSettings =
+      const presetId = this.selectPreset?.value;
+      const resultFormattingSettings =
         this.formatResultsSettingsPanel.getSettings();
       const newRun = new Run({
-        datasetId: datasetId,
-        datasetLength: records.length,
-        templateId,
-        languageModelSettingsId: settingsId,
-        insertPromptTailBeforeResult:
-          formatResultsSettings.insertPromptTailBeforeResult,
-        stripInitialWhiteSpace: formatResultsSettings.stripInitialWhiteSpace,
-        injectStartText: formatResultsSettings.injectStartText,
-        stripEndText: formatResultsSettings.stripEndText,
+        datasetId,
+        presetId,
+        resultFormattingSettings,
       });
       this.onSubmit(newRun);
     });

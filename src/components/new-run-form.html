@@ -2,11 +2,15 @@
   <label for="dataset">Dataset:</label>
   <select id="dataset" name="dataset" class="mb-1"></select>
   <br />
-  <label for="template">Template:</label>
-  <select id="template" name="template" class="mb-1"></select>
-  <br />
-  <label for="settings">Settings:</label>
-  <select id="settings" name="settings" class="mb-1"></select>
+  <label for="preset">Preset: </label>
+  <select id="preset" name="preset" class="mb-1"></select>
+  <div class="tooltip ml-1">
+    <!-- <i class="fa-solid fa-circle-exclamation"></i> -->
+    <i class="fa-regular fa-question-circle"></i>
+    <span class="tooltiptext"
+      >Only presets which have a placeholder in the prompt can be used to create a run.</span
+    >
+  </div>
   <br />
   <details id="format-panel">
     <summary class="h5">Format results</summary>

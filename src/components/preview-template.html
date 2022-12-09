@@ -1,0 +1,26 @@
+<div>
+  <div id="helper-message" class="mb-1">
+    Select a dataset and a record to see the resulting prompt after replacing
+    the placeholder with the text from the record.
+  </div>
+  <label for="dataset-select">Dataset</label>
+  <select id="dataset-select">
+    <option value="none" selected disabled hidden>Select a dataset</option>
+  </select>
+  <label for="record-select">Record</label>
+  <select id="record-select">
+    <option value="none" selected disabled hidden>Select a record</option>
+  </select>
+  <!-- <div id="prev-next-buttons">
+    <button id="prev-record-button" disabled>
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button id="next-record-button" disabled>
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div> -->
+  <hr />
+  <!-- <div id="preview-area"></div> -->
+  <textarea id="preview-area" disabled></textarea>
+  <button id="load-prompt-button" disabled>Load prompt into playground</button>
+</div>

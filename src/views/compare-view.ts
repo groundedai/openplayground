@@ -4,14 +4,12 @@ import compareViewCss from "./compare-view.css?raw";
 import {
   Run,
   Record,
-  PromptTemplate,
+  Prompt,
   LanguageModelSettings,
   Result,
+  Dataset,
 } from "../types";
-import { getDatasets } from "../db/datasets";
-import { getRecords } from "../db/records";
-import { getPromptTemplates } from "../db/prompt-templates";
-import { getLanguageModelSettings } from "../db/language-model-settings";
+import { db } from "../main";
 import { DataTable } from "../components/datatable";
 import { renderTemplate, newlinesToBreaks } from "../util/string";
 
@@ -56,40 +54,42 @@ export class CompareView extends View {
   }
 
   render() {
-    const dataset = getDatasets().find((d) => d.id === this.runA.datasetId);
-    const records = getRecords().filter((r) => r.datasetId === dataset.id);
-    const resultsA = this.runA.getFormattedResults();
-    const resultsB = this.runB.getFormattedResults();
+    const dataset = db
+      .getDatasets()
+      .find((d: Dataset) => d.id === this.runA.datasetId);
+    const records = db
+      .getRecords()
+      .filter((r: Record) => r.datasetId === dataset.id);
+    const resultsA = this.runA.formatResults();
+    const resultsB = this.runB.formatResults();
     this.renderSettingsTable();
     this.renderResultsTable({ records, resultsA, resultsB });
   }
 
   renderSettingsTable() {
-    const settingsA = getLanguageModelSettings().find(
-      (s) => s.id === this.runA.languageModelSettingsId
-    );
-    const settingsB = getLanguageModelSettings().find(
-      (s) => s.id === this.runB.languageModelSettingsId
-    );
-    const templateA = getPromptTemplates().find(
-      (t) => t.id === this.runA.templateId
-    );
-    const templateB = getPromptTemplates().find(
-      (t) => t.id === this.runB.templateId
-    );
+    const presetA = this.runA.getPreset();
+    const presetB = this.runB.getPreset();
+    const settingsA = presetA.getLanguageModelSettings();
+    const settingsB = presetB.getLanguageModelSettings();
+    const settingsASafe = { ...settingsA };
+    const settingsBSafe = { ...settingsB };
+    delete settingsASafe.apiSettings.apiKey;
+    delete settingsBSafe.apiSettings.apiKey;
+    const templateA = presetA.getPrompt();
+    const templateB = presetB.getPrompt();
     const renderSettingsCell = (settings: LanguageModelSettings) => {
-      return `<pre>${JSON.stringify(settings.settings, null, 2)}</pre>`;
+      return `<pre>${JSON.stringify(settings.apiSettings, null, 2)}</pre>`;
     };
-    const renderTemplateCell = (template: PromptTemplate) => {
-      let templateHtml = newlinesToBreaks(template.template);
+    const renderPromptCell = (prompt: Prompt) => {
+      let templateHtml = newlinesToBreaks(prompt.text);
       return `<pre>${templateHtml}</pre>`;
     };
     const rows = [
       {
-        id: "lms-name",
-        name: "Settings Name",
-        valueA: `<h5><pre>${settingsA!.name}</pre></h5>`,
-        valueB: `<h5><pre>${settingsB!.name}</pre></h5>`,
+        id: "preset-name",
+        name: "Preset Name",
+        valueA: `<h5><pre>${presetA!.name}</pre></h5>`,
+        valueB: `<h5><pre>${presetB!.name}</pre></h5>`,
       },
       {
         id: "lms",
@@ -98,16 +98,10 @@ export class CompareView extends View {
         valueB: renderSettingsCell(settingsB!),
       },
       {
-        id: "template-name",
-        name: "Template Name",
-        valueA: `<h5><pre>${templateA!.name}</pre></h5>`,
-        valueB: `<h5><pre>${templateB!.name}</pre></h5>`,
-      },
-      {
         id: "template",
         name: "Template",
-        valueA: renderTemplateCell(templateA!),
-        valueB: renderTemplateCell(templateB!),
+        valueA: renderPromptCell(templateA!),
+        valueB: renderPromptCell(templateB!),
       },
     ];
     const columns = [
@@ -183,20 +177,20 @@ export class CompareView extends View {
   makeResultHtml({
     record,
     result,
-    promptTemplate,
+    prompt,
   }: {
     record: Record;
     result: Result;
-    promptTemplate?: PromptTemplate;
+    prompt?: Prompt;
   }): string {
     let text: string;
-    if (!promptTemplate) {
-      text = `<pre>${record.text}\n\n<span class="completion">${result}</span></pre>`;
+    if (!prompt) {
+      text = `<pre>${record.text}\n\n<span class="completion">${result.text}</span></pre>`;
     } else {
-      let prompt = renderTemplate(promptTemplate.template, {
+      let promptText = renderTemplate(prompt.text, {
         text: record.text,
       });
-      text = `<pre>${prompt}<span class="completion">${result}</span></pre>`;
+      text = `<pre>${promptText}<span class="completion">${result.text}</span></pre>`;
     }
     let html = newlinesToBreaks(text);
     return html;

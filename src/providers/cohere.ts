@@ -133,7 +133,6 @@ export class CohereLanguageModel implements LanguageModel {
       prompt,
       ...this.settings,
     };
-    console.log(body);
     const response = fetch("https://api.cohere.ai/generate", {
       method: "POST",
       headers: {

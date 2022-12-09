@@ -1,12 +1,11 @@
 import runViewCss from "./run-view.css?raw";
 import runViewHtml from "./run-view.html?raw";
 import { newlinesToBreaks } from "../util/string";
-import { getRecords } from "../db/records";
-import { Run, ResultStatus } from "../types";
+import { db } from "../main";
+import { Run, ResultStatus, Record } from "../types";
 import { titleCase } from "../util/string";
 import { DataTable } from "../components/datatable";
 import { View } from "./view";
-import { updateRun } from "../db/runs";
 import { FormatResultsSettingsPanel } from "../components/format-results-settings-panel";
 import { startRun, exportRun, makeStartingRunMessage } from "../runs";
 import { errorMessageDuration } from "../globals";
@@ -52,15 +51,13 @@ export class RunView extends View {
     this.formatResultsSettingsPanel = new FormatResultsSettingsPanel(
       this.formatResultsSettingsPanelContainer
     );
+    console.log(this.run)
   }
 
   render() {
     this.formatResultsSettingsPanel.render();
-    this.formatResultsSettingsPanel.setSettings({
-      stripInitialWhiteSpace: this.run.stripInitialWhiteSpace,
-      injectStartText: this.run.injectStartText,
-      stripEndText: this.run.stripEndText,
-    });
+    const resultFormattingSettings = this.run.resultFormattingSettings;
+    this.formatResultsSettingsPanel.setSettings(resultFormattingSettings);
     this.updateStatus();
     this.renderRecordsTable();
     this.addListeners();
@@ -73,9 +70,9 @@ export class RunView extends View {
   }
 
   renderRecordsTable() {
-    const records = getRecords().filter(
-      (r) => r.datasetId === this.run.datasetId
-    );
+    const records = db
+      .getRecords()
+      .filter((r: Record) => r.datasetId === this.run.datasetId);
     const columns = [
       {
         key: "id",
@@ -86,7 +83,7 @@ export class RunView extends View {
         name: "Result",
       },
     ];
-    const resultsFormatted = this.run.getFormattedResults();
+    const resultsFormatted = this.run.formatResults();
     const rows = records.map((record: any) => {
       const text = record.text;
       const result = resultsFormatted[record.id];
@@ -136,14 +133,10 @@ export class RunView extends View {
   }
 
   addListeners() {
-    this.formatResultsSettingsPanel.on("settings-change", () => {
+    this.formatResultsSettingsPanel.on("change", () => {
       const settings = this.formatResultsSettingsPanel.getSettings();
-      this.run.insertPromptTailBeforeResult =
-        settings.insertPromptTailBeforeResult;
-      this.run.stripInitialWhiteSpace = settings.stripInitialWhiteSpace;
-      this.run.injectStartText = settings.injectStartText;
-      this.run.stripEndText = settings.stripEndText;
-      updateRun(this.run);
+      this.run.resultFormattingSettings = settings;
+      db.updateRun(this.run);
       this.renderRecordsTable();
     });
     this.startButton.addEventListener("click", () => {
