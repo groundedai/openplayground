@@ -63,7 +63,7 @@ export class RunsView extends View {
         status: titleCase(statusMessage),
         dataset: dataset?.name || "Not found",
         preset: preset?.name || "Not found",
-        actions: `<button id="start-run-button" data-id="${run.id}" class="outline icon" title="Start"><i class="fas fa-play"></i></button> <button id="view-run-button" data-id="${run.id}" class="outline icon" title="View"><i class="fas fa-eye"></i></button> <button id="delete-run-button" data-id="${run.id}" class="outline icon" title="Delete"><i class="fas fa-trash"></i></button> <button id="export-run-button" data-id="${run.id}" class="outline icon" title="Export"><i class="fas fa-download"></i></button>`,
+        actions: `<button id="start-run-button" data-id="${run.id}" class="outline icon" title="Start" data-action="start"><i class="fas fa-play"></i></button> <button id="view-run-button" data-id="${run.id}" class="outline icon" title="View" data-action="view"><i class="fas fa-eye"></i></button> <button id="delete-run-button" data-id="${run.id}" class="outline icon" title="Delete" data-action="delete"><i class="fas fa-trash"></i></button> <button id="export-run-button" data-id="${run.id}" class="outline icon" title="Export" data-action="export"><i class="fas fa-download"></i></button>`,
         select: `<input type="checkbox" id="select-run" data-id="${run.id}" />`,
         createdAt: `${run.createdAt.toLocaleDateString()} ${run.createdAt.getHours()}:${run.createdAt.getMinutes()}`,
       };

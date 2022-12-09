@@ -129,6 +129,7 @@ export class DatasetsView extends View {
         }
       });
     });
+    this.newDatasetModal.render();
   }
 
   initListeners() {
