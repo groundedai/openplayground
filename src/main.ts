@@ -5,7 +5,7 @@ import { DatasetsView } from "./views/datasets-view";
 import { DatasetView } from "./views/dataset-view";
 import { RunsView } from "./views/runs-view";
 import { RunView } from "./views/run-view";
-// import { CompareView } from "./views/compare-view";
+import { CompareView } from "./views/compare-view";
 import { IntroView } from "./views/intro-view";
 import { DB } from "./db";
 import { Dataset, Run } from "./types";
@@ -44,14 +44,14 @@ const routes = [
     const runView = new RunView({ container, run });
     runView.render();
   }),
-  // new Route("/runs/compare/(\\d+)/(\\d+)/?$", (path: string) => {
-  //   const runIdA = path.split("/")[3];
-  //   const runIdB = path.split("/")[4];
-  //   const runA = db.getRuns().find((r: Run) => r.id === runIdA);
-  //   const runB = db.getRuns().find((r: Run) => r.id === runIdB);
-  //   const compareView = new CompareView({ container, runA, runB });
-  //   compareView.render();
-  // }),
+  new Route("/runs/compare/(\\d+)/(\\d+)/?$", (path: string) => {
+    const runIdA = path.split("/")[3];
+    const runIdB = path.split("/")[4];
+    const runA = db.getRuns().find((r: Run) => r.id === runIdA);
+    const runB = db.getRuns().find((r: Run) => r.id === runIdB);
+    const compareView = new CompareView({ container, runA, runB });
+    compareView.render();
+  }),
   new Route("/intro/?$", () => {
     const introView = new IntroView({ container });
     introView.render();
