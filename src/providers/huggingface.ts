@@ -17,7 +17,6 @@ export const hfGenerationSettingsSchema: settingsSchema = {
   model: {
     type: "select",
     options: [
-      { value: "bigscience/bloomz", label: "bloomz" },
       { value: "bigscience/bloomz-7b1", label: "bloomz-7b1" },
       { value: "bigscience/bloomz-3b", label: "bloomz-3b" },
       { value: "bigscience/bloomz-1b7", label: "bloomz-1b7" },

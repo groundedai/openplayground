@@ -12,6 +12,10 @@ export const openaiGenerationSettingsSchema: settingsSchema = {
     type: "select",
     options: [
       {
+        label: "text-davinci-003",
+        value: "text-davinci-003",
+      },
+      {
         label: "text-davinci-002",
         value: "text-davinci-002",
       },
@@ -28,7 +32,7 @@ export const openaiGenerationSettingsSchema: settingsSchema = {
         value: "text-ada-001",
       },
     ],
-    default: "text-davinci-002",
+    default: "text-davinci-003",
     key: "model",
     label: "Model",
   },
