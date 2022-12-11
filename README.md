@@ -2,7 +2,7 @@
 
 Welcome to [OpenPlayground](https://openplayground.groundedai.company)!
 
-OpenPlayground is a web application that allows you to experiment with large language models, compare different models from different providers, and run them on your own data. The goal of OpenPlayground is to make it easier for people to start benefiting from language models in their work.
+[OpenPlayground](https://openplayground.groundedai.company) is a web application that allows you to experiment with large language models, compare different models from different providers, and run them on your own data. The goal of OpenPlayground is to make it easier for people to start benefiting from language models in their work.
 
 With OpenPlayground, you can:
 
@@ -15,7 +15,7 @@ You can use the hosted version of OpenPlayground at https://openplayground.groun
 
 OpenPlayground is open for use and contribution. Join the community and start using language models in your work today!
 
-## Installation
+## Installation 
 
 Clone the repository, install the dependencies, and start the server:
 
