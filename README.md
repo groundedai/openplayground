@@ -1,14 +1,23 @@
 # OpenPlayground
 
-Quickly and easily train a language model to process data and give desired results.
+Welcome to [OpenPlayground](https://openplayground.groundedai.company)!
 
-## Purpose 
+OpenPlayground is a web application that allows you to experiment with large language models, compare different models from different providers, and run them on your own data. The goal of OpenPlayground is to make it easier for people to start benefiting from language models in their work.
 
-If you need to carry out a repetitive task on textual data, such as summarising or extracting specific information from text, you want to be able to quickly train a computer to carry out that task so you can get more done.
+With OpenPlayground, you can:
 
-This tool helps by making it easy to train a language model to perform a task and to run it on your data unlike existing approaches that lack the infrastructure to connect to my data and/or require prohibitive amounts time/expertise to setup and deploy.
+- Explore a variety of pre-trained language models from different providers
+- Compare the performance of different models on a variety of tasks
+- Fine-tune a model to your own data to improve its performance
+- Run the model on your own data to generate predictions
+
+You can use the hosted version of OpenPlayground at https://openplayground.groundedai.company, or you can download and run the open-source version from GitHub.
+
+OpenPlayground is open for use and contribution. Join the community and start using language models in your work today!
 
 ## Installation
+
+Clone the repository, install the dependencies, and start the server:
 
 ```bash
 npm install
@@ -17,3 +26,7 @@ npm install
 ```bash
 npm start
 ```
+
+## License
+
+OpenPlayground is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
