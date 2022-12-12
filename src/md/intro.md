@@ -44,9 +44,9 @@ Once you have found the best model and settings for your task, you can run the m
 
 ## How to contribute
 
-OpenPlayground is open source and we welcome contributions. You can find the code on GitHub (todo: link).
+OpenPlayground is open source and we welcome contributions. You can find the code on [Github](https://github.com/groundedai/openplayground)
 
-If you would like to donate to support the development of OpenPlayground, you can do so here (todo: link).
+<!-- If you would like to donate to support the development of OpenPlayground, you can do so here (todo: link). -->
 
 ## Contact
 
