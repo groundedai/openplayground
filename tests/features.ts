@@ -1,5 +1,16 @@
 import { test, expect, Page } from "@playwright/test";
 
+export const testPresetName = "TestPreset";
+export const testDatasetName = "TestDataset";
+
+export async function insertCohereAPIKey({ page }: { page: Page }) {
+  await test.step("Insert API key", async () => {
+    await page.goto(`/#/playground`);
+    await page.getByRole("combobox", { name: "Provider" }).selectOption("cohere");
+    await page.getByLabel("API Key").fill(process.env.COHERE_API_KEY as string);
+  });
+}
+
 export async function createPreset({ page }: { page: Page }) {
   await test.step("Create preset", async () => {
     await page.goto(`/#/playground`);
@@ -8,8 +19,10 @@ export async function createPreset({ page }: { page: Page }) {
     await page
       .locator("#playground-textarea")
       .fill("{{text}}\n\nKeywords:\n- ");
+    await page.locator('#maxTokens').fill('10');
+    await page.locator('#temperature').fill('0');
     await page.getByRole("button", { name: "Save Preset" }).click();
-    await page.getByLabel("Preset Name").fill("TestPreset");
+    await page.getByLabel("Preset Name").fill(testPresetName);
     await page.getByRole("button", { name: "Save" }).last().click();
   });
 }
@@ -19,15 +32,15 @@ export async function createDataset({ page }: { page: Page }) {
     await page.goto(`/#/datasets`);
     await page.getByRole("button", { name: "Create Dataset" }).click();
     await page.getByLabel("Dataset name").click();
-    await page.getByLabel("Dataset name").fill("TestDataset");
+    await page.getByLabel("Dataset name").fill(testDatasetName);
     //await page.getByLabel('Data file').click();
     await page
       .getByLabel("Data file")
       .setInputFiles("data/articles_3_2022-11-10.md");
     await page.locator("#form").getByRole("button", { name: "Create" }).click();
-    await page.getByRole("cell", { name: "TestDataset" }).click();
+    await page.getByRole("cell", { name: testDatasetName }).click();
     const datasetRow = page
-      .getByRole("cell", { name: "TestDataset" })
+      .getByRole("cell", { name: testDatasetName })
       .locator("..");
     await datasetRow.locator("button[data-action='view']").click();
     expect(await page.locator("#row-count-value").textContent()).toBe("3");
@@ -39,7 +52,7 @@ export async function createCSVDataset({ page }: { page: Page }) {
     await page.goto(`/#/datasets`);
     await page.getByRole("button", { name: "Create Dataset" }).click();
     await page.getByLabel("Dataset name").click();
-    await page.getByLabel("Dataset name").fill("TestDataset");
+    await page.getByLabel("Dataset name").fill(testDatasetName);
     //await page.getByLabel('Data file').click();
     await page
       .getByLabel("Data file")
@@ -47,9 +60,9 @@ export async function createCSVDataset({ page }: { page: Page }) {
     await page.getByText("Column").nth(1).click();
     await page.getByRole("textbox", { name: "Column" }).fill("Organ");
     await page.locator("#form").getByRole("button", { name: "Create" }).click();
-    await page.getByRole("cell", { name: "TestDataset" }).click();
+    await page.getByRole("cell", { name: testDatasetName }).click();
     const datasetRow = page
-      .getByRole("cell", { name: "TestDataset" })
+      .getByRole("cell", { name: testDatasetName })
       .locator("..");
     await datasetRow.locator("button[data-action='view']").click();
     await page.getByText("Rows: 77").click();
@@ -66,18 +79,24 @@ export async function deleteDataset({ page }: { page: Page }) {
       dialog.accept().catch(() => {});
     });
     const datasetRow = page
-      .getByRole("cell", { name: "TestDataset" })
+      .getByRole("cell", { name: testDatasetName })
       .locator("..");
     await datasetRow.locator("button[data-action='delete']").click();
     await expect(datasetRow).toBeHidden();
   });
 }
 
-export async function createRun({ page }: { page: Page }) {
+export async function createRun({ page, presetName, datasetName }: { page: Page, presetName?: string, datasetName?: string }) {
   await test.step("Create a run", async () => {
     await page.goto(`/#/runs`);
     await page.getByRole("link", { name: " Runs" }).click();
     await page.getByRole("button", { name: "Create Run" }).click();
+    if (presetName) {
+      await page.getByRole("combobox", { name: "Preset" }).selectOption({label: presetName});
+    }
+    if (datasetName) {
+      await page.getByRole("combobox", { name: "Dataset" }).selectOption({label: datasetName});
+    }
     await page.getByText("Format results").click();
     await page.locator("#form").getByRole("button", { name: "Create" }).click();
   });
@@ -111,13 +130,7 @@ export async function startRun({ page }: { page: Page }) {
 
 export async function verifyResults({ page }: { page: Page }) {
   await test.step("Verify results", async () => {
-    await page.locator("#run-view").getByText("Format results").click();
-    await page.getByLabel("Inject start text").fill("\\n\\nKeywords:\\n-");
-    await page
-      .getByText("Keywords:-undefined Intermittent fasting- Obesity-")
-      .click(); //TODO: Fixed `undefined` in the output
-    await page
-      .getByText("Keywords:-undefined Intermittent fasting- Long-term memory")
-      .click();
+    await page.getByText('Keywords:- Intermittent fasting- Obesity-').click();
+    await page.getByText('Keywords:- Intermittent fasting- Long-term memory').click();
   });
 }

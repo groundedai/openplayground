@@ -98,6 +98,21 @@ export class SettingsPanel extends Component {
               .join("")}
           </select>
         `;
+      } else if (type === "datalist") {
+        if (!item.options) {
+          throw new Error("Select type requires options");
+        }
+        inputHtml = `
+          <input name="${key}" id="${key}" list="${key}_list" placeholder="${defaultVal}"/>
+          <datalist id="${key}_list">
+            ${item.options
+              .map(
+                (option) =>
+                  `<option value="${option.value}">${option.label}</option>`
+              )
+              .join("")}
+          </datalist>
+        `;
       } else if (type === "string-array") {
         defaultVal = defaultVal || [];
         inputHtml = `
@@ -145,6 +160,8 @@ export class SettingsPanel extends Component {
         this.settings[itemKey] = input.checked;
       } else if (type === "select") {
         this.settings[itemKey] = input.value;
+      } else if (type === "datalist") {
+        this.settings[itemKey] = input.value || item.default;
       } else if (type === "string-array") {
         this.settings[itemKey] = input.value.split(",").map((x) => x.trim());
       } else {
@@ -172,6 +189,8 @@ export class SettingsPanel extends Component {
         } else if (type === "checkbox") {
           input.checked = settings[itemKey];
         } else if (type === "select") {
+          input.value = settings[itemKey];
+        } else if (type === "datalist") {
           input.value = settings[itemKey];
         } else if (type === "string-array") {
           input.value = settings[itemKey].join(", ");

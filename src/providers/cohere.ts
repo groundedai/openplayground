@@ -9,7 +9,7 @@ export const cohereGenerationSettingsSchema: settingsSchema = {
     default: "",
   },
   model: {
-    type: "select",
+    type: "datalist",
     options: [
       { value: "command-xlarge-20221108", label: "command-xlarge-20221108" },
       { value: "xlarge-20221108", label: "xlarge-20221108" },

@@ -1,7 +1,7 @@
 import { test } from "@playwright/test";
 
 // @ts-ignore
-import { createPreset } from "./features.ts";
+import { createPreset, insertCohereAPIKey } from "./features.ts";
 
 test("Suggest with and w/o API key", async ({ page }) => {
   await page.goto(`/#/playground`);
@@ -16,7 +16,7 @@ test("Suggest with and w/o API key", async ({ page }) => {
       .click();
   });
   await test.step("Suggest with API key", async () => {
-    await page.getByLabel("API Key").fill(process.env.COHERE_API_KEY as string);
+    await insertCohereAPIKey({ page });
     await page.getByLabel("Temperature").fill("0");
     await page.getByRole("button", { name: "Suggest" }).click();
   });
