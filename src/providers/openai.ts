@@ -9,7 +9,7 @@ export const openaiGenerationSettingsSchema: settingsSchema = {
     default: "",
   },
   model: {
-    type: "select",
+    type: "datalist",
     options: [
       {
         label: "text-davinci-003",

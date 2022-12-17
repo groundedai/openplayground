@@ -161,7 +161,7 @@ export class SettingsPanel extends Component {
       } else if (type === "select") {
         this.settings[itemKey] = input.value;
       } else if (type === "datalist") {
-        this.settings[itemKey] = input.value;
+        this.settings[itemKey] = input.value || item.default;
       } else if (type === "string-array") {
         this.settings[itemKey] = input.value.split(",").map((x) => x.trim());
       } else {

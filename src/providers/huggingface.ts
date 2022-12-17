@@ -15,7 +15,7 @@ export const hfGenerationSettingsSchema: settingsSchema = {
   |Finetuned Model|mt0-base|mt0-small|mt0-large|mt0-xl|mt0-xxl|bloomz-560m|bloomz-1b1|bloomz-1b7|bloomz-3b|bloomz-7b1|bloomz|
   */
   model: {
-    type: "select",
+    type: "datalist",
     options: [
       { value: "bigscience/bloomz-7b1", label: "bloomz-7b1" },
       { value: "bigscience/bloomz-3b", label: "bloomz-3b" },
@@ -28,7 +28,7 @@ export const hfGenerationSettingsSchema: settingsSchema = {
       { value: "bigscience/mt0-small", label: "mt0-small" },
       { value: "bigscience/mt0-base", label: "mt0-base" },
     ],
-    default: "bloomz-7b1",
+    default: "bigscience/bloomz-7b1",
     key: "model",
     label: "Model",
     link: "https://huggingface.co/bigscience/bloomz",
